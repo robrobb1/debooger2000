@@ -116,5 +116,7 @@ function registerBackupButton() {
   button.addEventListener('click', backupLibrary);
 }
 
-if (globalThis.document?.readyState === 'loading') globalThis.addEventListener?.('DOMContentLoaded', registerBackupButton, { once: true });
-else registerBackupButton();
+if (globalThis.document) {
+  if (document.readyState === 'loading') globalThis.addEventListener?.('DOMContentLoaded', registerBackupButton, { once: true });
+  else registerBackupButton();
+}
