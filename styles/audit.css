@@ -1,0 +1,12 @@
+.audit-card { margin-top: 14px; padding: 14px; }
+.audit-summary { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.audit-summary p { margin-top: 3px; color: var(--muted); font-size: 11px; }
+.audit-score { min-width: 44px; text-align: right; font-size: 24px; font-weight: 700; }
+.audit-actions { display: flex; gap: 7px; flex-wrap: wrap; margin-top: 10px; }
+.audit-list { display: grid; gap: 7px; max-height: 300px; overflow: auto; margin-top: 10px; }
+.audit-item { border: 1px solid var(--line); border-left-width: 3px; border-radius: 9px; background: #fff; padding: 9px 10px; }
+.audit-item.error, .audit-item.critical { border-left-color: #a53c35; }
+.audit-item.warning { border-left-color: #b47b24; }
+.audit-item .audit-title { display: flex; justify-content: space-between; gap: 10px; font-size: 12px; font-weight: 650; }
+.audit-item .audit-evidence { margin-top: 4px; color: var(--muted); font-size: 11px; line-height: 1.4; }
+.audit-empty { padding: 12px 0; color: var(--muted); font-size: 12px; }

@@ -1,14 +1,14 @@
 DEBOOGER2000 BUILD LOG
 
-Version: deboogs5
-Source: deboogs4
-Phase: 5 — Share intake
+Version: deboogs6
+Source: deboogs5
+Phase: 6 — Audit system
 Changes:
-- Added browser-compatible iPhone Shortcut/share-link intake using the `share` URL parameter or hash parameter.
-- Shared selected text opens directly into Paste, gets a clean trailing line, cursor/focus moves to the bottom, and preview is prepared immediately.
-- Consumed share data is removed from the address after loading so refresh does not duplicate it.
-- Normal file/ZIP opening is unchanged when no share payload exists.
-Tests: one clean Phase 5 pass — query/hash share decoding, URL generation, consumed-share cleanup, normal-open fallback, syntax checks, duplicate/static clean-code audit.
+- Added structured project audit with confirmed/probable confidence labels, severity, file, line, explanation and evidence.
+- Added confirmed checks for duplicate HTML ids, broken label targets, missing relative resources, inline styles, invalid JSON, parseable plain-JavaScript syntax failures, production debugger/log/dialog remnants and runtime errors.
+- Added warning-level CSS selector conflict checks and duplicate function checks without mislabeling them as confirmed bugs.
+- Added React/Vite/runtime-aware project checks, audit score, AI repair prompt and downloadable audit report.
+Tests: one clean Phase 6 pass — known-fixture finding coverage, confidence/severity checks, prompt/report generation, score calculation, syntax checks, duplicate/static clean-code audit.
 Result: PASS
-Known limitation: a normal browser page cannot register as a native iOS Share Extension; very large text can exceed practical URL limits and must be pasted directly.
-Source of truth: yes — Phase 5 verified within the available environment.
+Known limitation: JSX/TSX/module syntax is not falsely parsed with `new Function`; those formats rely on framework/runtime evidence and targeted checks.
+Source of truth: yes — Phase 6 verified within the available environment.

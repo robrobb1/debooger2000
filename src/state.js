@@ -1,11 +1,12 @@
-export const BUILD_VERSION = 'deboogs5';
+export const BUILD_VERSION = 'deboogs6';
 
 export const state = {
   projectName: '',
   projectType: 'unknown',
   entryFile: '',
   files: Object.create(null),
-  runtimeErrors: []
+  runtimeErrors: [],
+  auditFindings: []
 };
 
 export function resetState() {
@@ -14,4 +15,5 @@ export function resetState() {
   state.entryFile = '';
   state.files = Object.create(null);
   state.runtimeErrors = [];
+  state.auditFindings = [];
 }
