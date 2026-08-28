@@ -1,4 +1,4 @@
-const CACHE_NAME = 'debooger-shell-deboogs20';
+const CACHE_NAME = 'debooger-shell-deboogs21';
 const APP_SHELL = [
   './',
   './index.html',
