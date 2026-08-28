@@ -1,18 +1,17 @@
-DEBOOGER2000 deboogs23 — PHASE 9 TEST REPORT
+DEBOOGER2000 deboogs24 — PHASE 10 TEST REPORT
 
 PASS
-- src/project-engine.js passed Node syntax validation in an isolated module harness.
-- Single PNG classification returned image-file.
-- Single JavaScript and JSON classification returned source-file.
-- Single TXT classification returned text-file.
-- Single unknown binary classification returned binary-file.
-- Single Python classification remains backend-service and therefore keeps backend semantics while the Phase 8 viewer may show the lone source file safely.
-- Single HTML classification remains single-html.
-- Multi-file non-HTML collection classification returned file-bundle.
-- Multi-file HTML collection classification remains html-static.
-- JSX detection still returns react-vite.
-- Existing common-root stripping and visual-entry selection behavior remained unchanged in the edited module.
-- PWA cache and UI/state build identifiers were rotated to deboogs23.
+- src/file-launch.js passed Node syntax validation.
+- filesFromLaunchParams() accepted file handles, ignored non-file handles and safely skipped failed handle reads.
+- forwardFilesToImport() built a DataTransfer, assigned the launched Files to the existing input and dispatched the same change event used by manual Import.
+- registerFileLaunchIntake() registered exactly one consumer when launchQueue is supported and returned false cleanly when unsupported.
+- End-to-end isolated launch fixture passed: launchQueue consumer → FileSystemFileHandle.getFile() → existing file input → change event.
+- Manifest parsed as valid JSON with launch_handler and file_handlers entries.
+- Registered file extensions include HTML, ZIP, JavaScript, JSON, PNG, SVG, Python and TSX among the supported list.
+- Existing GET text share_target metadata remains present.
+- file-launch.js is loaded after the main app module and registers after normal app startup.
+- service-worker.js app shell includes file-launch.js and cache version debooger-shell-deboogs24.
+- UI, state and service-worker build identifiers align to deboogs24.
 
 External limitation:
-Live rendered browser/PWA installation and console verification remain unavailable because local Chromium access is administrator-blocked.
+PWA OS file handling is currently limited availability and documented as Chromium desktop only. This phase does not claim iPhone/Safari file-handler support. Live installed-PWA OS association cannot be verified in this environment.
