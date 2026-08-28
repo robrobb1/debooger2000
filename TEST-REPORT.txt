@@ -1,16 +1,17 @@
-DEBOOGER2000 deboogs18 — PHASE 4 TEST REPORT
+DEBOOGER2000 deboogs19 — PHASE 5 TEST REPORT
 
 PASS
-- src/share-intake.js passed node syntax validation.
-- Direct ?share= intake passed.
-- Standards-based title/text/url share-target intake passed and preserves order without duplicate values.
-- Hash-based share intake passed.
-- Share cleanup removes share/title/text/url while preserving unrelated query/hash parameters.
-- Shortcut URL generation passed.
-- manifest.webmanifest parsed as valid JSON and its share_target uses GET with title/text/url parameters.
-- service-worker.js passed node syntax validation and isolated install/activate/fetch listener registration.
-- PWA cache name was rotated to deboogs18.
-- Existing Files library save/audit flow remains unchanged; shared payloads continue through savePastedContent without auto-opening the viewer.
+- src/audit-engine.js passed node syntax validation.
+- Regression fixture confirmed existing broken-label, missing-asset, JSON parse, console logging, duplicate selector, !important and scoring/report behavior still works.
+- New duplicate script-source detection passed.
+- New missing image alt detection passed.
+- New probable unlabeled control detection passed.
+- New unresolved inline-handler detection passed.
+- New duplicate named event-listener detection passed.
+- New literal missing DOM target detection passed.
+- New duplicate CSS property detection passed.
+- A clean HTML/JS/CSS fixture returned zero findings, reducing the risk of obvious false positives from the new rules.
+- service-worker.js cache version was rotated to deboogs19.
 
 External limitation:
-Safari/iOS currently does not support Web Share Target registration for PWAs. iPhone receiving therefore remains the supported Shortcut/browser URL intake path. Live installed-PWA browser verification is unavailable in this environment.
+Rendered-only behavior such as real overflow, viewport clipping or a visually clickable control that does nothing still requires a live browser/runtime check and is not falsely promoted to a confirmed static finding.
