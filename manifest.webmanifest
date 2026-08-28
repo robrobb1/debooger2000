@@ -9,6 +9,15 @@
   "orientation": "any",
   "background_color": "#f4f6f4",
   "theme_color": "#f4f6f4",
+  "share_target": {
+    "action": "./",
+    "method": "GET",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url"
+    }
+  },
   "icons": [
     {
       "src": "./assets/debooger-icon.svg",
