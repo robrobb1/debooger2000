@@ -1,19 +1,18 @@
-DEBOOGER2000 deboogs28 — PHASE 14 TEST REPORT
+DEBOOGER2000 deboogs29 — PHASE 15 TEST REPORT
 
 PASS
-- src/project-file-browser.js passed Node syntax validation after the search extension.
-- Internal path search matched nested filenames case-insensitively.
-- Non-binary content search matched source text case-insensitively.
-- Binary files matched by path but did not search their encoded content.
-- Text content after the 256 KB safety cap was intentionally not matched, confirming bounded content scanning.
-- Empty search returns all files.
-- Search filtering updates visible/total counts and keeps hidden rows non-openable.
-- Existing project file preview checks remain clean for source/text, browser-safe images and unsupported binaries.
-- Search uses one debounced input listener and the existing list MutationObserver; no duplicate project list rendering path was added.
-- Project search input has an accessible label and the internal summary has a stable DOM id.
-- styles.css introduced no !important rule or duplicate project-search selector.
-- service-worker.js cache version is debooger-shell-deboogs28.
-- UI, state and service-worker build identifiers align to deboogs28.
+- service-worker.js passed Node syntax validation in the isolated service-worker harness.
+- Install cached the app shell but did not call skipWaiting, preventing mid-session worker replacement.
+- Activation removed the previous DEBOOGER shell cache and claimed clients after cleanup.
+- Navigation under an active worker returned that worker's cached index.html without a network fetch, preserving one shell version per controlled session.
+- Missing same-origin non-navigation resources still fall back to network.
+- Non-GET and cross-origin requests remain outside the DEBOOGER cache handler.
+- IndexedDB library storage is not referenced by cache cleanup and therefore remains separate from service-worker shell versioning.
+- Existing APP_SHELL entries remain versioned together under debooger-shell-deboogs29.
+- UI, state and service-worker build identifiers align to deboogs29.
+
+Behavior note:
+A newly deployed PWA shell applies cleanly after existing DEBOOGER windows are closed and the waiting service worker activates. This is intentional to avoid mixed old/new UI code in one session.
 
 External limitation:
-Live visual filtering inside the installed PWA cannot be exercised here because local Chromium access is administrator-blocked. Search matching and bounded-content behavior were verified directly.
+A real browser service-worker lifecycle across an installed PWA restart cannot be exercised here because local Chromium access is administrator-blocked. Install/activate/fetch behavior was verified in an isolated runtime harness.
