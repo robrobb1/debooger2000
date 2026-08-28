@@ -1,17 +1,16 @@
 DEBOOGER2000 BUILD LOG
 
-Version: deboogs14
-Source: deboogs13
-Phase: Files App 2 — folders, Recents, search, sort/filter and item management
+Version: deboogs15
+Source: deboogs14
+Phase: Files App 3 — installable offline PWA shell
 Changes:
-- Added real folders backed by IndexedDB with create, rename and delete; deleting a folder safely moves contained items to root instead of deleting them.
-- Added Files and Recents views. Opening an older file does not update its saved timestamp or move it to the top.
-- Added search across item name, type, entry and internal file paths.
-- Added type filters and sort by newest, oldest, name, size and audit score.
-- Added item rename, move, duplicate and selected-item delete through one clean action modal.
-- Single-file rename preserves the original extension and re-runs the static audit.
-- Added saved date and audit status to selected-item metadata.
+- Added a standards-based web app manifest with standalone launch metadata and a full-bleed maskable DEBOOGER icon.
+- Added a versioned same-origin service-worker shell cache for the Files UI and all local production modules/styles.
+- Added service-worker registration only on HTTP/HTTPS; file:// usage remains unaffected.
+- IndexedDB remains the authoritative persistent Files library and is not duplicated into cache storage.
+- Existing viewer, ZIP, audit, project detection and truthful runtime routing remain unchanged.
+- Offline support covers the local Files UI, saved library data and browser-native static preview paths. WebContainer/npm or other network/runtime-dependent execution is not represented as offline-capable.
 Tests: strict phase verification completed; see TEST-REPORT.txt.
 Result: PASS.
 Known limitation: live Chromium rendering is externally policy-blocked in this environment.
-Source of truth: yes for Phase 2.
+Source of truth: yes for Phase 3.
