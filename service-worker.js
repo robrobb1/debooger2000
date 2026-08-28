@@ -1,4 +1,4 @@
-const CACHE_NAME = 'debooger-shell-deboogs28';
+const CACHE_NAME = 'debooger-shell-deboogs29';
 const APP_SHELL = [
   './',
   './index.html',
@@ -32,7 +32,7 @@ const APP_SHELL = [
 ];
 
 self.addEventListener('install', (event) => {
-  event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(APP_SHELL)).then(() => self.skipWaiting()));
+  event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(APP_SHELL)));
 });
 
 self.addEventListener('activate', (event) => {
@@ -50,7 +50,7 @@ self.addEventListener('fetch', (event) => {
   if (url.origin !== self.location.origin) return;
 
   if (request.mode === 'navigate') {
-    event.respondWith(fetch(request).catch(() => caches.match('./index.html')));
+    event.respondWith(caches.match('./index.html').then((cached) => cached || fetch(request)));
     return;
   }
 
