@@ -1,22 +1,20 @@
 DEBOOGER2000 BUILD LOG
 
-Version: deboogs21
-Source: deboogs20
-Phase: Files App 7 — final PWA-only integration
+Version: deboogs22
+Source: deboogs21
+Phase: Files App 8 — universal direct file preview
 Changes:
-- Finalized DEBOOGER2000 as a PWA-only Files application. No native iOS app, native bridge, Share Extension, App Group, or native-intake production code is part of this branch.
-- Preserved the persistent IndexedDB Files library with folders, Files/Recents, search, type filtering, sorting, rename, move, duplicate, delete, metadata and saved audit state.
-- Import, paste and supported browser/Shortcut share intake save to the Files library, detect project/type, run the automatic audit and remain in Files; opening the viewer is optional.
-- Preserved the proven dependency-free ZIP/project/runtime/export core from deboogs12, including compiled React/Vite preference and truthful Electron/backend/WebContainer limitations.
-- Preserved the expanded evidence-based audit with confirmed/probable separation and repair report/prompt output.
-- Preserved the single authoritative viewer with Desktop, Tablet and Mobile viewport presets, desktop default, Fit, zoom, drag, pinch, full-screen, phone landscape refit, snapshot and Exit.
-- Preserved installable standalone PWA metadata, versioned same-origin offline shell cache and IndexedDB-backed saved library data.
-- Preserved browser share-target metadata where supported while keeping the iPhone Shortcut/browser URL intake path.
-- Final build identifiers are aligned to deboogs21 in the UI, state module and service-worker cache.
-Tests: final PWA integration verification completed; see TEST-REPORT.txt.
-Result: PASS for all checks available in this environment.
-Known limitations:
-- Live rendered browser/PWA installation and console verification cannot run in this environment because local Chromium access is administrator-blocked.
-- Safari/iOS does not currently register installed PWAs as Web Share Targets, so iPhone inbound sharing uses the Shortcut/browser URL path.
-- WebContainer/npm execution and the lazily loaded snapshot library require compatible runtime/network availability and are not represented as guaranteed offline features.
-Source of truth: yes.
+- Added truthful direct viewer routes for single saved source/text files and browser-safe image files.
+- HTML continues to use the existing portable project preview with local CSS, JavaScript and asset materialization.
+- CSS, JavaScript, JSX, TypeScript, TSX, JSON, Markdown, text, XML, Python, shell, VBS, YAML and similar saved text files open as escaped source instead of being executed as fake apps.
+- JSON source preview is formatted when valid while invalid JSON remains visible exactly as source for audit/debugging.
+- PNG, JPEG, GIF, WebP, ICO and SVG open as contained image previews using the saved file data.
+- Single backend source files may be viewed as source, but multi-file backend projects remain analysis-only unless they have a real browser-compatible entry/runtime.
+- Uncompiled React/Vite/Next projects remain truthful: compiled dist/build/out is preferred; otherwise a compatible real WebContainer runtime is required to run the project.
+- Electron main/preload and unsupported binary files remain explicitly non-runnable rather than receiving fake previews.
+- Existing viewer zoom, pinch, drag, viewport presets, full screen and snapshot bridge remain authoritative.
+- Rotated the PWA shell cache and aligned build identifiers to deboogs22.
+Tests: strict phase verification completed; see TEST-REPORT.txt.
+Result: PASS for the checks available in this environment.
+Known limitation: live rendered browser/PWA installation and console verification remain unavailable because local Chromium is administrator-blocked.
+Source of truth: yes for Phase 8.
