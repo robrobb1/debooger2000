@@ -1,8 +1,9 @@
 import { decodeBase64ToUint8Array } from './file-utils.js';
 import { listFolders, listLibraryItems } from './storage.js';
 import { encodeStoredZip } from './zip-codec.js';
+import { ZIP_LIMITS } from './zip-engine.js';
 
-const MAX_BACKUP_ENTRIES = 65000;
+const MAX_BACKUP_ENTRIES = ZIP_LIMITS.maxEntries;
 const encoder = new TextEncoder();
 
 function safeSegment(value, fallback = 'item') {
@@ -50,7 +51,7 @@ export function buildLibraryBackupEntries(items, folders, createdAt = new Date()
   }
 
   if (entries.length + 1 > MAX_BACKUP_ENTRIES) {
-    throw new Error(`Library backup has too many files for a standard ZIP. Limit: ${MAX_BACKUP_ENTRIES - 1} saved files.`);
+    throw new Error(`Library backup has too many files for the safe DEBOOGER restore limit. Limit: ${MAX_BACKUP_ENTRIES - 1} saved files.`);
   }
 
   const manifest = {
