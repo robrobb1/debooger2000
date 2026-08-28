@@ -3,6 +3,7 @@ import { encodeArrayBufferToBase64, getFileTypeFromName, isTextVirtualPath, norm
 
 const IGNORED_PATH = /(^|\/)(?:node_modules|\.git|\.next|\.cache|coverage)(?:\/|$)/i;
 const IGNORED_FILE = /(^|\/)(?:\.DS_Store|Thumbs\.db)$/i;
+const IMAGE_FILE = /\.(?:svg|png|jpe?g|gif|webp|ico)$/i;
 
 export async function ingestFileList(fileList) {
   if (!fileList || !fileList.length) throw new Error('No files were selected.');
@@ -69,6 +70,15 @@ export function isReactProjectFiles(files = state.files) {
   } catch { return false; }
 }
 
+function classifyLooseSingle(path, file) {
+  if (/\.html?$/i.test(path)) return 'single-html';
+  if (IMAGE_FILE.test(path)) return 'image-file';
+  if (file?.binary) return 'binary-file';
+  const type = getFileTypeFromName(path);
+  if (['javascript', 'jsx', 'tsx', 'typescript', 'css', 'json'].includes(type)) return 'source-file';
+  return 'text-file';
+}
+
 export function detectProjectTypeAndEntry() {
   const keys = Object.keys(state.files);
   const packageKey = keys.find((key) => /(^|\/)package\.json$/i.test(key));
@@ -81,13 +91,15 @@ export function detectProjectTypeAndEntry() {
   const hasReact = isReactProjectFiles(state.files);
   const hasNode = Boolean(pkg && (pkg?.dependencies?.express || pkg?.dependencies?.fastify || pkg?.dependencies?.koa || pkg?.dependencies?.hapi));
   const lowerKeys = keys.map((key) => key.toLowerCase());
+  const hasHtml = lowerKeys.some((key) => /\.html?$/.test(key));
   if (hasElectron) state.projectType = 'electron';
   else if (hasNext) state.projectType = 'nextjs';
   else if (hasReact) state.projectType = 'react-vite';
   else if (hasNode) state.projectType = 'node-service';
-  else if (lowerKeys.some((key) => /\.(?:py|vbs|sh|db|sqlite|sqlite3)$/.test(key)) && !lowerKeys.some((key) => /\.html?$/.test(key))) state.projectType = 'backend-service';
-  else if (keys.length === 1 && /\.html?$/i.test(keys[0])) state.projectType = 'single-html';
-  else state.projectType = 'html-static';
+  else if (lowerKeys.some((key) => /\.(?:py|vbs|sh|db|sqlite|sqlite3)$/.test(key)) && !hasHtml) state.projectType = 'backend-service';
+  else if (keys.length === 1) state.projectType = classifyLooseSingle(keys[0], state.files[keys[0]]);
+  else if (hasHtml) state.projectType = 'html-static';
+  else state.projectType = 'file-bundle';
   state.entryFile = chooseVisualEntry(keys) || keys[0] || '';
   return { projectType: state.projectType, entryFile: state.entryFile };
 }
