@@ -1,16 +1,17 @@
 DEBOOGER2000 BUILD LOG
 
-Version: deboogs13
-Source: deboogs12
-Phase: Files App 1 — persistent Files home + automatic audit/save
+Version: deboogs14
+Source: deboogs13
+Phase: Files App 2 — folders, Recents, search, sort/filter and item management
 Changes:
-- Preserved deboogs12 viewer, ZIP, project detection, runtime routing, preview, export and audit engines.
-- Replaced the upload-first home with a persistent Files library home.
-- Imports now save permanently to IndexedDB, detect project type/entry, run the audit automatically, and remain in Files without forcing the viewer open.
-- Opening an existing library item does not change its saved order.
-- Added saved audit score/status, item-specific delete, pasted-code save, and automatic save for browser share-text intake.
-- Migrates legacy project-cache history into the new library-items store and removes the legacy object store during IndexedDB upgrade.
+- Added real folders backed by IndexedDB with create, rename and delete; deleting a folder safely moves contained items to root instead of deleting them.
+- Added Files and Recents views. Opening an older file does not update its saved timestamp or move it to the top.
+- Added search across item name, type, entry and internal file paths.
+- Added type filters and sort by newest, oldest, name, size and audit score.
+- Added item rename, move, duplicate and selected-item delete through one clean action modal.
+- Single-file rename preserves the original extension and re-runs the static audit.
+- Added saved date and audit status to selected-item metadata.
 Tests: strict phase verification completed; see TEST-REPORT.txt.
 Result: PASS.
 Known limitation: live Chromium rendering is externally policy-blocked in this environment.
-Source of truth: yes for Phase 1.
+Source of truth: yes for Phase 2.
