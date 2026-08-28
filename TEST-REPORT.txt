@@ -1,14 +1,15 @@
-DEBOOGER2000 deboogs14 — PHASE 2 TEST REPORT
+DEBOOGER2000 deboogs15 — PHASE 3 TEST REPORT
 
 PASS
-- All production JavaScript modules passed node --check.
-- HTML ids are unique and every app.js DOM id reference resolves.
-- All 33 visible buttons have explicit ids; no duplicate direct app listener target/event pairs were found.
-- No duplicate declared function names, console.log, debugger, alert, prompt or confirm remnants in the Files controller.
-- Files stylesheet contains no duplicate selectors and no !important rules.
-- IndexedDB-compatible tests passed: legacy migration, folder create/rename/delete, safe move-to-root on folder delete, library save/get/delete and item duplication.
-- Core regression tests passed for audit rules, React/Vite compiled-dist routing, truthful Electron analysis-only routing and ZIP export/read round trip.
-- Source review confirms file opening does not write savedAt, while rename/move/duplicate operations update only their intended item.
+- All production JavaScript modules plus service-worker.js passed node --check.
+- manifest.webmanifest parsed as valid JSON and contains standalone display, scoped start URL, theme/background colors and a maskable icon.
+- Every service-worker APP_SHELL path resolves to an existing local production file.
+- Service-worker install, activate and fetch listeners registered successfully in the isolated test harness.
+- PWA registration was verified against a mocked HTTPS serviceWorker environment with the expected relative script URL and scope.
+- Service worker caches only same-origin GET requests, uses a versioned cache, removes older DEBOOGER shell caches and supplies index.html as the navigation fallback.
+- HTML ids remain unique and every app.js DOM reference resolves.
+- No duplicate declared functions, direct listener pairs, Files CSS selectors, !important, console.log, debugger, alert, prompt or confirm remnants were introduced.
+- Existing core regression checks remain clean for audit rules, compiled React/Vite routing, truthful Electron analysis-only routing and ZIP round trip.
 
 External browser limitation:
-Local Chromium is blocked by administrator policy from localhost/private/file URLs (ERR_BLOCKED_BY_ADMINISTRATOR), so live rendered UI and console verification cannot run here.
+Local Chromium is blocked by administrator policy from localhost/private/file URLs (ERR_BLOCKED_BY_ADMINISTRATOR), so installation UI, rendered offline launch and live console verification cannot run here.
