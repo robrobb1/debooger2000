@@ -1,11 +1,12 @@
 import { BUILD_VERSION, resetState, state } from './state.js';
 import { auditScore, buildAuditReport, buildRepairPrompt, runProjectAudit } from './audit-engine.js';
 import { formatBytes } from './file-utils.js';
+import { buildStandaloneHtml, createProjectZip, projectZipFilename, standaloneHtmlFilename, standaloneHtmlPlan } from './export-engine.js';
 import { applyVirtualProject, detectProjectTypeAndEntry, ingestFileList } from './project-engine.js';
 import { buildStaticPreviewDocument } from './preview-engine.js';
 import { appendClipboardText, buildPastedPreviewDocument, createDownloadBlob, detectPastedType, filenameForPasted } from './paste-engine.js';
 import { currentWebContainerEnvironment, selectPreviewRoute } from './runtime-router.js';
-import { clearProjectSnapshot, loadProjectSnapshot, saveProjectSnapshot } from './storage.js';
+import { clearProjectSnapshot, loadProjectHistory, loadProjectSnapshot, removeProjectHistory, saveProjectSnapshot } from './storage.js';
 import { clearSharePayloadFromAddress, readSharePayload } from './share-intake.js';
 import { ViewerController } from './viewer.js';
 import { WebContainerEngine } from './webcontainer-engine.js';
@@ -24,6 +25,9 @@ const pasteType = document.getElementById('paste-type');
 const pasteDownload = document.getElementById('paste-download');
 const auditCard = document.getElementById('audit-card');
 const auditList = document.getElementById('audit-list');
+const historyList = document.getElementById('history-list');
+const projectHtml = document.getElementById('project-html');
+const projectExport = document.getElementById('project-export');
 
 document.getElementById('build-badge').textContent = BUILD_VERSION;
 
@@ -39,6 +43,30 @@ const viewer = new ViewerController({
 
 const webcontainer = new WebContainerEngine((message) => { state.runtimeErrors.push({ message, file: 'WebContainer', line: 0 }); viewer.setStatus(message); refreshAudit(); });
 
+function downloadBlob(blob, filename) {
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement('a');
+  anchor.href = url;
+  anchor.download = filename;
+  document.body.appendChild(anchor);
+  anchor.click();
+  anchor.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+function newSnapshotId() {
+  try { if (crypto?.randomUUID) return crypto.randomUUID(); } catch {}
+  return `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+}
+
+function refreshExportActions() {
+  const hasProject = Boolean(Object.keys(state.files).length);
+  projectExport.disabled = !hasProject;
+  const plan = hasProject ? standaloneHtmlPlan(state.files, state.projectType) : { supported: false, reason: 'Load a project first.' };
+  projectHtml.disabled = !plan.supported;
+  projectHtml.title = plan.supported ? plan.reason : plan.reason;
+}
+
 function renderProject() {
   const keys = Object.keys(state.files);
   projectPanel.hidden = !keys.length;
@@ -49,6 +77,7 @@ function renderProject() {
   document.getElementById('total-size').textContent = formatBytes(keys.reduce((sum, path) => sum + Number(state.files[path]?.size || 0), 0));
   const list = document.getElementById('file-list');
   list.replaceChildren(...keys.sort().map((path) => { const item = document.createElement('li'); const code = document.createElement('code'); const size = document.createElement('span'); code.textContent = path; size.textContent = formatBytes(state.files[path]?.size || 0); item.append(code, size); return item; }));
+  refreshExportActions();
 }
 
 
@@ -145,7 +174,7 @@ function downloadPaste() {
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
-function snapshotFromState() { return { projectName: state.projectName, projectType: state.projectType, entryFile: state.entryFile, files: state.files, savedAt: Date.now() }; }
+function snapshotFromState(id = newSnapshotId()) { return { id, projectName: state.projectName, projectType: state.projectType, entryFile: state.entryFile, files: state.files, savedAt: Date.now() }; }
 
 async function openPreview() {
   state.runtimeErrors = [];
@@ -183,12 +212,86 @@ async function handleFiles(files) {
     const selected = Array.from(files || []);
     if (selected.length === 1 && looksLikeZip(selected[0])) { const extracted = await parseZipArchive(selected[0]); applyVirtualProject(extracted.files, extracted.projectName); }
     else await ingestFileList(files);
-    await saveProjectSnapshot(snapshotFromState()).catch(() => undefined);
+    const snapshot = snapshotFromState();
+    await saveProjectSnapshot(snapshot).catch(() => undefined);
+    await renderHistory();
     renderProject();
     refreshAudit();
     await openPreview();
   } catch (error) { setStatus(error?.message || 'Could not load the selected project.', true); viewer.hide(); }
   finally { fileInput.value = ''; }
+}
+
+async function openHistorySnapshot(snapshot) {
+  if (!snapshot?.files || !Object.keys(snapshot.files).length) return;
+  await webcontainer.dispose();
+  viewer.hide();
+  state.projectName = String(snapshot.projectName || 'Project');
+  state.files = snapshot.files;
+  state.runtimeErrors = [];
+  detectProjectTypeAndEntry();
+  await saveProjectSnapshot(snapshot, { addToHistory: false }).catch(() => undefined);
+  renderProject();
+  refreshAudit();
+  await openPreview();
+}
+
+async function renderHistory() {
+  let history = [];
+  try { history = await loadProjectHistory(); } catch { history = []; }
+  if (!history.length) {
+    const empty = document.createElement('p');
+    empty.className = 'history-empty';
+    empty.textContent = 'No saved projects yet.';
+    historyList.replaceChildren(empty);
+    return;
+  }
+  historyList.replaceChildren(...history.map((snapshot) => {
+    const row = document.createElement('div');
+    row.className = 'history-row';
+    const main = document.createElement('div');
+    main.className = 'history-main';
+    const name = document.createElement('div');
+    name.className = 'history-name';
+    name.textContent = snapshot.projectName || 'Project';
+    const meta = document.createElement('div');
+    meta.className = 'history-meta';
+    const count = Object.keys(snapshot.files || {}).length;
+    const when = snapshot.savedAt ? new Date(snapshot.savedAt).toLocaleString() : 'Saved project';
+    meta.textContent = `${when} · ${count} file${count === 1 ? '' : 's'} · ${String(snapshot.projectType || 'unknown').toUpperCase()}`;
+    main.append(name, meta);
+    const actions = document.createElement('div');
+    actions.className = 'history-actions';
+    const open = document.createElement('button');
+    open.type = 'button';
+    open.textContent = 'Open';
+    open.addEventListener('click', () => openHistorySnapshot(snapshot));
+    const remove = document.createElement('button');
+    remove.type = 'button';
+    remove.className = 'history-delete';
+    remove.textContent = 'Delete';
+    remove.addEventListener('click', async () => { await removeProjectHistory(snapshot.id).catch(() => undefined); await renderHistory(); });
+    actions.append(open, remove);
+    row.append(main, actions);
+    return row;
+  }));
+}
+
+async function exportCurrentZip() {
+  if (!Object.keys(state.files).length) return;
+  try {
+    setStatus('Creating project ZIP…');
+    downloadBlob(await createProjectZip(state.files), projectZipFilename(state.projectName));
+    setStatus('Project ZIP ready.');
+  } catch (error) { setStatus(error?.message || 'Project ZIP could not be created.', true); }
+}
+
+function downloadStandaloneHtml() {
+  try {
+    const html = buildStandaloneHtml(state.files, state.projectType);
+    downloadBlob(new Blob([html], { type: 'text/html;charset=utf-8' }), standaloneHtmlFilename(state.projectName));
+    setStatus('Standalone HTML ready.');
+  } catch (error) { setStatus(error?.message || 'Standalone HTML could not be created.', true); }
 }
 
 fileInput.addEventListener('change', () => handleFiles(fileInput.files));
@@ -198,6 +301,8 @@ document.getElementById('paste-close').addEventListener('click', closePasteDialo
 document.getElementById('paste-preview').addEventListener('click', renderPastePreview);
 document.getElementById('audit-copy').addEventListener('click', copyRepairPrompt);
 document.getElementById('audit-download').addEventListener('click', downloadAudit);
+projectExport.addEventListener('click', exportCurrentZip);
+projectHtml.addEventListener('click', downloadStandaloneHtml);
 pasteDownload.addEventListener('click', downloadPaste);
 pasteEditor.addEventListener('input', currentPasteType);
 pasteEditor.addEventListener('paste', (event) => {
@@ -226,6 +331,7 @@ function loadSharedText() {
 }
 
 async function restoreLastProject() {
+  await renderHistory();
   try {
     const saved = await loadProjectSnapshot();
     if (!saved?.files || !Object.keys(saved.files).length) return;

@@ -1,14 +1,14 @@
 DEBOOGER2000 BUILD LOG
 
-Version: deboogs7
-Source: deboogs6
-Purpose: deep-audit repair before Phase 7
+Version: deboogs9
+Source: deboogs8
+Phase: 7 — Storage, history, conversion and export (verification repair)
 Changes:
-- Removed stale deboogs3 fallback badge.
-- Prevented uncompiled React/Vite and Next.js source from being falsely shown as a static preview when WebContainer is unavailable.
-- Viewer now applies phone-landscape wide mode immediately when opened.
-- Viewer hide/clear stops the prior iframe runtime instead of leaving hidden project code running.
-- Project opening no longer fails only because optional IndexedDB persistence is unavailable.
-Tests: strict static/module/unit audit plus targeted regression tests.
-Result: PASS — 18 core unit checks plus targeted truthful-route and stale-code regression checks.
-Source of truth: yes — deep-audit repair verified within the available environment.
+- Preserved recent-project history, stable reopen order, delete behavior, project ZIP export and truthful standalone HTML export.
+- Removed the startup CDN dependency on JSZip.
+- Added an internal standard ZIP reader with CRC, path, size and compression-ratio checks.
+- Added dependency-free STORE ZIP export.
+- Deflated ZIP entries use the browser's native DecompressionStream and fail truthfully when unavailable.
+Tests: pending strict Phase 7 verification.
+Result: pending verification.
+Source of truth: no until verification passes.
