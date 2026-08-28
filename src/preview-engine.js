@@ -129,6 +129,42 @@ function bridgeScript() {
   })();<\/script>`;
 }
 
+function injectBridge(html) {
+  const injected = bridgeScript();
+  if (/<head[\s>]/i.test(html)) return html.replace(/<head([^>]*)>/i, `<head$1>${injected}`);
+  if (/<html[\s>]/i.test(html)) return html.replace(/<html([^>]*)>/i, `<html$1>${injected}`);
+  if (/<!doctype[^>]*>/i.test(html)) return html.replace(/(<!doctype[^>]*>)/i, `$1${injected}`);
+  return injected + html;
+}
+
+function escapeHtml(value) {
+  return String(value ?? '').replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
+}
+
+function sourceText(path, file) {
+  const raw = String(file?.content ?? '');
+  if (/\.json$/i.test(path)) {
+    try { return JSON.stringify(JSON.parse(raw), null, 2); } catch {}
+  }
+  return raw;
+}
+
+function buildSourcePreview(path, file) {
+  const content = escapeHtml(sourceText(path, file));
+  const title = escapeHtml(path);
+  return `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>
+    :root{color-scheme:light}*{box-sizing:border-box}html,body{margin:0;min-height:100%;background:#f6f7f6;color:#202529;font:14px/1.55 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}.file-head{position:sticky;top:0;z-index:1;padding:10px 14px;border-bottom:1px solid #d9ded9;background:rgba(255,255,255,.96);font:12px/1.3 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#5e6861}.source{margin:0;padding:18px;min-width:max-content;white-space:pre;tab-size:2}
+  </style></head><body><div class="file-head">${title}</div><pre class="source">${content}</pre></body></html>`;
+}
+
+function buildImagePreview(files, path) {
+  const title = escapeHtml(path);
+  const url = createMaterializer(files)(path);
+  return `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>
+    *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;background:#202528}.file-head{position:fixed;top:0;left:0;right:0;z-index:1;padding:9px 12px;background:rgba(248,250,248,.94);border-bottom:1px solid #d7ddd8;color:#505b54;font:12px/1.3 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}.image-wrap{width:100%;min-height:100%;display:grid;place-items:center;padding:52px 22px 22px}.image-wrap img{display:block;max-width:100%;height:auto;object-fit:contain;background:transparent}
+  </style></head><body><div class="file-head">${title}</div><div class="image-wrap"><img src="${url}" alt="${title}"></div></body></html>`;
+}
+
 export function buildPortableHtmlDocument(files, entryPath) {
   const entry = files?.[entryPath];
   if (!entry || entry.binary) throw new Error('The selected preview entry is not readable HTML.');
@@ -137,11 +173,10 @@ export function buildPortableHtmlDocument(files, entryPath) {
 }
 
 export function buildStaticPreviewDocument(files, entryPath) {
-  let html = buildPortableHtmlDocument(files, entryPath);
-  const injected = bridgeScript();
-  if (/<head[\s>]/i.test(html)) html = html.replace(/<head([^>]*)>/i, `<head$1>${injected}`);
-  else if (/<html[\s>]/i.test(html)) html = html.replace(/<html([^>]*)>/i, `<html$1>${injected}`);
-  else if (/<!doctype[^>]*>/i.test(html)) html = html.replace(/(<!doctype[^>]*>)/i, `$1${injected}`);
-  else html = injected + html;
-  return html;
+  const entry = files?.[entryPath];
+  if (!entry) throw new Error('The selected preview file is missing.');
+  if (/\.html?$/i.test(entryPath)) return injectBridge(buildPortableHtmlDocument(files, entryPath));
+  if (/\.(?:svg|png|jpe?g|gif|webp|ico)$/i.test(entryPath)) return injectBridge(buildImagePreview(files, entryPath));
+  if (!entry.binary) return injectBridge(buildSourcePreview(entryPath, entry));
+  throw new Error('This binary file type does not have a safe browser preview in DEBOOGER yet.');
 }
