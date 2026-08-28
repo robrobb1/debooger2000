@@ -217,6 +217,35 @@ export async function deleteFolder(id) {
   } finally { db.close(); }
 }
 
+export async function restoreLibraryBatch({ folders = [], items = [] } = {}) {
+  if (!Array.isArray(folders) || !Array.isArray(items)) throw new Error('Restore batch must contain folder and item arrays.');
+  const folderIds = new Set();
+  for (const folder of folders) {
+    const id = String(folder?.id || '');
+    if (!id || id === 'root' || folderIds.has(id)) throw new Error('Restore batch contains an invalid or duplicate folder id.');
+    folderIds.add(id);
+  }
+  const itemIds = new Set();
+  for (const item of items) {
+    const id = String(item?.id || '');
+    if (!id || itemIds.has(id)) throw new Error('Restore batch contains an invalid or duplicate item id.');
+    itemIds.add(id);
+    const folderId = String(item?.folderId || 'root');
+    if (folderId !== 'root' && !folderIds.has(folderId)) throw new Error('Restore batch item references a folder that is not in the same batch.');
+  }
+
+  const db = await openDatabase();
+  try {
+    const tx = db.transaction([FOLDER_STORE, LIBRARY_STORE], 'readwrite');
+    const folderStore = tx.objectStore(FOLDER_STORE);
+    const libraryStore = tx.objectStore(LIBRARY_STORE);
+    for (const folder of folders) folderStore.add(folder);
+    for (const item of items) libraryStore.add(item);
+    await commitTransaction(tx);
+    return { folderCount: folders.length, itemCount: items.length };
+  } finally { db.close(); }
+}
+
 export async function requestPersistentStorage() {
   if (!navigator.storage?.persist) return false;
   try { return Boolean(await navigator.storage.persist()); }
