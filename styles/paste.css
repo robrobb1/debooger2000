@@ -1,0 +1,10 @@
+.intake-actions { display: flex; justify-content: flex-end; margin-top: 10px; }
+.paste-dialog { position: fixed; inset: 0; z-index: 6500; display: grid; place-items: center; padding: 16px; background: rgba(20,24,22,.35); }
+.paste-dialog[hidden] { display: none; }
+.paste-card { width: min(760px, 100%); max-height: 90vh; display: grid; grid-template-rows: auto minmax(260px, 1fr) auto; gap: 10px; border: 1px solid var(--line); border-radius: 14px; background: #fff; padding: 12px; box-shadow: 0 20px 60px rgba(0,0,0,.18); }
+.paste-head, .paste-actions { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.paste-head p { margin-top: 3px; color: var(--muted); font-size: 11px; }
+.paste-head button { border: 1px solid var(--line); border-radius: 8px; background: #fff; padding: 7px 10px; }
+.paste-card textarea { width: 100%; min-height: 260px; resize: vertical; border: 1px solid #cfd7d0; border-radius: 10px; background: #fbfcfb; color: #1f2529; padding: 12px; outline: none; font: 13px/1.5 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; -webkit-user-select: text; user-select: text; }
+.paste-card textarea:focus { border-color: #9cad9f; box-shadow: 0 0 0 3px rgba(63,143,47,.08); }
+.paste-actions { justify-content: flex-end; }

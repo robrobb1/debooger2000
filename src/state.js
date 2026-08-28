@@ -1,4 +1,4 @@
-export const BUILD_VERSION = 'deboogs3';
+export const BUILD_VERSION = 'deboogs4';
 
 export const state = {
   projectName: '',
