@@ -25,7 +25,7 @@
   <main class="app-shell">
     <header class="topbar files-topbar">
       <div><p class="eyebrow">DEBOOGER2000</p><h1>Files</h1></div>
-      <span id="build-badge" class="badge">deboogs27</span>
+      <span id="build-badge" class="badge">deboogs28</span>
     </header>
 
     <section class="files-actions" aria-label="Add and organize files">
@@ -85,7 +85,11 @@
         <div><dt>Saved</dt><dd id="saved-date">—</dd></div>
         <div><dt>Audit</dt><dd id="audit-state">—</dd></div>
       </dl>
-      <div class="file-list-wrap"><h3>Project files</h3><ul id="file-list" class="file-list"></ul></div>
+      <div class="file-list-wrap">
+        <div class="project-file-list-head"><h3>Project files</h3><span id="project-file-summary">0 files</span></div>
+        <label class="project-file-search"><span class="visually-hidden">Search project files and text content</span><input id="project-file-search" type="search" placeholder="Search inside project"></label>
+        <ul id="file-list" class="file-list"></ul>
+      </div>
     </section>
 
     <section id="audit-card" class="panel audit-card" hidden aria-labelledby="audit-title">
