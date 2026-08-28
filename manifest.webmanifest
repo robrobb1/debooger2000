@@ -1,0 +1,20 @@
+{
+  "id": "./",
+  "name": "DEBOOGER2000",
+  "short_name": "DEBOOGER",
+  "description": "Personal files, project viewer and automatic code auditor.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#f4f6f4",
+  "theme_color": "#f4f6f4",
+  "icons": [
+    {
+      "src": "./assets/debooger-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
