@@ -1,19 +1,19 @@
 DEBOOGER2000 BUILD LOG
 
-Version: deboogs27
-Source: deboogs26
-Phase: Files App 13 — internal ZIP/project file browser
+Version: deboogs28
+Source: deboogs27
+Phase: Files App 14 — search inside ZIP/project contents
 Changes:
-- Added direct opening for previewable files listed inside an imported ZIP or multi-file project.
-- Non-binary source/text/HTML files and browser-safe images are marked previewable in the existing Project files list.
-- Clicking or pressing Enter/Space on a previewable internal file opens that exact file through buildStaticPreviewDocument().
-- Source code remains escaped source; React JSX/TSX is not represented as a running app. HTML uses the real static materializer and images use saved data URLs.
-- Unsupported binary rows remain visible but non-interactive.
-- Added one isolated project-file-browser module using event delegation and one MutationObserver; no duplicate file-list rendering implementation was added.
-- The existing ViewerController remains the only viewer. It now accepts a scoped debooger-open-document event and handles the document with its normal setFrameDocument/show/fit path.
-- Existing project Open viewer routing remains unchanged and truthful for compiled React/Vite, WebContainer, Electron and backend cases.
-- Added keyboard/ARIA behavior and a small previewable-row focus/hover cue.
-- Added project-file-browser.js to the offline app shell and aligned build identifiers to deboogs27.
+- Added a Search inside project field directly above the internal Project files list.
+- Search matches full internal file paths and, for non-binary files, text/code content.
+- Content search is capped to the first 256 KB per text file so large ZIPs do not scan unlimited source on every query.
+- Binary files are searched by path/name only; their encoded payload is never text-searched.
+- Search input is debounced by 90 ms and reuses the existing internal-file rows rather than rebuilding the project state.
+- The file summary shows total file count or matching/total counts while searching.
+- Hidden search results cannot be opened by click or keyboard until they match again.
+- Existing previewability, viewer routing, ZIP extraction, audit, library search and project runtime behavior remain unchanged.
+- Added only the small project-search UI styles; no duplicate search implementation or second project list was created.
+- Rotated the PWA shell cache and aligned build identifiers to deboogs28.
 Tests: strict phase verification completed; see TEST-REPORT.txt.
 Result: PASS.
-Source of truth: yes for Phase 13.
+Source of truth: yes for Phase 14.
