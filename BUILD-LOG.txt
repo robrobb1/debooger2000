@@ -1,20 +1,18 @@
 DEBOOGER2000 BUILD LOG
 
-Version: deboogs22
-Source: deboogs21
-Phase: Files App 8 — universal direct file preview
+Version: deboogs23
+Source: deboogs22
+Phase: Files App 9 — accurate loose-file classification
 Changes:
-- Added truthful direct viewer routes for single saved source/text files and browser-safe image files.
-- HTML continues to use the existing portable project preview with local CSS, JavaScript and asset materialization.
-- CSS, JavaScript, JSX, TypeScript, TSX, JSON, Markdown, text, XML, Python, shell, VBS, YAML and similar saved text files open as escaped source instead of being executed as fake apps.
-- JSON source preview is formatted when valid while invalid JSON remains visible exactly as source for audit/debugging.
-- PNG, JPEG, GIF, WebP, ICO and SVG open as contained image previews using the saved file data.
-- Single backend source files may be viewed as source, but multi-file backend projects remain analysis-only unless they have a real browser-compatible entry/runtime.
-- Uncompiled React/Vite/Next projects remain truthful: compiled dist/build/out is preferred; otherwise a compatible real WebContainer runtime is required to run the project.
-- Electron main/preload and unsupported binary files remain explicitly non-runnable rather than receiving fake previews.
-- Existing viewer zoom, pinch, drag, viewport presets, full screen and snapshot bridge remain authoritative.
-- Rotated the PWA shell cache and aligned build identifiers to deboogs22.
+- Corrected saved/imported loose-file metadata so non-HTML files are no longer mislabeled as HTML/static projects.
+- Single images are classified as image-file.
+- Single JavaScript, TypeScript, CSS and JSON files are classified as source-file.
+- Single plain text/Markdown/XML/YAML-style files are classified as text-file.
+- Single unsupported binary files are classified as binary-file.
+- Multi-file collections with no HTML/framework/backend signature are classified as file-bundle instead of HTML/static.
+- Existing Electron, Next.js, React/Vite, Node service, backend service, single HTML and HTML/static detection order remains intact.
+- Existing visual-entry scoring still prefers compiled dist/build/out, then common renderer/public entries, then root HTML.
+- Rotated the PWA shell cache and aligned build identifiers to deboogs23.
 Tests: strict phase verification completed; see TEST-REPORT.txt.
-Result: PASS for the checks available in this environment.
-Known limitation: live rendered browser/PWA installation and console verification remain unavailable because local Chromium is administrator-blocked.
-Source of truth: yes for Phase 8.
+Result: PASS.
+Source of truth: yes for Phase 9.
