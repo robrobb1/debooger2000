@@ -1,13 +1,26 @@
+const VIEWPORTS = {
+  desktop: { width: 1280, height: 800, label: 'Desktop' },
+  tablet: { width: 834, height: 1112, label: 'Tablet' },
+  mobile: { width: 390, height: 844, label: 'Mobile' }
+};
+
 export class ViewerController {
   constructor(elements, callbacks = {}) {
     this.el = elements;
     this.callbacks = callbacks;
     this.view = { scale: 1, left: 0, top: 0, fit: 1 };
+    this.viewportMode = 'desktop';
     this.userFullscreen = false;
     this.pointer = null;
+    this.viewportButtons = {
+      desktop: document.getElementById('viewer-desktop'),
+      tablet: document.getElementById('viewer-tablet'),
+      mobile: document.getElementById('viewer-mobile')
+    };
     this.boundMessage = (event) => this.onBridgeMessage(event);
     addEventListener('message', this.boundMessage);
     this.bind();
+    this.syncViewportButtons();
   }
 
   bind() {
@@ -22,6 +35,7 @@ export class ViewerController {
     this.el.stage.addEventListener('pointerup', () => { this.pointer = null; });
     this.el.stage.addEventListener('pointercancel', () => { this.pointer = null; });
     this.el.stage.addEventListener('wheel', (event) => { event.preventDefault(); this.zoomBy(event.deltaY < 0 ? 1.08 : 0.92); }, { passive: false });
+    for (const [mode, button] of Object.entries(this.viewportButtons)) button?.addEventListener('click', () => this.setViewportMode(mode));
     addEventListener('resize', () => this.onViewportChange());
     const mq = matchMedia('(orientation: landscape)');
     const change = () => this.onViewportChange();
@@ -34,12 +48,46 @@ export class ViewerController {
   setFrameDocument(html) { this.el.frame.removeAttribute('src'); this.el.frame.setAttribute('sandbox', 'allow-scripts allow-forms allow-modals allow-popups allow-downloads'); this.el.frame.srcdoc = html; this.show(); }
   setFrameUrl(url) { this.el.frame.removeAttribute('srcdoc'); this.el.frame.removeAttribute('sandbox'); this.el.frame.src = url; this.show(); }
 
+  setViewportMode(mode) {
+    if (!VIEWPORTS[mode]) return;
+    this.viewportMode = mode;
+    this.syncViewportButtons();
+    this.fit();
+  }
+
+  syncViewportButtons() {
+    for (const [mode, button] of Object.entries(this.viewportButtons)) {
+      if (!button) continue;
+      const active = mode === this.viewportMode;
+      button.classList.toggle('active', active);
+      button.setAttribute('aria-pressed', active ? 'true' : 'false');
+    }
+  }
+
+  viewportSize() {
+    return VIEWPORTS[this.viewportMode] || VIEWPORTS.desktop;
+  }
+
   stagePointerDown(event) { if (event.target === this.el.frame) return; this.pointer = { id: event.pointerId, x: event.clientX, y: event.clientY }; this.el.stage.setPointerCapture?.(event.pointerId); }
   stagePointerMove(event) { if (!this.pointer || this.pointer.id !== event.pointerId) return; const dx = event.clientX - this.pointer.x; const dy = event.clientY - this.pointer.y; this.pointer.x = event.clientX; this.pointer.y = event.clientY; this.moveBy(dx, dy); }
   moveBy(dx, dy) { this.view.left += Number(dx || 0); this.view.top += Number(dy || 0); this.apply(); }
   zoomBy(factor) { const next = Math.max(this.view.fit * 0.65, Math.min(6, this.view.scale * Number(factor || 1))); this.zoomCentered(next); }
   zoomCentered(next) { const rect = this.el.stage.getBoundingClientRect(); const cx = rect.width / 2; const cy = rect.height / 2; const wx = (cx - this.view.left) / this.view.scale; const wy = (cy - this.view.top) / this.view.scale; this.view.scale = next; this.view.left = cx - wx * next; this.view.top = cy - wy * next; this.apply(); }
-  fit() { const w = this.el.stage.clientWidth; const h = this.el.stage.clientHeight; if (!w || !h) return; const baseW = 1280; const baseH = 800; this.el.surface.style.width = `${baseW}px`; this.el.surface.style.height = `${baseH}px`; this.view.fit = Math.min((w - 20) / baseW, (h - 20) / baseH); this.view.scale = Math.max(0.05, this.view.fit); this.view.left = (w - baseW * this.view.scale) / 2; this.view.top = (h - baseH * this.view.scale) / 2; this.apply(); }
+  fit() {
+    const w = this.el.stage.clientWidth;
+    const h = this.el.stage.clientHeight;
+    if (!w || !h) return;
+    const viewport = this.viewportSize();
+    const baseW = viewport.width;
+    const baseH = viewport.height;
+    this.el.surface.style.width = `${baseW}px`;
+    this.el.surface.style.height = `${baseH}px`;
+    this.view.fit = Math.min((w - 20) / baseW, (h - 20) / baseH);
+    this.view.scale = Math.max(0.05, this.view.fit);
+    this.view.left = (w - baseW * this.view.scale) / 2;
+    this.view.top = (h - baseH * this.view.scale) / 2;
+    this.apply();
+  }
   apply() { this.el.surface.style.transform = `translate3d(${this.view.left}px,${this.view.top}px,0) scale(${this.view.scale})`; }
 
   async enterFullscreen(user = false) { this.userFullscreen = this.userFullscreen || user; document.body.classList.add('viewer-wide'); if (user) { try { await this.el.shell.requestFullscreen?.(); } catch {} } requestAnimationFrame(() => this.fit()); }
