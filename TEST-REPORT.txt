@@ -1,21 +1,15 @@
-DEBOOGER2000 deboogs12 — STRICT TEST REPORT
+DEBOOGER2000 deboogs13 — PHASE 1 TEST REPORT
 
 PASS
-- 32 core project/runtime/paste/audit/share/ZIP/export assertions
-- 5 viewer controller assertions
-- 4 preview/multi-page integration assertions
-- Standard ZIP export independently opened and CRC-validated by Python zipfile
-- All JavaScript modules passed syntax checks
-- 16/16 production modules reachable from the application entry
-- No duplicate HTML ids
-- No duplicate declared function names
-- No broken local imports or page references
-- No startup CDN dependencies
-- No orphan production modules
-- No production console.log/debugger remnants
-- No old panX/panY viewer system
-- All visible buttons have handlers
-- Controls have accessible names
+- All 16 production JavaScript modules passed node --check syntax validation.
+- HTML ids are unique; every app.js getElementById reference resolves to existing markup.
+- All visible buttons have explicit ids and are wired through app.js or the preserved ViewerController.
+- New Files stylesheet has no duplicate selectors or !important rules.
+- Audit-engine fixture verified duplicate ID, missing asset, inline override, duplicate function, console.log and duplicate CSS detection.
+- React/Vite compiled-dist routing verified; Electron without browser renderer remains analysis-only.
+- ZIP export/read round-trip passed with extracted text equality.
+- New IndexedDB library storage passed migration, save, list, get, update, delete and persistent-storage request tests using an in-memory IndexedDB-compatible test harness.
+- Import flow source audit confirms save + automatic audit occurs before optional viewer opening.
 
-External verification limitation:
-The installed Chromium is policy-blocked from opening localhost and file URLs (ERR_BLOCKED_BY_ADMINISTRATOR), so visual browser rendering and live console verification remain externally blocked in this environment.
+External browser limitation:
+Local Chromium is blocked by administrator policy from localhost/private/file URLs (ERR_BLOCKED_BY_ADMINISTRATOR), so a live rendered Chromium/console pass cannot run in this environment.
