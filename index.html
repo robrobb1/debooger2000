@@ -18,12 +18,13 @@
   <script type="module" src="./src/app.js"></script>
   <script type="module" src="./src/file-launch.js"></script>
   <script type="module" src="./src/library-backup.js"></script>
+  <script type="module" src="./src/library-restore.js"></script>
 </head>
 <body>
   <main class="app-shell">
     <header class="topbar files-topbar">
       <div><p class="eyebrow">DEBOOGER2000</p><h1>Files</h1></div>
-      <span id="build-badge" class="badge">deboogs25</span>
+      <span id="build-badge" class="badge">deboogs26</span>
     </header>
 
     <section class="files-actions" aria-label="Add and organize files">
@@ -32,6 +33,8 @@
       <button id="open-paste" class="button secondary" type="button">Paste code</button>
       <button id="new-folder" class="button secondary" type="button">New folder</button>
       <button id="backup-library" class="button secondary" type="button">Backup library</button>
+      <button id="restore-library" class="button secondary" type="button">Restore backup</button>
+      <input id="restore-library-input" class="visually-hidden" type="file" accept=".zip,application/zip">
     </section>
     <p id="status" class="status files-status" role="status" aria-live="polite">Ready.</p>
 
