@@ -1,16 +1,22 @@
-DEBOOGER2000 deboogs20 — PHASE 6 TEST REPORT
+DEBOOGER2000 deboogs21 — FINAL PWA INTEGRATION TEST REPORT
 
 PASS
-- src/viewer.js passed node syntax validation.
-- Viewer controller harness confirmed Desktop is the default mode.
-- Tablet mode resizes the authoritative viewer surface to 834×1112 and refits it.
-- Mobile mode resizes the same viewer surface to 390×844 and refits it.
-- Returning to Desktop restores 1280×800.
-- Existing viewer zoom, Fit, drag, pinch bridge, full-screen, rotation handling, snapshot and Exit methods remain in the same ViewerController.
-- New viewport buttons use unique ids and aria-pressed state; Desktop starts active.
-- The active viewport selector uses one non-conflicting CSS rule.
-- No panX/panY state, duplicate viewer implementation or second gesture system was introduced.
-- PWA cache version was rotated to deboogs20.
+- All 17 production src JavaScript modules and service-worker.js passed Node syntax validation in the final integration harness.
+- manifest.webmanifest parsed as valid JSON with standalone display, scoped start URL, icon metadata and GET share-target parameters.
+- The service worker registered install, activate and fetch listeners in the isolated harness, used the debooger-shell-deboogs21 cache, removed older DEBOOGER shell caches and retained navigation fallback behavior.
+- Every service-worker APP_SHELL path resolves to an expected production file in the final project tree.
+- Final build identifiers align: index.html badge deboogs21, state BUILD_VERSION deboogs21 and service-worker cache debooger-shell-deboogs21.
+- Final root/src/styles/assets inspection found no native iOS directory, native-intake module or temporary planning/test files in production.
+- IndexedDB library regression tests passed: legacy migration, save/get/delete, folder create/rename/delete, safe move-to-root on folder deletion and item duplication.
+- Files/project core regression tests passed for automatic audit, React/Vite compiled-dist detection/routing, truthful Electron analysis-only routing and dependency-free ZIP export/read round trip.
+- Browser/Shortcut share tests passed for ?share= intake, title/text/url intake, hash intake, cleanup without deleting unrelated URL parameters and Shortcut URL creation.
+- Expanded audit tests passed for duplicate script loading, missing image alt, probable unlabeled control, unresolved inline handler, duplicate named listener, literal missing DOM target, duplicate CSS property and existing audit regressions; a clean fixture returned zero findings.
+- Viewer controller tests passed with Desktop 1280×800 default, Tablet 834×1112, Mobile 390×844 and return to Desktop; no panX/panY state or second viewer implementation was introduced.
+- Final HTML structural check found unique ids and all literal app.js byId references resolved to existing elements.
+- Component stylesheets passed the duplicate-selector check used for the Files, audit and paste components.
+- Comparison with deboogs12 confirms the proven export, file-utils, package-utils, paste, preview, project, runtime-router, WebContainer, zip-codec and zip-engine modules remain unchanged.
 
-External limitation:
-A live browser visual pass is blocked in this environment, so exact on-device rendering of each viewport preset still needs device/browser verification when deployed.
+External limitations:
+- Live rendered browser/PWA installation, visual overflow and live console verification cannot run here because local Chromium access is administrator-blocked.
+- Safari/iOS currently does not support Web Share Target registration for installed PWAs; iPhone inbound sharing therefore remains the Shortcut/browser URL path.
+- Network/runtime-dependent WebContainer/npm execution and lazy snapshot-library loading are not guaranteed offline.
