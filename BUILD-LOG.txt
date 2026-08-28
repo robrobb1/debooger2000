@@ -1,18 +1,18 @@
 DEBOOGER2000 BUILD LOG
 
-Version: deboogs24
-Source: deboogs23
-Phase: Files App 10 — supported PWA OS file handling
+Version: deboogs25
+Source: deboogs24
+Phase: Files App 11 — full library ZIP backup
 Changes:
-- Added standards-based installed-PWA file_handlers metadata for HTML, CSS, JavaScript, JSON, text/code, ZIP and common image formats.
-- Added launch_handler metadata using navigate-existing so supported installs can reuse the active DEBOOGER window.
-- Added src/file-launch.js using window.launchQueue and FileSystemFileHandle.getFile() only when the browser exposes the feature.
-- Incoming OS-launched files are forwarded into the existing file input change event, so they use the same authoritative import, type detection, audit, persistence and ZIP handling flow as manual Import.
-- The launch intake registers after normal app startup to avoid racing the existing Import listener.
-- Unsupported browsers no-op cleanly and continue to use the normal Import button.
-- Existing browser/Shortcut text share intake remains unchanged.
-- Added file-launch.js to the offline app-shell cache and aligned build identifiers to deboogs24.
+- Added a Backup library action that exports the entire saved DEBOOGER library as one standard ZIP.
+- The backup contains DEBOOGER-BACKUP.json plus every saved item file under a unique item archive root.
+- Folder metadata, item metadata, saved dates, type, entry file, audit score/status and audit findings are preserved in the backup manifest.
+- Text files are stored as UTF-8 bytes and saved binary files are decoded from their stored base64 so their original bytes are preserved.
+- Backup archive paths sanitize control characters and neutralize parent traversal segments instead of writing unsafe ../ paths.
+- Added a standard-ZIP entry-count guard before export.
+- Backup uses the existing authoritative dependency-free ZIP encoder rather than adding another archive implementation.
+- Backup UI wiring is isolated in src/library-backup.js and uses the existing status area; the Files/import/runtime code is unchanged.
+- Added library-backup.js to the offline app-shell cache and aligned build identifiers to deboogs25.
 Tests: strict phase verification completed; see TEST-REPORT.txt.
-Result: PASS for supported-path logic.
-Known limitation: current standards/browser documentation marks PWA file handling as limited availability and Chromium desktop only; it is not represented as an iPhone/Safari capability.
-Source of truth: yes for Phase 10.
+Result: PASS.
+Source of truth: yes for Phase 11.
