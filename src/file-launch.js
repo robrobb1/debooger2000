@@ -35,4 +35,12 @@ export function registerFileLaunchIntake(queue = globalThis.launchQueue) {
   return true;
 }
 
-registerFileLaunchIntake();
+function startFileLaunchIntake() {
+  registerFileLaunchIntake();
+}
+
+if (globalThis.document?.readyState === 'loading') {
+  globalThis.addEventListener?.('DOMContentLoaded', startFileLaunchIntake, { once: true });
+} else {
+  startFileLaunchIntake();
+}
