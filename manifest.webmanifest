@@ -9,6 +9,29 @@
   "orientation": "any",
   "background_color": "#f4f6f4",
   "theme_color": "#f4f6f4",
+  "launch_handler": {
+    "client_mode": "navigate-existing"
+  },
+  "file_handlers": [
+    {
+      "action": "./",
+      "accept": {
+        "text/html": [".html", ".htm"],
+        "text/css": [".css"],
+        "text/javascript": [".js", ".mjs", ".cjs", ".jsx"],
+        "application/json": [".json"],
+        "application/xml": [".xml"],
+        "text/plain": [".txt", ".md", ".ts", ".tsx", ".py", ".sh", ".vbs", ".yml", ".yaml", ".env"],
+        "application/zip": [".zip"],
+        "image/png": [".png"],
+        "image/jpeg": [".jpg", ".jpeg"],
+        "image/gif": [".gif"],
+        "image/webp": [".webp"],
+        "image/svg+xml": [".svg"],
+        "image/x-icon": [".ico"]
+      }
+    }
+  ],
   "share_target": {
     "action": "./",
     "method": "GET",
