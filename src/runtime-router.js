@@ -25,7 +25,16 @@ export function evaluateWebContainerEnvironment(env) {
 export function currentWebContainerEnvironment() {
   let embedded = true;
   try { embedded = window.self !== window.top; } catch { embedded = true; }
-  return { embedded, protocol: location.protocol, hostname: location.hostname, secure: window.isSecureContext, webAssembly: 'WebAssembly' in window, worker: 'Worker' in window, readableStream: 'ReadableStream' in window, writableStream: 'WritableStream' in window };
+  return {
+    embedded,
+    protocol: location.protocol,
+    hostname: location.hostname,
+    secure: window.isSecureContext,
+    webAssembly: 'WebAssembly' in window,
+    worker: 'Worker' in window,
+    readableStream: 'ReadableStream' in window,
+    writableStream: 'WritableStream' in window
+  };
 }
 
 export function selectPreviewRoute(files = state.files, projectType = state.projectType, env = null) {
@@ -33,18 +42,21 @@ export function selectPreviewRoute(files = state.files, projectType = state.proj
   const entry = chooseVisualEntry(keys);
   const compiledEntry = keys.find((path) => /(^|\/)(?:dist|build|out)\/index\.html?$/i.test(path)) || null;
   if (compiledEntry) return { mode: 'static-compiled', entry: compiledEntry, runnable: true, reason: 'Using existing compiled output.' };
+
   if (projectType === 'backend-service') return { mode: 'analysis-only', entry: null, runnable: false, reason: 'Backend-only project has no browser page to preview.' };
   if (projectType === 'electron') {
     if (entry) return { mode: 'electron-renderer-static', entry, runnable: true, reason: 'Previewing browser-compatible renderer content only.' };
     return { mode: 'analysis-only', entry: null, runnable: false, reason: 'Electron main/preload code cannot run as a normal browser page.' };
   }
+
   const pkg = packageJson(files);
   if (['react-vite', 'nextjs', 'node-service'].includes(projectType) && runnablePackage(pkg)) {
     const environment = evaluateWebContainerEnvironment(env || currentWebContainerEnvironment());
     if (environment.supported) return { mode: 'webcontainer', entry: entry || 'package.json', runnable: true, reason: 'Project has a runnable package and the host supports WebContainer.' };
-    if (entry) return { mode: 'static-fallback', entry, runnable: true, reason: environment.reason };
-    return { mode: 'analysis-only', entry: null, runnable: false, reason: environment.reason };
+    if (projectType === 'node-service' && entry) return { mode: 'static-fallback', entry, runnable: true, reason: `Backend runtime is unavailable; previewing only the browser-compatible HTML entry. ${environment.reason}` };
+    return { mode: 'analysis-only', entry: null, runnable: false, reason: `${environment.reason} Uncompiled ${projectType === 'nextjs' ? 'Next.js' : 'React/Vite'} source is not shown as a fake static preview; add compiled output or use a supported real runtime.` };
   }
+
   if (entry) return { mode: 'static', entry, runnable: true, reason: 'Using detected HTML entry.' };
   return { mode: 'analysis-only', entry: null, runnable: false, reason: 'No browser-renderable entry was found.' };
 }

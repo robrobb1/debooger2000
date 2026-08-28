@@ -1,14 +1,14 @@
 DEBOOGER2000 BUILD LOG
 
-Version: deboogs6
-Source: deboogs5
-Phase: 6 — Audit system
+Version: deboogs7
+Source: deboogs6
+Purpose: deep-audit repair before Phase 7
 Changes:
-- Added structured project audit with confirmed/probable confidence labels, severity, file, line, explanation and evidence.
-- Added confirmed checks for duplicate HTML ids, broken label targets, missing relative resources, inline styles, invalid JSON, parseable plain-JavaScript syntax failures, production debugger/log/dialog remnants and runtime errors.
-- Added warning-level CSS selector conflict checks and duplicate function checks without mislabeling them as confirmed bugs.
-- Added React/Vite/runtime-aware project checks, audit score, AI repair prompt and downloadable audit report.
-Tests: one clean Phase 6 pass — known-fixture finding coverage, confidence/severity checks, prompt/report generation, score calculation, syntax checks, duplicate/static clean-code audit.
-Result: PASS
-Known limitation: JSX/TSX/module syntax is not falsely parsed with `new Function`; those formats rely on framework/runtime evidence and targeted checks.
-Source of truth: yes — Phase 6 verified within the available environment.
+- Removed stale deboogs3 fallback badge.
+- Prevented uncompiled React/Vite and Next.js source from being falsely shown as a static preview when WebContainer is unavailable.
+- Viewer now applies phone-landscape wide mode immediately when opened.
+- Viewer hide/clear stops the prior iframe runtime instead of leaving hidden project code running.
+- Project opening no longer fails only because optional IndexedDB persistence is unavailable.
+Tests: strict static/module/unit audit plus targeted regression tests.
+Result: PASS — 18 core unit checks plus targeted truthful-route and stale-code regression checks.
+Source of truth: yes — deep-audit repair verified within the available environment.

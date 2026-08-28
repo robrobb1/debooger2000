@@ -10,14 +10,227 @@ import { clearSharePayloadFromAddress, readSharePayload } from './share-intake.j
 import { ViewerController } from './viewer.js';
 import { WebContainerEngine } from './webcontainer-engine.js';
 import { looksLikeZip, parseZipArchive } from './zip-engine.js';
-const fileInput=document.getElementById('file-input'),status=document.getElementById('status'),projectPanel=document.getElementById('project-panel'),clearButton=document.getElementById('clear-project'),snapshotDialog=document.getElementById('snapshot-dialog'),snapshotImage=document.getElementById('snapshot-image'),snapshotSave=document.getElementById('snapshot-save'),pasteDialog=document.getElementById('paste-dialog'),pasteEditor=document.getElementById('paste-editor'),pasteType=document.getElementById('paste-type'),pasteDownload=document.getElementById('paste-download'),auditCard=document.getElementById('audit-card'),auditList=document.getElementById('audit-list');document.getElementById('build-badge').textContent=BUILD_VERSION;
-function setStatus(message,isError=false){status.textContent=message;status.classList.toggle('error',isError);}
-function refreshAudit(){state.auditFindings=runProjectAudit(state.files,{projectType:state.projectType,runtimeErrors:state.runtimeErrors});const findings=state.auditFindings;auditCard.hidden=!Object.keys(state.files).length;document.getElementById('audit-count').textContent=`${findings.length} finding${findings.length===1?'':'s'}`;document.getElementById('audit-score').textContent=String(auditScore(findings));if(!findings.length){const empty=document.createElement('div');empty.className='audit-empty';empty.textContent='No confirmed errors or audit warnings found.';auditList.replaceChildren(empty);return;}auditList.replaceChildren(...findings.map(item=>{const row=document.createElement('div');row.className=`audit-item ${item.severity}`;const title=document.createElement('div');title.className='audit-title';const name=document.createElement('span');name.textContent=item.title;const meta=document.createElement('span');meta.textContent=`${item.severity.toUpperCase()} · ${item.confidence.toUpperCase()}`;title.append(name,meta);const evidence=document.createElement('div');evidence.className='audit-evidence';evidence.textContent=`${item.file||'project'}${item.line?`:${item.line}`:''} — ${item.evidence}`;row.append(title,evidence);return row;}));}
-async function copyRepairPrompt(){const prompt=buildRepairPrompt(state.auditFindings);try{await navigator.clipboard.writeText(prompt);setStatus('AI repair prompt copied.');}catch{setStatus('Clipboard access is unavailable in this browser.',true);}}function downloadAudit(){const url=URL.createObjectURL(new Blob([buildAuditReport(state.auditFindings)],{type:'text/plain'})),anchor=document.createElement('a');anchor.href=url;anchor.download='debooger-audit-report.txt';document.body.appendChild(anchor);anchor.click();anchor.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);}
-const viewer=new ViewerController({shell:document.getElementById('viewer-shell'),stage:document.getElementById('viewer-stage'),surface:document.getElementById('viewer-surface'),frame:document.getElementById('viewer-frame'),status:document.getElementById('viewer-status'),zoomOut:document.getElementById('viewer-zoom-out'),zoomIn:document.getElementById('viewer-zoom-in'),fit:document.getElementById('viewer-fit'),snapshot:document.getElementById('viewer-snapshot'),full:document.getElementById('viewer-full'),exit:document.getElementById('viewer-exit')},{onRuntimeError:item=>{state.runtimeErrors.push({message:String(item.message||'Runtime error'),file:String(item.source||'preview'),line:Number(item.line||0)});refreshAudit();},onSnapshot:dataUrl=>{snapshotImage.src=dataUrl;snapshotSave.href=dataUrl;snapshotDialog.hidden=false;},onSnapshotError:message=>setStatus(`Snapshot failed: ${message}`,true)});const webcontainer=new WebContainerEngine(message=>{state.runtimeErrors.push({message,file:'WebContainer',line:0});viewer.setStatus(message);refreshAudit();});
-function renderProject(){const keys=Object.keys(state.files);projectPanel.hidden=!keys.length;document.getElementById('project-title').textContent=state.projectName||'Project';document.getElementById('project-type').textContent=String(state.projectType||'unknown').toUpperCase();document.getElementById('file-count').textContent=String(keys.length);document.getElementById('entry-file').textContent=state.entryFile||'—';document.getElementById('total-size').textContent=formatBytes(keys.reduce((sum,path)=>sum+Number(state.files[path]?.size||0),0));const list=document.getElementById('file-list');list.replaceChildren(...keys.sort().map(path=>{const item=document.createElement('li'),code=document.createElement('code'),size=document.createElement('span');code.textContent=path;size.textContent=formatBytes(state.files[path]?.size||0);item.append(code,size);return item;}));}
-function currentPasteType(){const detected=detectPastedType(pasteEditor.value);pasteType.textContent=`${detected.label.toUpperCase()} · ${detected.extension}${detected.confidence==='low'?' · LOW CONFIDENCE':''}`;pasteDownload.textContent=`Download ${detected.extension}`;return detected;}function renderPastePreview(){const content=pasteEditor.value;if(!content.trim())return;const detected=currentPasteType(),previewContent=buildPastedPreviewDocument(content,detected),previewFiles={'preview.html':{content:previewContent,binary:false,type:'html',size:new Blob([previewContent]).size}};viewer.setFrameDocument(buildStaticPreviewDocument(previewFiles,'preview.html'));viewer.setStatus(`Pasted ${detected.label} · ${detected.extension}`);setStatus(`Pasted content detected as ${detected.label}.`);}function openPasteDialog(){pasteDialog.hidden=false;currentPasteType();requestAnimationFrame(()=>{const end=pasteEditor.value.length;pasteEditor.setSelectionRange(end,end);pasteEditor.scrollTop=pasteEditor.scrollHeight;pasteEditor.focus();});}function closePasteDialog(){pasteDialog.hidden=true;}function downloadPaste(){if(!pasteEditor.value.trim())return;const detected=currentPasteType(),url=URL.createObjectURL(createDownloadBlob(pasteEditor.value,detected)),anchor=document.createElement('a');anchor.href=url;anchor.download=filenameForPasted(detected);document.body.appendChild(anchor);anchor.click();anchor.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);}function snapshotFromState(){return{projectName:state.projectName,projectType:state.projectType,entryFile:state.entryFile,files:state.files,savedAt:Date.now()};}
-async function openPreview(){state.runtimeErrors=[];const route=selectPreviewRoute();viewer.setStatus(`${state.projectType} · ${route.mode}`);if(!route.runnable){viewer.hide();setStatus(route.reason,true);return;}if(route.mode==='webcontainer'){viewer.setStatus('Starting real project runtime…');viewer.show();try{const ready=await webcontainer.run(state.files,currentWebContainerEnvironment());viewer.setFrameUrl(ready.url);viewer.setStatus(`${state.projectType} · port ${ready.port}`);setStatus('Project opened in real browser runtime.');}catch(error){const fallback=selectPreviewRoute(state.files,state.projectType,{...currentWebContainerEnvironment(),embedded:true});if(fallback.entry){viewer.setFrameDocument(buildStaticPreviewDocument(state.files,fallback.entry));viewer.setStatus(`${state.projectType} · static fallback`);setStatus(`Real runtime unavailable; opened browser-compatible fallback. ${error?.message||''}`.trim());}else{viewer.hide();setStatus(error?.message||'Real runtime could not start.',true);}}return;}viewer.setFrameDocument(buildStaticPreviewDocument(state.files,route.entry));viewer.setStatus(`${state.projectType} · ${route.entry}`);setStatus('Project opened in viewer.');}
-async function handleFiles(files){setStatus('Reading project…');try{const selected=Array.from(files||[]);if(selected.length===1&&looksLikeZip(selected[0])){const extracted=await parseZipArchive(selected[0]);applyVirtualProject(extracted.files,extracted.projectName);}else await ingestFileList(files);await saveProjectSnapshot(snapshotFromState());renderProject();refreshAudit();await openPreview();}catch(error){setStatus(error?.message||'Could not load the selected project.',true);viewer.hide();}finally{fileInput.value='';}}
-fileInput.addEventListener('change',()=>handleFiles(fileInput.files));document.getElementById('open-paste').addEventListener('click',openPasteDialog);document.getElementById('paste-close').addEventListener('click',closePasteDialog);document.getElementById('paste-preview').addEventListener('click',renderPastePreview);document.getElementById('audit-copy').addEventListener('click',copyRepairPrompt);document.getElementById('audit-download').addEventListener('click',downloadAudit);pasteDownload.addEventListener('click',downloadPaste);pasteEditor.addEventListener('input',currentPasteType);pasteEditor.addEventListener('paste',event=>{const text=event.clipboardData?.getData('text/plain');if(typeof text!=='string')return;event.preventDefault();appendClipboardText(pasteEditor,text);currentPasteType();renderPastePreview();});clearButton.addEventListener('click',async()=>{await webcontainer.dispose();viewer.hide();resetState();await clearProjectSnapshot().catch(()=>undefined);renderProject();refreshAudit();setStatus('Ready.');});document.getElementById('snapshot-close').addEventListener('click',()=>{snapshotDialog.hidden=true;snapshotImage.removeAttribute('src');snapshotSave.removeAttribute('href');});
-function loadSharedText(){let shared=null;try{shared=readSharePayload();}catch(error){setStatus(error?.message||'Shared text could not be loaded.',true);return;}if(!shared)return;pasteEditor.value=shared;if(!pasteEditor.value.endsWith('\n'))pasteEditor.value+='\n';clearSharePayloadFromAddress();openPasteDialog();renderPastePreview();}async function restoreLastProject(){try{const saved=await loadProjectSnapshot();if(!saved?.files||!Object.keys(saved.files).length)return;state.projectName=String(saved.projectName||'Project');state.files=saved.files;detectProjectTypeAndEntry();renderProject();refreshAudit();setStatus('Restored last project.');}catch{setStatus('Ready.');}}restoreLastProject().finally(loadSharedText);
+
+const fileInput = document.getElementById('file-input');
+const status = document.getElementById('status');
+const projectPanel = document.getElementById('project-panel');
+const clearButton = document.getElementById('clear-project');
+const snapshotDialog = document.getElementById('snapshot-dialog');
+const snapshotImage = document.getElementById('snapshot-image');
+const snapshotSave = document.getElementById('snapshot-save');
+const pasteDialog = document.getElementById('paste-dialog');
+const pasteEditor = document.getElementById('paste-editor');
+const pasteType = document.getElementById('paste-type');
+const pasteDownload = document.getElementById('paste-download');
+const auditCard = document.getElementById('audit-card');
+const auditList = document.getElementById('audit-list');
+
+document.getElementById('build-badge').textContent = BUILD_VERSION;
+
+function setStatus(message, isError = false) { status.textContent = message; status.classList.toggle('error', isError); }
+
+const viewer = new ViewerController({
+  shell: document.getElementById('viewer-shell'), stage: document.getElementById('viewer-stage'), surface: document.getElementById('viewer-surface'), frame: document.getElementById('viewer-frame'), status: document.getElementById('viewer-status'), zoomOut: document.getElementById('viewer-zoom-out'), zoomIn: document.getElementById('viewer-zoom-in'), fit: document.getElementById('viewer-fit'), snapshot: document.getElementById('viewer-snapshot'), full: document.getElementById('viewer-full'), exit: document.getElementById('viewer-exit')
+}, {
+  onRuntimeError: (item) => { state.runtimeErrors.push({ message: String(item.message || 'Runtime error'), file: String(item.source || 'preview'), line: Number(item.line || 0) }); refreshAudit(); },
+  onSnapshot: (dataUrl) => { snapshotImage.src = dataUrl; snapshotSave.href = dataUrl; snapshotDialog.hidden = false; },
+  onSnapshotError: (message) => setStatus(`Snapshot failed: ${message}`, true)
+});
+
+const webcontainer = new WebContainerEngine((message) => { state.runtimeErrors.push({ message, file: 'WebContainer', line: 0 }); viewer.setStatus(message); refreshAudit(); });
+
+function renderProject() {
+  const keys = Object.keys(state.files);
+  projectPanel.hidden = !keys.length;
+  document.getElementById('project-title').textContent = state.projectName || 'Project';
+  document.getElementById('project-type').textContent = String(state.projectType || 'unknown').toUpperCase();
+  document.getElementById('file-count').textContent = String(keys.length);
+  document.getElementById('entry-file').textContent = state.entryFile || '—';
+  document.getElementById('total-size').textContent = formatBytes(keys.reduce((sum, path) => sum + Number(state.files[path]?.size || 0), 0));
+  const list = document.getElementById('file-list');
+  list.replaceChildren(...keys.sort().map((path) => { const item = document.createElement('li'); const code = document.createElement('code'); const size = document.createElement('span'); code.textContent = path; size.textContent = formatBytes(state.files[path]?.size || 0); item.append(code, size); return item; }));
+}
+
+
+
+function refreshAudit() {
+  state.auditFindings = runProjectAudit(state.files, { projectType: state.projectType, runtimeErrors: state.runtimeErrors });
+  const findings = state.auditFindings;
+  auditCard.hidden = !Object.keys(state.files).length;
+  document.getElementById('audit-count').textContent = `${findings.length} finding${findings.length === 1 ? '' : 's'}`;
+  document.getElementById('audit-score').textContent = String(auditScore(findings));
+  if (!findings.length) {
+    const empty = document.createElement('div');
+    empty.className = 'audit-empty';
+    empty.textContent = 'No confirmed errors or audit warnings found.';
+    auditList.replaceChildren(empty);
+    return;
+  }
+  auditList.replaceChildren(...findings.map((item) => {
+    const row = document.createElement('div');
+    row.className = `audit-item ${item.severity}`;
+    const title = document.createElement('div');
+    title.className = 'audit-title';
+    const name = document.createElement('span');
+    name.textContent = item.title;
+    const meta = document.createElement('span');
+    meta.textContent = `${item.severity.toUpperCase()} · ${item.confidence.toUpperCase()}`;
+    title.append(name, meta);
+    const evidence = document.createElement('div');
+    evidence.className = 'audit-evidence';
+    evidence.textContent = `${item.file || 'project'}${item.line ? `:${item.line}` : ''} — ${item.evidence}`;
+    row.append(title, evidence);
+    return row;
+  }));
+}
+
+async function copyRepairPrompt() {
+  const prompt = buildRepairPrompt(state.auditFindings);
+  try { await navigator.clipboard.writeText(prompt); setStatus('AI repair prompt copied.'); }
+  catch { setStatus('Clipboard access is unavailable in this browser.', true); }
+}
+
+function downloadAudit() {
+  const url = URL.createObjectURL(new Blob([buildAuditReport(state.auditFindings)], { type: 'text/plain' }));
+  const anchor = document.createElement('a');
+  anchor.href = url;
+  anchor.download = 'debooger-audit-report.txt';
+  document.body.appendChild(anchor);
+  anchor.click();
+  anchor.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+function currentPasteType() {
+  const detected = detectPastedType(pasteEditor.value);
+  pasteType.textContent = `${detected.label.toUpperCase()} · ${detected.extension}${detected.confidence === 'low' ? ' · LOW CONFIDENCE' : ''}`;
+  pasteDownload.textContent = `Download ${detected.extension}`;
+  return detected;
+}
+
+function renderPastePreview() {
+  const content = pasteEditor.value;
+  if (!content.trim()) return;
+  const detected = currentPasteType();
+  const previewContent = buildPastedPreviewDocument(content, detected);
+  const previewFiles = { 'preview.html': { content: previewContent, binary: false, type: 'html', size: new Blob([previewContent]).size } };
+  viewer.setFrameDocument(buildStaticPreviewDocument(previewFiles, 'preview.html'));
+  viewer.setStatus(`Pasted ${detected.label} · ${detected.extension}`);
+  setStatus(`Pasted content detected as ${detected.label}.`);
+}
+
+function openPasteDialog() {
+  pasteDialog.hidden = false;
+  currentPasteType();
+  requestAnimationFrame(() => {
+    const end = pasteEditor.value.length;
+    pasteEditor.setSelectionRange(end, end);
+    pasteEditor.scrollTop = pasteEditor.scrollHeight;
+    pasteEditor.focus();
+  });
+}
+
+function closePasteDialog() { pasteDialog.hidden = true; }
+
+function downloadPaste() {
+  if (!pasteEditor.value.trim()) return;
+  const detected = currentPasteType();
+  const url = URL.createObjectURL(createDownloadBlob(pasteEditor.value, detected));
+  const anchor = document.createElement('a');
+  anchor.href = url;
+  anchor.download = filenameForPasted(detected);
+  document.body.appendChild(anchor);
+  anchor.click();
+  anchor.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+function snapshotFromState() { return { projectName: state.projectName, projectType: state.projectType, entryFile: state.entryFile, files: state.files, savedAt: Date.now() }; }
+
+async function openPreview() {
+  state.runtimeErrors = [];
+  const route = selectPreviewRoute();
+  viewer.setStatus(`${state.projectType} · ${route.mode}`);
+  if (!route.runnable) { viewer.hide(); setStatus(route.reason, true); return; }
+  if (route.mode === 'webcontainer') {
+    viewer.setStatus('Starting real project runtime…');
+    viewer.show();
+    try {
+      const ready = await webcontainer.run(state.files, currentWebContainerEnvironment());
+      viewer.setFrameUrl(ready.url);
+      viewer.setStatus(`${state.projectType} · port ${ready.port}`);
+      setStatus('Project opened in real browser runtime.');
+    } catch (error) {
+      const fallback = selectPreviewRoute(state.files, state.projectType, { ...currentWebContainerEnvironment(), embedded: true });
+      if (fallback.entry) {
+        viewer.setFrameDocument(buildStaticPreviewDocument(state.files, fallback.entry));
+        viewer.setStatus(`${state.projectType} · static fallback`);
+        setStatus(`Real runtime unavailable; opened browser-compatible fallback. ${error?.message || ''}`.trim());
+      } else {
+        viewer.hide(); setStatus(error?.message || 'Real runtime could not start.', true);
+      }
+    }
+    return;
+  }
+  viewer.setFrameDocument(buildStaticPreviewDocument(state.files, route.entry));
+  viewer.setStatus(`${state.projectType} · ${route.entry}`);
+  setStatus('Project opened in viewer.');
+}
+
+async function handleFiles(files) {
+  setStatus('Reading project…');
+  try {
+    const selected = Array.from(files || []);
+    if (selected.length === 1 && looksLikeZip(selected[0])) { const extracted = await parseZipArchive(selected[0]); applyVirtualProject(extracted.files, extracted.projectName); }
+    else await ingestFileList(files);
+    await saveProjectSnapshot(snapshotFromState()).catch(() => undefined);
+    renderProject();
+    refreshAudit();
+    await openPreview();
+  } catch (error) { setStatus(error?.message || 'Could not load the selected project.', true); viewer.hide(); }
+  finally { fileInput.value = ''; }
+}
+
+fileInput.addEventListener('change', () => handleFiles(fileInput.files));
+
+document.getElementById('open-paste').addEventListener('click', openPasteDialog);
+document.getElementById('paste-close').addEventListener('click', closePasteDialog);
+document.getElementById('paste-preview').addEventListener('click', renderPastePreview);
+document.getElementById('audit-copy').addEventListener('click', copyRepairPrompt);
+document.getElementById('audit-download').addEventListener('click', downloadAudit);
+pasteDownload.addEventListener('click', downloadPaste);
+pasteEditor.addEventListener('input', currentPasteType);
+pasteEditor.addEventListener('paste', (event) => {
+  const text = event.clipboardData?.getData('text/plain');
+  if (typeof text !== 'string') return;
+  event.preventDefault();
+  appendClipboardText(pasteEditor, text);
+  currentPasteType();
+  renderPastePreview();
+});
+
+clearButton.addEventListener('click', async () => { await webcontainer.dispose(); viewer.hide(); resetState(); await clearProjectSnapshot().catch(() => undefined); renderProject(); refreshAudit(); setStatus('Ready.'); });
+document.getElementById('snapshot-close').addEventListener('click', () => { snapshotDialog.hidden = true; snapshotImage.removeAttribute('src'); snapshotSave.removeAttribute('href'); });
+
+
+function loadSharedText() {
+  let shared = null;
+  try { shared = readSharePayload(); }
+  catch (error) { setStatus(error?.message || 'Shared text could not be loaded.', true); return; }
+  if (!shared) return;
+  pasteEditor.value = shared;
+  if (!pasteEditor.value.endsWith('\n')) pasteEditor.value += '\n';
+  clearSharePayloadFromAddress();
+  openPasteDialog();
+  renderPastePreview();
+}
+
+async function restoreLastProject() {
+  try {
+    const saved = await loadProjectSnapshot();
+    if (!saved?.files || !Object.keys(saved.files).length) return;
+    state.projectName = String(saved.projectName || 'Project'); state.files = saved.files; detectProjectTypeAndEntry(); renderProject(); refreshAudit();
+    setStatus('Restored last project.');
+  } catch { setStatus('Ready.'); }
+}
+restoreLastProject().finally(loadSharedText);
