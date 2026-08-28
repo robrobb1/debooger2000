@@ -2,11 +2,24 @@ import { state } from './state.js';
 import { chooseVisualEntry } from './project-engine.js';
 import { readPackageJson } from './package-utils.js';
 
+const DIRECT_SOURCE_RE = /\.(?:css|js|mjs|cjs|jsx|ts|tsx|json|md|txt|xml|py|sh|vbs|yml|yaml|env|gitignore)$/i;
+const DIRECT_IMAGE_RE = /\.(?:svg|png|jpe?g|gif|webp|ico)$/i;
+
 function runnablePackage(pkg) {
   if (!pkg) return false;
   const scripts = pkg.scripts || {};
   const deps = { ...(pkg.dependencies || {}), ...(pkg.devDependencies || {}) };
   return Boolean(scripts.dev || scripts.start || scripts.serve || deps.vite || deps.next || deps.react || deps['react-dom'] || deps.express || deps.fastify || deps.koa);
+}
+
+function directFileRoute(files, keys) {
+  if (keys.length !== 1) return null;
+  const path = keys[0];
+  const file = files?.[path];
+  if (/\.html?$/i.test(path)) return null;
+  if (DIRECT_IMAGE_RE.test(path)) return { mode: 'file-image', entry: path, runnable: true, reason: 'Showing the saved image directly in the viewer.' };
+  if (!file?.binary && DIRECT_SOURCE_RE.test(path)) return { mode: 'file-source', entry: path, runnable: true, reason: 'Showing the saved source/text file without executing it.' };
+  return null;
 }
 
 export function evaluateWebContainerEnvironment(env) {
@@ -38,7 +51,10 @@ export function selectPreviewRoute(files = state.files, projectType = state.proj
   const compiledEntry = keys.find((path) => /(^|\/)(?:dist|build|out)\/index\.html?$/i.test(path)) || null;
   if (compiledEntry) return { mode: 'static-compiled', entry: compiledEntry, runnable: true, reason: 'Using existing compiled output.' };
 
-  if (projectType === 'backend-service') return { mode: 'analysis-only', entry: null, runnable: false, reason: 'Backend-only project has no browser page to preview.' };
+  const direct = directFileRoute(files, keys);
+  if (direct) return direct;
+
+  if (projectType === 'backend-service') return { mode: 'analysis-only', entry: null, runnable: false, reason: 'Backend-only project has no browser page to preview. Multi-file backend projects remain analysis-only.' };
   if (projectType === 'electron') {
     if (entry) return { mode: 'electron-renderer-static', entry, runnable: true, reason: 'Previewing browser-compatible renderer content only.' };
     return { mode: 'analysis-only', entry: null, runnable: false, reason: 'Electron main/preload code cannot run as a normal browser page.' };
