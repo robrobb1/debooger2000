@@ -1,15 +1,16 @@
-DEBOOGER2000 deboogs15 — PHASE 3 TEST REPORT
+DEBOOGER2000 deboogs18 — PHASE 4 TEST REPORT
 
 PASS
-- All production JavaScript modules plus service-worker.js passed node --check.
-- manifest.webmanifest parsed as valid JSON and contains standalone display, scoped start URL, theme/background colors and a maskable icon.
-- Every service-worker APP_SHELL path resolves to an existing local production file.
-- Service-worker install, activate and fetch listeners registered successfully in the isolated test harness.
-- PWA registration was verified against a mocked HTTPS serviceWorker environment with the expected relative script URL and scope.
-- Service worker caches only same-origin GET requests, uses a versioned cache, removes older DEBOOGER shell caches and supplies index.html as the navigation fallback.
-- HTML ids remain unique and every app.js DOM reference resolves.
-- No duplicate declared functions, direct listener pairs, Files CSS selectors, !important, console.log, debugger, alert, prompt or confirm remnants were introduced.
-- Existing core regression checks remain clean for audit rules, compiled React/Vite routing, truthful Electron analysis-only routing and ZIP round trip.
+- src/share-intake.js passed node syntax validation.
+- Direct ?share= intake passed.
+- Standards-based title/text/url share-target intake passed and preserves order without duplicate values.
+- Hash-based share intake passed.
+- Share cleanup removes share/title/text/url while preserving unrelated query/hash parameters.
+- Shortcut URL generation passed.
+- manifest.webmanifest parsed as valid JSON and its share_target uses GET with title/text/url parameters.
+- service-worker.js passed node syntax validation and isolated install/activate/fetch listener registration.
+- PWA cache name was rotated to deboogs18.
+- Existing Files library save/audit flow remains unchanged; shared payloads continue through savePastedContent without auto-opening the viewer.
 
-External browser limitation:
-Local Chromium is blocked by administrator policy from localhost/private/file URLs (ERR_BLOCKED_BY_ADMINISTRATOR), so installation UI, rendered offline launch and live console verification cannot run here.
+External limitation:
+Safari/iOS currently does not support Web Share Target registration for PWAs. iPhone receiving therefore remains the supported Shortcut/browser URL intake path. Live installed-PWA browser verification is unavailable in this environment.
