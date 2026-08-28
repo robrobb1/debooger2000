@@ -1,6 +1,7 @@
 const DB_NAME = 'debooger2000';
-const DB_VERSION = 2;
+const DB_VERSION = 3;
 const LIBRARY_STORE = 'library-items';
+const FOLDER_STORE = 'folders';
 const LEGACY_STORE = 'project-cache';
 const LEGACY_ACTIVE_KEY = 'active';
 const LEGACY_HISTORY_KEY = 'history';
@@ -41,6 +42,10 @@ function openDatabase() {
       if (!library.indexNames.contains('savedAt')) library.createIndex('savedAt', 'savedAt');
       if (!library.indexNames.contains('folderId')) library.createIndex('folderId', 'folderId');
       if (!library.indexNames.contains('projectType')) library.createIndex('projectType', 'projectType');
+      const folders = db.objectStoreNames.contains(FOLDER_STORE)
+        ? tx.objectStore(FOLDER_STORE)
+        : db.createObjectStore(FOLDER_STORE, { keyPath: 'id' });
+      if (!folders.indexNames.contains('name')) folders.createIndex('name', 'name');
 
       if (db.objectStoreNames.contains(LEGACY_STORE)) {
         const legacy = tx.objectStore(LEGACY_STORE);
@@ -88,6 +93,11 @@ function commitTransaction(tx) {
   });
 }
 
+function copyId() {
+  try { if (crypto?.randomUUID) return crypto.randomUUID(); } catch {}
+  return `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+}
+
 export async function saveLibraryItem(item) {
   if (!item?.id) throw new Error('Library item id is required.');
   const db = await openDatabase();
@@ -96,9 +106,7 @@ export async function saveLibraryItem(item) {
     tx.objectStore(LIBRARY_STORE).put(item);
     await commitTransaction(tx);
     return item;
-  } finally {
-    db.close();
-  }
+  } finally { db.close(); }
 }
 
 export async function listLibraryItems() {
@@ -106,10 +114,8 @@ export async function listLibraryItems() {
   try {
     const tx = db.transaction(LIBRARY_STORE, 'readonly');
     const result = await requestResult(tx.objectStore(LIBRARY_STORE).getAll(), 'Could not read the Files library.');
-    return (Array.isArray(result) ? result : []).sort((a, b) => Number(b.savedAt || 0) - Number(a.savedAt || 0));
-  } finally {
-    db.close();
-  }
+    return Array.isArray(result) ? result : [];
+  } finally { db.close(); }
 }
 
 export async function getLibraryItem(id) {
@@ -117,9 +123,7 @@ export async function getLibraryItem(id) {
   try {
     const tx = db.transaction(LIBRARY_STORE, 'readonly');
     return await requestResult(tx.objectStore(LIBRARY_STORE).get(String(id)), 'Could not read the selected library item.');
-  } finally {
-    db.close();
-  }
+  } finally { db.close(); }
 }
 
 export async function updateLibraryItem(id, patch) {
@@ -133,9 +137,7 @@ export async function updateLibraryItem(id, patch) {
     store.put(next);
     await commitTransaction(tx);
     return next;
-  } finally {
-    db.close();
-  }
+  } finally { db.close(); }
 }
 
 export async function deleteLibraryItem(id) {
@@ -144,9 +146,75 @@ export async function deleteLibraryItem(id) {
     const tx = db.transaction(LIBRARY_STORE, 'readwrite');
     tx.objectStore(LIBRARY_STORE).delete(String(id));
     await commitTransaction(tx);
-  } finally {
-    db.close();
-  }
+  } finally { db.close(); }
+}
+
+export async function duplicateLibraryItem(id) {
+  const original = await getLibraryItem(id);
+  if (!original) throw new Error('The selected library item no longer exists.');
+  const now = Date.now();
+  const copy = structuredClone(original);
+  copy.id = copyId();
+  copy.name = `${original.name || original.projectName || 'Project'} copy`;
+  copy.projectName = copy.name;
+  copy.savedAt = now;
+  copy.updatedAt = now;
+  await saveLibraryItem(copy);
+  return copy;
+}
+
+export async function listFolders() {
+  const db = await openDatabase();
+  try {
+    const tx = db.transaction(FOLDER_STORE, 'readonly');
+    const result = await requestResult(tx.objectStore(FOLDER_STORE).getAll(), 'Could not read folders.');
+    return (Array.isArray(result) ? result : []).sort((a, b) => String(a.name || '').localeCompare(String(b.name || '')));
+  } finally { db.close(); }
+}
+
+export async function createFolder(name) {
+  const clean = String(name || '').trim();
+  if (!clean) throw new Error('Folder name is required.');
+  const folder = { id: copyId(), name: clean, createdAt: Date.now(), updatedAt: Date.now() };
+  const db = await openDatabase();
+  try {
+    const tx = db.transaction(FOLDER_STORE, 'readwrite');
+    tx.objectStore(FOLDER_STORE).put(folder);
+    await commitTransaction(tx);
+    return folder;
+  } finally { db.close(); }
+}
+
+export async function renameFolder(id, name) {
+  const clean = String(name || '').trim();
+  if (!clean) throw new Error('Folder name is required.');
+  const db = await openDatabase();
+  try {
+    const tx = db.transaction(FOLDER_STORE, 'readwrite');
+    const store = tx.objectStore(FOLDER_STORE);
+    const existing = await requestResult(store.get(String(id)), 'Could not read the folder.');
+    if (!existing) throw new Error('The folder no longer exists.');
+    const next = { ...existing, name: clean, updatedAt: Date.now() };
+    store.put(next);
+    await commitTransaction(tx);
+    return next;
+  } finally { db.close(); }
+}
+
+export async function deleteFolder(id) {
+  const folderId = String(id);
+  const db = await openDatabase();
+  try {
+    const tx = db.transaction([FOLDER_STORE, LIBRARY_STORE], 'readwrite');
+    const folders = tx.objectStore(FOLDER_STORE);
+    const library = tx.objectStore(LIBRARY_STORE);
+    const items = await requestResult(library.getAll(), 'Could not read the Files library.');
+    for (const item of Array.isArray(items) ? items : []) {
+      if (String(item.folderId || 'root') === folderId) library.put({ ...item, folderId: 'root', updatedAt: Date.now() });
+    }
+    folders.delete(folderId);
+    await commitTransaction(tx);
+  } finally { db.close(); }
 }
 
 export async function requestPersistentStorage() {
