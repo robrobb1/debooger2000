@@ -2,9 +2,18 @@ import { state } from './state.js';
 import { buildStaticPreviewDocument } from './preview-engine.js';
 
 const IMAGE_FILE = /\.(?:svg|png|jpe?g|gif|webp|ico)$/i;
+const CONTENT_SEARCH_CHARS = 256 * 1024;
 
 export function projectFileCanPreview(path, file) {
   return Boolean(file && (!file.binary || IMAGE_FILE.test(String(path || ''))));
+}
+
+export function projectFileMatchesQuery(path, file, query) {
+  const q = String(query || '').trim().toLowerCase();
+  if (!q) return true;
+  if (String(path || '').toLowerCase().includes(q)) return true;
+  if (file?.binary) return false;
+  return String(file?.content ?? '').slice(0, CONTENT_SEARCH_CHARS).toLowerCase().includes(q);
 }
 
 function rowPath(row) {
@@ -27,8 +36,22 @@ function decorateRow(row) {
   }
 }
 
-export function decorateProjectFileList(list) {
+export function filterProjectFileList(list, query = '', summary = null) {
+  const rows = Array.from(list?.children || []);
+  let visible = 0;
+  for (const row of rows) {
+    const path = rowPath(row);
+    const match = projectFileMatchesQuery(path, state.files?.[path], query);
+    row.hidden = !match;
+    if (match) visible += 1;
+  }
+  if (summary) summary.textContent = String(query || '').trim() ? `${visible} of ${rows.length} files` : `${rows.length} file${rows.length === 1 ? '' : 's'}`;
+  return visible;
+}
+
+export function decorateProjectFileList(list, query = '', summary = null) {
   for (const row of Array.from(list?.children || [])) decorateRow(row);
+  return filterProjectFileList(list, query, summary);
 }
 
 export function openProjectFile(path) {
@@ -51,22 +74,33 @@ function reportError(error) {
   status.classList.add('error');
 }
 
-export function registerProjectFileBrowser(list = globalThis.document?.getElementById?.('file-list')) {
+export function registerProjectFileBrowser(
+  list = globalThis.document?.getElementById?.('file-list'),
+  search = globalThis.document?.getElementById?.('project-file-search'),
+  summary = globalThis.document?.getElementById?.('project-file-summary')
+) {
   if (!list) return null;
+  const query = () => String(search?.value || '');
+  const refresh = () => decorateProjectFileList(list, query(), summary);
   const openRow = (row) => {
-    if (!row?.classList?.contains('previewable')) return;
+    if (!row?.classList?.contains('previewable') || row.hidden) return;
     try { openProjectFile(rowPath(row)); } catch (error) { reportError(error); }
   };
   list.addEventListener('click', (event) => openRow(event.target?.closest?.('li')));
   list.addEventListener('keydown', (event) => {
     if (event.key !== 'Enter' && event.key !== ' ') return;
     const row = event.target?.closest?.('li');
-    if (!row?.classList?.contains('previewable')) return;
+    if (!row?.classList?.contains('previewable') || row.hidden) return;
     event.preventDefault();
     openRow(row);
   });
-  decorateProjectFileList(list);
-  const observer = new MutationObserver(() => decorateProjectFileList(list));
+  let searchTimer = 0;
+  search?.addEventListener('input', () => {
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(() => filterProjectFileList(list, query(), summary), 90);
+  });
+  refresh();
+  const observer = new MutationObserver(refresh);
   observer.observe(list, { childList: true });
   return observer;
 }
