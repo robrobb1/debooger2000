@@ -1,18 +1,21 @@
-DEBOOGER2000 deboogs25 — PHASE 11 TEST REPORT
+DEBOOGER2000 deboogs26 — PHASE 12 TEST REPORT
 
 PASS
-- src/library-backup.js passed Node syntax validation.
-- Mixed text and binary library fixture produced a DEBOOGER2000_LIBRARY_BACKUP formatVersion 1 manifest.
-- Item, folder and file counts matched the source fixture.
-- Saved audit findings and item metadata remained present in the manifest while raw file content was kept out of manifest metadata.
-- Unsafe ../ path segments were neutralized in archive paths.
-- Binary base64 content round-tripped through the real DEBOOGER stored-ZIP encoder/decoder with exact byte equality.
-- DEBOOGER-BACKUP.json was present and parseable from the generated ZIP.
-- Text and binary file records in the ZIP matched their manifest archivePath records.
-- Non-browser module import is safely guarded; the initial test exposed and the phase fixed an unguarded document startup reference before completion.
-- Empty-library export returns an explicit error instead of generating a fake backup.
-- service-worker.js app shell includes library-backup.js and cache version debooger-shell-deboogs25.
-- UI, state and service-worker build identifiers align to deboogs25.
+- src/library-restore.js passed Node syntax validation in the isolated restore harness.
+- Valid DEBOOGER backup ZIP decoded into remapped folders/items with no reuse of original IDs.
+- Folder relationship remapping passed; missing backup folder references fall back to root.
+- Text and binary file restoration passed, including exact binary base64 reconstruction.
+- Restored item fileCount and size are calculated from archive payloads rather than trusted manifest totals.
+- Audit findings/status are recalculated during restore; a fixture with an audit error restored with issues status and the recalculated score.
+- Unsupported backup format was rejected.
+- Unsafe original file path in the manifest was rejected.
+- Extra unreferenced archive payload was rejected.
+- Manifest count validation and required DEBOOGER-BACKUP.json checks passed.
+- restoreLibraryBatch() was tested with an IndexedDB-compatible harness: valid folder/items committed together; invalid folder references were rejected before writing.
+- Simulated existing-item ID collision aborted the transaction and rolled back the new folder, verifying no half-restored library remains.
+- Backup export entry limit is now aligned with ZIP_LIMITS.maxEntries so generated backups remain within the restore decoder's supported envelope.
+- service-worker.js app shell includes library-restore.js and cache version debooger-shell-deboogs26.
+- UI, state and service-worker build identifiers align to deboogs26.
 
 External limitation:
-The browser download gesture itself cannot be visually exercised in this environment because local Chromium access is administrator-blocked. ZIP generation and byte-level archive round trip were verified directly.
+The native browser file-picker gesture and post-restore visual reload cannot be exercised here because local Chromium access is administrator-blocked. Archive validation, reconstruction and atomic storage behavior were verified directly.
