@@ -4,33 +4,71 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#f4f6f4">
-  <title>DEBOOGER2000</title>
+  <title>DEBOOGER2000 Files</title>
   <link rel="stylesheet" href="./styles.css">
+  <link rel="stylesheet" href="./styles/files.css">
   <link rel="stylesheet" href="./styles/paste.css">
   <link rel="stylesheet" href="./styles/audit.css">
   <script type="module" src="./src/app.js"></script>
 </head>
 <body>
   <main class="app-shell">
-    <header class="topbar"><div><p class="eyebrow">DEBOOGER2000</p><h1>Project Viewer + Debugger</h1></div><span id="build-badge" class="badge">deboogs12</span></header>
-    <section class="panel intake-panel" aria-labelledby="intake-title">
-      <div class="section-heading"><div><h2 id="intake-title">Open project files</h2><p>Choose a ZIP, one file, or several project files. Supported projects open directly in the viewer.</p></div></div>
-      <label class="dropzone" for="file-input"><span class="drop-icon" aria-hidden="true">+</span><strong>Choose files</strong><span>ZIP, HTML, CSS, JavaScript, JSON, images and project source files</span></label>
+    <header class="topbar files-topbar">
+      <div>
+        <p class="eyebrow">DEBOOGER2000</p>
+        <h1>Files</h1>
+      </div>
+      <span id="build-badge" class="badge">deboogs13</span>
+    </header>
+
+    <section class="files-actions" aria-label="Add files">
+      <label class="button files-primary" for="file-input">Import</label>
       <input id="file-input" class="visually-hidden" type="file" multiple>
-      <div class="intake-actions"><button id="open-paste" class="button secondary" type="button">Paste code</button></div>
-      <p id="status" class="status" role="status" aria-live="polite">Ready.</p>
+      <button id="open-paste" class="button secondary" type="button">Paste code</button>
+    </section>
+    <p id="status" class="status files-status" role="status" aria-live="polite">Ready.</p>
+
+    <section id="library-panel" class="panel files-library" aria-labelledby="library-title">
+      <div class="section-heading files-library-heading">
+        <div>
+          <h2 id="library-title">My Files</h2>
+          <p id="library-summary">Saved files and projects appear here automatically after import and audit.</p>
+        </div>
+      </div>
+      <div id="library-list" class="files-list">
+        <p class="history-empty">No saved files yet.</p>
+      </div>
     </section>
 
-    <section id="history-panel" class="panel history-panel" aria-labelledby="history-title">
-      <div class="section-heading history-heading"><div><h2 id="history-title">Recent projects</h2><p>Saved projects stay in their original order when reopened.</p></div></div>
-      <div id="history-list" class="history-list"><p class="history-empty">No saved projects yet.</p></div>
-    </section>
     <section id="project-panel" class="panel project-panel" hidden aria-labelledby="project-title">
-      <div class="section-heading project-heading"><div><p id="project-type" class="eyebrow">UNKNOWN</p><h2 id="project-title">No project loaded</h2></div><div class="project-actions"><button id="project-html" class="button secondary" type="button">Standalone HTML</button><button id="project-export" class="button secondary" type="button">Export ZIP</button><button id="clear-project" class="button secondary" type="button">Clear</button></div></div>
-      <dl class="project-meta"><div><dt>Files</dt><dd id="file-count">0</dd></div><div><dt>Main entry</dt><dd id="entry-file">—</dd></div><div><dt>Total size</dt><dd id="total-size">0 KB</dd></div></dl>
+      <div class="section-heading project-heading">
+        <div><p id="project-type" class="eyebrow">UNKNOWN</p><h2 id="project-title">No project selected</h2></div>
+        <div class="project-actions">
+          <button id="project-open" class="button secondary" type="button">Open viewer</button>
+          <button id="project-html" class="button secondary" type="button">Standalone HTML</button>
+          <button id="project-export" class="button secondary" type="button">Export ZIP</button>
+          <button id="clear-project" class="button secondary" type="button">Close details</button>
+        </div>
+      </div>
+      <dl class="project-meta">
+        <div><dt>Files</dt><dd id="file-count">0</dd></div>
+        <div><dt>Main entry</dt><dd id="entry-file">—</dd></div>
+        <div><dt>Total size</dt><dd id="total-size">0 KB</dd></div>
+      </dl>
       <div class="file-list-wrap"><h3>Project files</h3><ul id="file-list" class="file-list"></ul></div>
     </section>
-    <section id="audit-card" class="panel audit-card" hidden aria-labelledby="audit-title"><div class="audit-summary"><div><h2 id="audit-title">Project audit</h2><p id="audit-count">0 findings</p></div><div id="audit-score" class="audit-score">100</div></div><div class="audit-actions"><button id="audit-copy" class="button secondary" type="button">Copy AI Repair Prompt</button><button id="audit-download" class="button secondary" type="button">Download Audit Report</button></div><div id="audit-list" class="audit-list"></div></section>
+
+    <section id="audit-card" class="panel audit-card" hidden aria-labelledby="audit-title">
+      <div class="audit-summary">
+        <div><h2 id="audit-title">Automatic audit</h2><p id="audit-count">0 findings</p></div>
+        <div id="audit-score" class="audit-score">100</div>
+      </div>
+      <div class="audit-actions">
+        <button id="audit-copy" class="button secondary" type="button">Copy AI Repair Prompt</button>
+        <button id="audit-download" class="button secondary" type="button">Download Audit Report</button>
+      </div>
+      <div id="audit-list" class="audit-list"></div>
+    </section>
   </main>
 
   <section id="viewer-shell" class="viewer-shell" hidden aria-label="Project preview">
@@ -57,11 +95,16 @@
       <a id="snapshot-save" class="button snapshot-save" download="debooger-snapshot.jpg">Save JPEG</a>
     </div>
   </div>
+
   <div id="paste-dialog" class="paste-dialog" hidden>
     <div class="paste-card" role="dialog" aria-modal="true" aria-labelledby="paste-title">
       <div class="paste-head"><div><h2 id="paste-title">Paste code</h2><p id="paste-type">TEXT · .txt</p></div><button id="paste-close" type="button">Close</button></div>
       <textarea id="paste-editor" spellcheck="false" autocapitalize="off" autocomplete="off" placeholder="Paste code here…"></textarea>
-      <div class="paste-actions"><button id="paste-preview" class="button secondary" type="button">Preview</button><button id="paste-download" class="button secondary" type="button">Download .txt</button></div>
+      <div class="paste-actions">
+        <button id="paste-preview" class="button secondary" type="button">Preview</button>
+        <button id="paste-download" class="button secondary" type="button">Download .txt</button>
+        <button id="paste-save" class="button files-primary" type="button">Save to Files</button>
+      </div>
     </div>
   </div>
 </body>
