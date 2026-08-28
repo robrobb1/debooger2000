@@ -1,22 +1,20 @@
-DEBOOGER2000 deboogs21 — FINAL PWA INTEGRATION TEST REPORT
+DEBOOGER2000 deboogs22 — PHASE 8 TEST REPORT
 
 PASS
-- All 17 production src JavaScript modules and service-worker.js passed Node syntax validation in the final integration harness.
-- manifest.webmanifest parsed as valid JSON with standalone display, scoped start URL, icon metadata and GET share-target parameters.
-- The service worker registered install, activate and fetch listeners in the isolated harness, used the debooger-shell-deboogs21 cache, removed older DEBOOGER shell caches and retained navigation fallback behavior.
-- Every service-worker APP_SHELL path resolves to an expected production file in the final project tree.
-- Final build identifiers align: index.html badge deboogs21, state BUILD_VERSION deboogs21 and service-worker cache debooger-shell-deboogs21.
-- Final root/src/styles/assets inspection found no native iOS directory, native-intake module or temporary planning/test files in production.
-- IndexedDB library regression tests passed: legacy migration, save/get/delete, folder create/rename/delete, safe move-to-root on folder deletion and item duplication.
-- Files/project core regression tests passed for automatic audit, React/Vite compiled-dist detection/routing, truthful Electron analysis-only routing and dependency-free ZIP export/read round trip.
-- Browser/Shortcut share tests passed for ?share= intake, title/text/url intake, hash intake, cleanup without deleting unrelated URL parameters and Shortcut URL creation.
-- Expanded audit tests passed for duplicate script loading, missing image alt, probable unlabeled control, unresolved inline handler, duplicate named listener, literal missing DOM target, duplicate CSS property and existing audit regressions; a clean fixture returned zero findings.
-- Viewer controller tests passed with Desktop 1280×800 default, Tablet 834×1112, Mobile 390×844 and return to Desktop; no panX/panY state or second viewer implementation was introduced.
-- Final HTML structural check found unique ids and all literal app.js byId references resolved to existing elements.
-- Component stylesheets passed the duplicate-selector check used for the Files, audit and paste components.
-- Comparison with deboogs12 confirms the proven export, file-utils, package-utils, paste, preview, project, runtime-router, WebContainer, zip-codec and zip-engine modules remain unchanged.
+- src/preview-engine.js passed Node syntax validation.
+- src/runtime-router.js passed Node syntax validation in an isolated module harness.
+- Direct source routing passed for JavaScript and Python single-file items.
+- Direct image routing passed for binary PNG input.
+- Unsupported binary input remains analysis-only and is not falsely marked runnable.
+- Existing compiled React/Vite dist/build/out priority remained intact.
+- Compatible runnable React/Vite packages still route to WebContainer rather than fake static source rendering.
+- Source preview escapes HTML-sensitive code so saved code cannot become accidental rendered markup.
+- Valid JSON source is pretty-formatted for viewing; invalid source remains safely escaped text.
+- Binary PNG preview produced the expected image data URL.
+- Unsupported binary preview throws an explicit safe error.
+- Existing HTML portable preview regression passed: local CSS, JavaScript and image assets still materialize into the preview document.
+- Viewer bridge injection remains present for HTML, source and image preview documents, preserving drag/pinch/runtime-error/snapshot communication.
+- PWA cache identifier and UI/state build identifiers were rotated to deboogs22.
 
-External limitations:
-- Live rendered browser/PWA installation, visual overflow and live console verification cannot run here because local Chromium access is administrator-blocked.
-- Safari/iOS currently does not support Web Share Target registration for installed PWAs; iPhone inbound sharing therefore remains the Shortcut/browser URL path.
-- Network/runtime-dependent WebContainer/npm execution and lazy snapshot-library loading are not guaranteed offline.
+External limitation:
+Live rendered browser/PWA installation, visual overflow and live console verification cannot run here because local Chromium access is administrator-blocked.
