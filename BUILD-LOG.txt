@@ -1,16 +1,22 @@
 DEBOOGER2000 BUILD LOG
 
-Version: deboogs20
-Source: deboogs19
-Phase: Files App 6 — responsive viewer viewport modes
+Version: deboogs21
+Source: deboogs20
+Phase: Files App 7 — final PWA-only integration
 Changes:
-- Added one authoritative viewer viewport system with Desktop 1280×800, Tablet 834×1112 and Mobile 390×844 presets.
-- Desktop remains the default preview canvas, including on phones, so full desktop layouts are not silently replaced by a narrow mobile view.
-- Switching viewport size reuses the existing Fit, zoom, drag, pinch, full-screen, rotation/refit, snapshot and Exit behavior instead of creating a second viewer system.
-- Added accessible aria-pressed state and a single active-button visual rule for the viewport selector.
-- No old panX/panY implementation or duplicate gesture handlers were added.
-- Rotated the PWA shell cache to deboogs20.
-Tests: strict phase verification completed; see TEST-REPORT.txt.
-Result: PASS.
-Known limitation: live installed-PWA visual verification is unavailable in this environment, so the viewport controller was tested in an isolated DOM harness rather than a real browser window here.
-Source of truth: yes for Phase 6.
+- Finalized DEBOOGER2000 as a PWA-only Files application. No native iOS app, native bridge, Share Extension, App Group, or native-intake production code is part of this branch.
+- Preserved the persistent IndexedDB Files library with folders, Files/Recents, search, type filtering, sorting, rename, move, duplicate, delete, metadata and saved audit state.
+- Import, paste and supported browser/Shortcut share intake save to the Files library, detect project/type, run the automatic audit and remain in Files; opening the viewer is optional.
+- Preserved the proven dependency-free ZIP/project/runtime/export core from deboogs12, including compiled React/Vite preference and truthful Electron/backend/WebContainer limitations.
+- Preserved the expanded evidence-based audit with confirmed/probable separation and repair report/prompt output.
+- Preserved the single authoritative viewer with Desktop, Tablet and Mobile viewport presets, desktop default, Fit, zoom, drag, pinch, full-screen, phone landscape refit, snapshot and Exit.
+- Preserved installable standalone PWA metadata, versioned same-origin offline shell cache and IndexedDB-backed saved library data.
+- Preserved browser share-target metadata where supported while keeping the iPhone Shortcut/browser URL intake path.
+- Final build identifiers are aligned to deboogs21 in the UI, state module and service-worker cache.
+Tests: final PWA integration verification completed; see TEST-REPORT.txt.
+Result: PASS for all checks available in this environment.
+Known limitations:
+- Live rendered browser/PWA installation and console verification cannot run in this environment because local Chromium access is administrator-blocked.
+- Safari/iOS does not currently register installed PWAs as Web Share Targets, so iPhone inbound sharing uses the Shortcut/browser URL path.
+- WebContainer/npm execution and the lazily loaded snapshot library require compatible runtime/network availability and are not represented as guaranteed offline features.
+Source of truth: yes.
