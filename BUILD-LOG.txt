@@ -1,16 +1,16 @@
 DEBOOGER2000 BUILD LOG
 
-Version: deboogs15
-Source: deboogs14
-Phase: Files App 3 — installable offline PWA shell
+Version: deboogs18
+Source: deboogs17
+Phase: Files App 4 — PWA-only share intake
 Changes:
-- Added a standards-based web app manifest with standalone launch metadata and a full-bleed maskable DEBOOGER icon.
-- Added a versioned same-origin service-worker shell cache for the Files UI and all local production modules/styles.
-- Added service-worker registration only on HTTP/HTTPS; file:// usage remains unaffected.
-- IndexedDB remains the authoritative persistent Files library and is not duplicated into cache storage.
-- Existing viewer, ZIP, audit, project detection and truthful runtime routing remain unchanged.
-- Offline support covers the local Files UI, saved library data and browser-native static preview paths. WebContainer/npm or other network/runtime-dependent execution is not represented as offline-capable.
+- Kept the project PWA-only; no native iOS app or Share Extension is part of this build.
+- Expanded browser share intake to accept the existing ?share= shortcut format plus standards-based title/text/url share parameters.
+- Added Web Share Target manifest metadata for browsers that support installed-PWA share targets.
+- Shared text is still saved into the permanent Files library and audited without requiring the viewer to open.
+- Share query/hash parameters are removed from the address after intake so a refresh cannot save the same payload again.
+- Rotated the PWA shell cache to deboogs18; existing Files, viewer, ZIP, audit, project detection and truthful runtime routing remain authoritative.
 Tests: strict phase verification completed; see TEST-REPORT.txt.
 Result: PASS.
-Known limitation: live Chromium rendering is externally policy-blocked in this environment.
-Source of truth: yes for Phase 3.
+Known limitation: Safari/iOS does not currently register installed PWAs as Web Share Targets, so iPhone intake remains the browser/Shortcut URL flow rather than a native Share Sheet target.
+Source of truth: yes for Phase 4.
