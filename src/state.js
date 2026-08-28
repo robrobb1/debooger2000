@@ -1,4 +1,4 @@
-export const BUILD_VERSION = 'deboogs23';
+export const BUILD_VERSION = 'deboogs24';
 
 export const state = {
   libraryItemId: '',
