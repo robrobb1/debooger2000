@@ -1,12 +1,16 @@
 DEBOOGER2000 BUILD LOG
 
-Version: deboogs12
-Source: deboogs11
-Phase: 8 — Full integration verified
+Version: deboogs13
+Source: deboogs12
+Phase: Files App 1 — persistent Files home + automatic audit/save
 Changes:
-- Final verified Phase 8 build; production behavior is unchanged from deboogs11 except the build version marker.
-- Includes dependency-free standard ZIP read/export, stable project history, truthful standalone HTML conversion, improved multi-page resource materialization, consolidated package parsing, true viewer Exit, lazy Snapshot loading and cleaned responsive CSS.
-Tests: one strict final pass on this exact build — JS syntax/import audit, HTML/accessibility/reference audit, dead/duplicate/stale-code audit, all-button wiring audit, project/runtime/paste/audit/share/ZIP/export tests, independent Python ZIP validation, viewer control tests and multi-page preview rewriting tests.
+- Preserved deboogs12 viewer, ZIP, project detection, runtime routing, preview, export and audit engines.
+- Replaced the upload-first home with a persistent Files library home.
+- Imports now save permanently to IndexedDB, detect project type/entry, run the audit automatically, and remain in Files without forcing the viewer open.
+- Opening an existing library item does not change its saved order.
+- Added saved audit score/status, item-specific delete, pasted-code save, and automatic save for browser share-text intake.
+- Migrates legacy project-cache history into the new library-items store and removes the legacy object store during IndexedDB upgrade.
+Tests: strict phase verification completed; see TEST-REPORT.txt.
 Result: PASS.
-Known limitation: the available local Chromium is blocked by administrator policy, so a live rendered browser/console screenshot pass could not run in this environment. Runtime behavior was tested through module/integration fixtures instead.
-Source of truth: yes.
+Known limitation: live Chromium rendering is externally policy-blocked in this environment.
+Source of truth: yes for Phase 1.
