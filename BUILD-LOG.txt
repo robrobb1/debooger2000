@@ -1,18 +1,20 @@
 DEBOOGER2000 BUILD LOG
 
-Version: deboogs25
-Source: deboogs24
-Phase: Files App 11 — full library ZIP backup
+Version: deboogs26
+Source: deboogs25
+Phase: Files App 12 — safe merge-only library restore
 Changes:
-- Added a Backup library action that exports the entire saved DEBOOGER library as one standard ZIP.
-- The backup contains DEBOOGER-BACKUP.json plus every saved item file under a unique item archive root.
-- Folder metadata, item metadata, saved dates, type, entry file, audit score/status and audit findings are preserved in the backup manifest.
-- Text files are stored as UTF-8 bytes and saved binary files are decoded from their stored base64 so their original bytes are preserved.
-- Backup archive paths sanitize control characters and neutralize parent traversal segments instead of writing unsafe ../ paths.
-- Added a standard-ZIP entry-count guard before export.
-- Backup uses the existing authoritative dependency-free ZIP encoder rather than adding another archive implementation.
-- Backup UI wiring is isolated in src/library-backup.js and uses the existing status area; the Files/import/runtime code is unchanged.
-- Added library-backup.js to the offline app-shell cache and aligned build identifiers to deboogs25.
+- Added Restore backup for DEBOOGER2000 library backup ZIPs.
+- Restore validates the archive and DEBOOGER-BACKUP.json completely before any library write.
+- Unsupported format versions, count mismatches, duplicate references, missing file payloads, unsafe saved paths and unexpected/unreferenced ZIP files are rejected.
+- Restored folder and item IDs are regenerated so existing library records are never overwritten.
+- Folder relationships are remapped to the new restored folder IDs; missing backup folder references safely fall back to root.
+- Saved file bytes are reconstructed exactly from the archive, including base64 restoration for binary files.
+- Audit findings and scores are recalculated from restored file contents rather than trusting backup audit metadata.
+- Restore preserves original savedAt chronology and marks restored records updated now so they appear in Recents without changing their original saved order.
+- Added restoreLibraryBatch() to the authoritative storage module using one IndexedDB readwrite transaction and add(), so collisions abort/roll back instead of partially restoring or overwriting data.
+- Backup export limit is aligned to the existing safe ZIP decoder limit so every generated backup is restorable by this build.
+- Added library-restore.js to the offline app shell and aligned build identifiers to deboogs26.
 Tests: strict phase verification completed; see TEST-REPORT.txt.
 Result: PASS.
-Source of truth: yes for Phase 11.
+Source of truth: yes for Phase 12.
