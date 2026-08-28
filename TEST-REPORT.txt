@@ -1,15 +1,14 @@
-DEBOOGER2000 deboogs13 — PHASE 1 TEST REPORT
+DEBOOGER2000 deboogs14 — PHASE 2 TEST REPORT
 
 PASS
-- All 16 production JavaScript modules passed node --check syntax validation.
-- HTML ids are unique; every app.js getElementById reference resolves to existing markup.
-- All visible buttons have explicit ids and are wired through app.js or the preserved ViewerController.
-- New Files stylesheet has no duplicate selectors or !important rules.
-- Audit-engine fixture verified duplicate ID, missing asset, inline override, duplicate function, console.log and duplicate CSS detection.
-- React/Vite compiled-dist routing verified; Electron without browser renderer remains analysis-only.
-- ZIP export/read round-trip passed with extracted text equality.
-- New IndexedDB library storage passed migration, save, list, get, update, delete and persistent-storage request tests using an in-memory IndexedDB-compatible test harness.
-- Import flow source audit confirms save + automatic audit occurs before optional viewer opening.
+- All production JavaScript modules passed node --check.
+- HTML ids are unique and every app.js DOM id reference resolves.
+- All 33 visible buttons have explicit ids; no duplicate direct app listener target/event pairs were found.
+- No duplicate declared function names, console.log, debugger, alert, prompt or confirm remnants in the Files controller.
+- Files stylesheet contains no duplicate selectors and no !important rules.
+- IndexedDB-compatible tests passed: legacy migration, folder create/rename/delete, safe move-to-root on folder delete, library save/get/delete and item duplication.
+- Core regression tests passed for audit rules, React/Vite compiled-dist routing, truthful Electron analysis-only routing and ZIP export/read round trip.
+- Source review confirms file opening does not write savedAt, while rename/move/duplicate operations update only their intended item.
 
 External browser limitation:
-Local Chromium is blocked by administrator policy from localhost/private/file URLs (ERR_BLOCKED_BY_ADMINISTRATOR), so a live rendered Chromium/console pass cannot run in this environment.
+Local Chromium is blocked by administrator policy from localhost/private/file URLs (ERR_BLOCKED_BY_ADMINISTRATOR), so live rendered UI and console verification cannot run here.
