@@ -1,17 +1,16 @@
-DEBOOGER2000 deboogs19 — PHASE 5 TEST REPORT
+DEBOOGER2000 deboogs20 — PHASE 6 TEST REPORT
 
 PASS
-- src/audit-engine.js passed node syntax validation.
-- Regression fixture confirmed existing broken-label, missing-asset, JSON parse, console logging, duplicate selector, !important and scoring/report behavior still works.
-- New duplicate script-source detection passed.
-- New missing image alt detection passed.
-- New probable unlabeled control detection passed.
-- New unresolved inline-handler detection passed.
-- New duplicate named event-listener detection passed.
-- New literal missing DOM target detection passed.
-- New duplicate CSS property detection passed.
-- A clean HTML/JS/CSS fixture returned zero findings, reducing the risk of obvious false positives from the new rules.
-- service-worker.js cache version was rotated to deboogs19.
+- src/viewer.js passed node syntax validation.
+- Viewer controller harness confirmed Desktop is the default mode.
+- Tablet mode resizes the authoritative viewer surface to 834×1112 and refits it.
+- Mobile mode resizes the same viewer surface to 390×844 and refits it.
+- Returning to Desktop restores 1280×800.
+- Existing viewer zoom, Fit, drag, pinch bridge, full-screen, rotation handling, snapshot and Exit methods remain in the same ViewerController.
+- New viewport buttons use unique ids and aria-pressed state; Desktop starts active.
+- The active viewport selector uses one non-conflicting CSS rule.
+- No panX/panY state, duplicate viewer implementation or second gesture system was introduced.
+- PWA cache version was rotated to deboogs20.
 
 External limitation:
-Rendered-only behavior such as real overflow, viewport clipping or a visually clickable control that does nothing still requires a live browser/runtime check and is not falsely promoted to a confirmed static finding.
+A live browser visual pass is blocked in this environment, so exact on-device rendering of each viewport preset still needs device/browser verification when deployed.
