@@ -18,7 +18,9 @@ export class ViewerController {
       mobile: document.getElementById('viewer-mobile')
     };
     this.boundMessage = (event) => this.onBridgeMessage(event);
+    this.boundOpenDocument = (event) => this.onOpenDocument(event);
     addEventListener('message', this.boundMessage);
+    addEventListener('debooger-open-document', this.boundOpenDocument);
     this.bind();
     this.syncViewportButtons();
   }
@@ -47,6 +49,13 @@ export class ViewerController {
   setStatus(message) { this.el.status.textContent = message; }
   setFrameDocument(html) { this.el.frame.removeAttribute('src'); this.el.frame.setAttribute('sandbox', 'allow-scripts allow-forms allow-modals allow-popups allow-downloads'); this.el.frame.srcdoc = html; this.show(); }
   setFrameUrl(url) { this.el.frame.removeAttribute('srcdoc'); this.el.frame.removeAttribute('sandbox'); this.el.frame.src = url; this.show(); }
+
+  onOpenDocument(event) {
+    const detail = event?.detail;
+    if (!detail || typeof detail.html !== 'string') return;
+    this.setFrameDocument(detail.html);
+    this.setStatus(String(detail.status || 'File preview'));
+  }
 
   setViewportMode(mode) {
     if (!VIEWPORTS[mode]) return;
