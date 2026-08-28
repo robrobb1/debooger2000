@@ -1,16 +1,20 @@
 DEBOOGER2000 BUILD LOG
 
-Version: deboogs18
-Source: deboogs17
-Phase: Files App 4 — PWA-only share intake
+Version: deboogs19
+Source: deboogs18
+Phase: Files App 5 — expanded evidence-based audit
 Changes:
-- Kept the project PWA-only; no native iOS app or Share Extension is part of this build.
-- Expanded browser share intake to accept the existing ?share= shortcut format plus standards-based title/text/url share parameters.
-- Added Web Share Target manifest metadata for browsers that support installed-PWA share targets.
-- Shared text is still saved into the permanent Files library and audited without requiring the viewer to open.
-- Share query/hash parameters are removed from the address after intake so a refresh cannot save the same payload again.
-- Rotated the PWA shell cache to deboogs18; existing Files, viewer, ZIP, audit, project detection and truthful runtime routing remain authoritative.
+- Reworked the audit engine into one readable authoritative implementation while preserving existing exports and scoring behavior.
+- Added confirmed duplicate script-source detection.
+- Added probable duplicate event-listener detection for the same target/event/named handler.
+- Added probable missing literal DOM id/querySelector target checks.
+- Added confirmed missing image alt checks and probable unlabeled form-control checks.
+- Added probable unresolved inline handler checks.
+- Added probable hidden legacy/old/backup layout checks only when the markup is explicitly named that way and hidden.
+- Added probable duplicate CSS-property checks inside one rule while retaining duplicate-selector and !important checks.
+- Existing duplicate IDs, broken labels, missing assets, JSON parsing, JavaScript syntax, duplicate functions, debugger/console/dialog, framework, runtime error, repair prompt and report behavior remain in the same authoritative audit engine.
+- Rotated the PWA shell cache to deboogs19.
 Tests: strict phase verification completed; see TEST-REPORT.txt.
 Result: PASS.
-Known limitation: Safari/iOS does not currently register installed PWAs as Web Share Targets, so iPhone intake remains the browser/Shortcut URL flow rather than a native Share Sheet target.
-Source of truth: yes for Phase 4.
+Known limitation: checks that require a rendered page, such as actual overflow or a visually clickable element that has no effect, are not marked as confirmed by static analysis alone.
+Source of truth: yes for Phase 5.
