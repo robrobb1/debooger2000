@@ -1,17 +1,18 @@
-DEBOOGER2000 deboogs24 — PHASE 10 TEST REPORT
+DEBOOGER2000 deboogs25 — PHASE 11 TEST REPORT
 
 PASS
-- src/file-launch.js passed Node syntax validation.
-- filesFromLaunchParams() accepted file handles, ignored non-file handles and safely skipped failed handle reads.
-- forwardFilesToImport() built a DataTransfer, assigned the launched Files to the existing input and dispatched the same change event used by manual Import.
-- registerFileLaunchIntake() registered exactly one consumer when launchQueue is supported and returned false cleanly when unsupported.
-- End-to-end isolated launch fixture passed: launchQueue consumer → FileSystemFileHandle.getFile() → existing file input → change event.
-- Manifest parsed as valid JSON with launch_handler and file_handlers entries.
-- Registered file extensions include HTML, ZIP, JavaScript, JSON, PNG, SVG, Python and TSX among the supported list.
-- Existing GET text share_target metadata remains present.
-- file-launch.js is loaded after the main app module and registers after normal app startup.
-- service-worker.js app shell includes file-launch.js and cache version debooger-shell-deboogs24.
-- UI, state and service-worker build identifiers align to deboogs24.
+- src/library-backup.js passed Node syntax validation.
+- Mixed text and binary library fixture produced a DEBOOGER2000_LIBRARY_BACKUP formatVersion 1 manifest.
+- Item, folder and file counts matched the source fixture.
+- Saved audit findings and item metadata remained present in the manifest while raw file content was kept out of manifest metadata.
+- Unsafe ../ path segments were neutralized in archive paths.
+- Binary base64 content round-tripped through the real DEBOOGER stored-ZIP encoder/decoder with exact byte equality.
+- DEBOOGER-BACKUP.json was present and parseable from the generated ZIP.
+- Text and binary file records in the ZIP matched their manifest archivePath records.
+- Non-browser module import is safely guarded; the initial test exposed and the phase fixed an unguarded document startup reference before completion.
+- Empty-library export returns an explicit error instead of generating a fake backup.
+- service-worker.js app shell includes library-backup.js and cache version debooger-shell-deboogs25.
+- UI, state and service-worker build identifiers align to deboogs25.
 
 External limitation:
-PWA OS file handling is currently limited availability and documented as Chromium desktop only. This phase does not claim iPhone/Safari file-handler support. Live installed-PWA OS association cannot be verified in this environment.
+The browser download gesture itself cannot be visually exercised in this environment because local Chromium access is administrator-blocked. ZIP generation and byte-level archive round trip were verified directly.
