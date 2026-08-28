@@ -1,19 +1,17 @@
 DEBOOGER2000 BUILD LOG
 
-Version: deboogs28
-Source: deboogs27
-Phase: Files App 14 — search inside ZIP/project contents
+Version: deboogs29
+Source: deboogs28
+Phase: Files App 15 — atomic PWA shell updates / stale-version protection
 Changes:
-- Added a Search inside project field directly above the internal Project files list.
-- Search matches full internal file paths and, for non-binary files, text/code content.
-- Content search is capped to the first 256 KB per text file so large ZIPs do not scan unlimited source on every query.
-- Binary files are searched by path/name only; their encoded payload is never text-searched.
-- Search input is debounced by 90 ms and reuses the existing internal-file rows rather than rebuilding the project state.
-- The file summary shows total file count or matching/total counts while searching.
-- Hidden search results cannot be opened by click or keyboard until they match again.
-- Existing previewability, viewer routing, ZIP extraction, audit, library search and project runtime behavior remain unchanged.
-- Added only the small project-search UI styles; no duplicate search implementation or second project list was created.
-- Rotated the PWA shell cache and aligned build identifiers to deboogs28.
+- Removed automatic skipWaiting during service-worker install so a newly deployed shell cannot take control halfway through an already-open DEBOOGER session.
+- Navigation is now served from the active service worker's cached index.html first, keeping HTML, CSS and JavaScript on one matching build version while that worker controls the app.
+- A newly installed service worker waits normally; after the old DEBOOGER clients close, the new worker activates, removes older DEBOOGER shell caches and claims the next session.
+- First-time installs still load normally from the network and populate the complete versioned app-shell cache.
+- Same-origin non-navigation resources remain cache-first with network fallback.
+- This deliberately favors version consistency over silently hot-swapping code inside an open session.
+- Existing IndexedDB library data is separate from the shell cache and is not deleted during service-worker version cleanup.
+- Build identifiers are aligned to deboogs29.
 Tests: strict phase verification completed; see TEST-REPORT.txt.
 Result: PASS.
-Source of truth: yes for Phase 14.
+Source of truth: yes for Phase 15.
