@@ -1,15 +1,14 @@
 DEBOOGER2000 BUILD LOG
 
-Version: deboogs4
-Source: deboogs3
-Phase: 4 — Paste/type detection
+Version: deboogs5
+Source: deboogs4
+Phase: 5 — Share intake
 Changes:
-- Added real paste intake with HTML, CSS, JavaScript, JSX, TSX, TypeScript, JSON and unknown-text detection.
-- Added correct automatic extension/MIME download for the detected content.
-- Paste appends at the bottom when no deliberate selection exists; selected text is replaced only when the user selected it.
-- Cursor stays focused at the end with a clean trailing line and the editor scrolls to the bottom.
-- Paste triggers an immediate viewer preview; non-HTML code uses a truthful source preview instead of pretending it can execute.
-Tests: one clean Phase 4 pass — type-detection cases, append/selection behavior, source-preview generation, syntax checks, duplicate/static clean-code audit.
+- Added browser-compatible iPhone Shortcut/share-link intake using the `share` URL parameter or hash parameter.
+- Shared selected text opens directly into Paste, gets a clean trailing line, cursor/focus moves to the bottom, and preview is prepared immediately.
+- Consumed share data is removed from the address after loading so refresh does not duplicate it.
+- Normal file/ZIP opening is unchanged when no share payload exists.
+Tests: one clean Phase 5 pass — query/hash share decoding, URL generation, consumed-share cleanup, normal-open fallback, syntax checks, duplicate/static clean-code audit.
 Result: PASS
-Known limitation: raw JSX/TSX/TypeScript paste is source-previewed, not falsely executed without compilation.
-Source of truth: yes — Phase 4 verified within the available environment.
+Known limitation: a normal browser page cannot register as a native iOS Share Extension; very large text can exceed practical URL limits and must be pasted directly.
+Source of truth: yes — Phase 5 verified within the available environment.
