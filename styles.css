@@ -43,6 +43,8 @@ h3 { font-size: 13px; font-weight: 650; }
 .file-list-wrap { border-top: 1px solid var(--line); padding-top: 12px; }
 .file-list { display: grid; gap: 6px; margin: 8px 0 0; padding: 0; list-style: none; max-height: 300px; overflow: auto; }
 .file-list li { display: flex; justify-content: space-between; gap: 12px; border: 1px solid var(--line); border-radius: 9px; padding: 8px 10px; background: #fff; }
+.file-list li.previewable { cursor: pointer; }
+.file-list li.previewable:hover, .file-list li.previewable:focus-visible { border-color: #aab7ab; background: #f7faf7; outline: none; }
 .file-list code { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; }
 .file-list span { flex: 0 0 auto; color: var(--muted); font-size: 11px; }
 .visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; clip-path: inset(50%); }
