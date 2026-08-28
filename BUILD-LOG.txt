@@ -1,18 +1,18 @@
 DEBOOGER2000 BUILD LOG
 
-Version: deboogs23
-Source: deboogs22
-Phase: Files App 9 — accurate loose-file classification
+Version: deboogs24
+Source: deboogs23
+Phase: Files App 10 — supported PWA OS file handling
 Changes:
-- Corrected saved/imported loose-file metadata so non-HTML files are no longer mislabeled as HTML/static projects.
-- Single images are classified as image-file.
-- Single JavaScript, TypeScript, CSS and JSON files are classified as source-file.
-- Single plain text/Markdown/XML/YAML-style files are classified as text-file.
-- Single unsupported binary files are classified as binary-file.
-- Multi-file collections with no HTML/framework/backend signature are classified as file-bundle instead of HTML/static.
-- Existing Electron, Next.js, React/Vite, Node service, backend service, single HTML and HTML/static detection order remains intact.
-- Existing visual-entry scoring still prefers compiled dist/build/out, then common renderer/public entries, then root HTML.
-- Rotated the PWA shell cache and aligned build identifiers to deboogs23.
+- Added standards-based installed-PWA file_handlers metadata for HTML, CSS, JavaScript, JSON, text/code, ZIP and common image formats.
+- Added launch_handler metadata using navigate-existing so supported installs can reuse the active DEBOOGER window.
+- Added src/file-launch.js using window.launchQueue and FileSystemFileHandle.getFile() only when the browser exposes the feature.
+- Incoming OS-launched files are forwarded into the existing file input change event, so they use the same authoritative import, type detection, audit, persistence and ZIP handling flow as manual Import.
+- The launch intake registers after normal app startup to avoid racing the existing Import listener.
+- Unsupported browsers no-op cleanly and continue to use the normal Import button.
+- Existing browser/Shortcut text share intake remains unchanged.
+- Added file-launch.js to the offline app-shell cache and aligned build identifiers to deboogs24.
 Tests: strict phase verification completed; see TEST-REPORT.txt.
-Result: PASS.
-Source of truth: yes for Phase 9.
+Result: PASS for supported-path logic.
+Known limitation: current standards/browser documentation marks PWA file handling as limited availability and Chromium desktop only; it is not represented as an iPhone/Safari capability.
+Source of truth: yes for Phase 10.
