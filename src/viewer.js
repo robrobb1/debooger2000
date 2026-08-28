@@ -15,7 +15,7 @@ export class ViewerController {
     this.el.zoomOut.addEventListener('click', () => this.zoomBy(1 / 1.2));
     this.el.fit.addEventListener('click', () => this.fit());
     this.el.full.addEventListener('click', () => this.enterFullscreen(true));
-    this.el.exit.addEventListener('click', () => this.exitFullscreen());
+    this.el.exit.addEventListener('click', () => { if (this.callbacks.onExit) this.callbacks.onExit(); else this.hide(); });
     this.el.snapshot.addEventListener('click', () => this.requestSnapshot());
     this.el.stage.addEventListener('pointerdown', (event) => this.stagePointerDown(event));
     this.el.stage.addEventListener('pointermove', (event) => this.stagePointerMove(event));

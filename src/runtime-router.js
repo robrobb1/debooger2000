@@ -1,11 +1,6 @@
 import { state } from './state.js';
 import { chooseVisualEntry } from './project-engine.js';
-
-function packageJson(files) {
-  const key = Object.keys(files || {}).find((path) => /(^|\/)package\.json$/i.test(path));
-  if (!key || files[key]?.binary) return null;
-  try { return JSON.parse(String(files[key].content || '{}')); } catch { return null; }
-}
+import { readPackageJson } from './package-utils.js';
 
 function runnablePackage(pkg) {
   if (!pkg) return false;
@@ -49,7 +44,7 @@ export function selectPreviewRoute(files = state.files, projectType = state.proj
     return { mode: 'analysis-only', entry: null, runnable: false, reason: 'Electron main/preload code cannot run as a normal browser page.' };
   }
 
-  const pkg = packageJson(files);
+  const pkg = readPackageJson(files);
   if (['react-vite', 'nextjs', 'node-service'].includes(projectType) && runnablePackage(pkg)) {
     const environment = evaluateWebContainerEnvironment(env || currentWebContainerEnvironment());
     if (environment.supported) return { mode: 'webcontainer', entry: entry || 'package.json', runnable: true, reason: 'Project has a runnable package and the host supports WebContainer.' };

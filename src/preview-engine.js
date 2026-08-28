@@ -1,5 +1,3 @@
-import { decodeBase64ToUint8Array } from './file-utils.js';
-
 function dirname(path) {
   const parts = String(path || '').split('/');
   parts.pop();
@@ -53,11 +51,16 @@ function asDataUrl(path, file, contentOverride = null) {
 }
 
 function rewriteCss(css, path, files, materialize) {
-  return String(css).replace(/url\(\s*(['"]?)([^)'"\s]+)\1\s*\)/gi, (match, quote, request) => {
+  let next = String(css).replace(/url\(\s*(['"]?)([^)'"\s]+)\1\s*\)/gi, (match, quote, request) => {
     const target = resolveProjectPath(path, request);
     if (!target || !files[target]) return match;
     return `url("${materialize(target)}")`;
   });
+  next = next.replace(/(@import\s+)(['"])([^'"]+)\2/gi, (match, prefix, quote, request) => {
+    const target = resolveProjectPath(path, request);
+    return target && files[target] ? `${prefix}${quote}${materialize(target)}${quote}` : match;
+  });
+  return next;
 }
 
 function rewriteJavaScript(code, path, files, materialize) {
@@ -72,6 +75,17 @@ function rewriteJavaScript(code, path, files, materialize) {
   return next;
 }
 
+function rewriteHtml(html, path, files, materialize) {
+  let next = String(html);
+  next = next.replace(/\b(src|href)\s*=\s*(['"])([^'"]+)\2/gi, (match, attr, quote, request) => {
+    const target = resolveProjectPath(path, request);
+    return target && files[target] ? `${attr}=${quote}${materialize(target)}${quote}` : match;
+  });
+  next = next.replace(/(<style\b[^>]*>)([\s\S]*?)(<\/style>)/gi, (match, open, css, close) => `${open}${rewriteCss(css, path, files, materialize)}${close}`);
+  next = next.replace(/\bstyle\s*=\s*(['"])([\s\S]*?)\1/gi, (match, quote, css) => `style=${quote}${rewriteCss(css, path, files, materialize)}${quote}`);
+  return next;
+}
+
 export function createMaterializer(files) {
   const cache = new Map();
   const working = new Set();
@@ -83,6 +97,7 @@ export function createMaterializer(files) {
     working.add(path);
     let value;
     if (file.binary) value = asDataUrl(path, file);
+    else if (/\.html?$/i.test(path)) value = asDataUrl(path, file, rewriteHtml(file.content, path, files, materialize));
     else if (path.toLowerCase().endsWith('.css')) value = asDataUrl(path, file, rewriteCss(file.content, path, files, materialize));
     else if (/\.(?:js|mjs|cjs)$/i.test(path)) value = asDataUrl(path, file, rewriteJavaScript(file.content, path, files, materialize));
     else value = asDataUrl(path, file);
@@ -96,7 +111,7 @@ export function createMaterializer(files) {
 function bridgeScript() {
   return `<script>(function(){
     const send=(payload)=>parent.postMessage(Object.assign({type:'DEBOOGER_VIEWER_BRIDGE'},payload),'*');
-    const active=new Map(); let drag=false; let last=null; let pinchDistance=0;
+    const active=new Map(); let drag=false; let last=null; let pinchDistance=0; let capturePromise=null;
     addEventListener('error',e=>send({event:'runtime-error',message:String(e.message||'Runtime error'),source:String(e.filename||'preview'),line:Number(e.lineno||0)}));
     addEventListener('unhandledrejection',e=>send({event:'runtime-error',message:String(e.reason&&e.reason.message||e.reason||'Unhandled promise rejection'),source:'promise',line:0}));
     addEventListener('pointerdown',e=>{ active.set(e.pointerId,{x:e.clientX,y:e.clientY}); last={x:e.clientX,y:e.clientY}; pinchDistance=0; });
@@ -107,9 +122,10 @@ function bridgeScript() {
       if(pts.length>=2){ e.preventDefault(); const d=Math.hypot(pts[0].x-pts[1].x,pts[0].y-pts[1].y); if(pinchDistance) send({event:'pinch',factor:d/pinchDistance}); pinchDistance=d; drag=true; return; }
       if(!last) return; const dx=e.clientX-last.x,dy=e.clientY-last.y; if(drag||Math.hypot(dx,dy)>5){ drag=true; e.preventDefault(); send({event:'drag',dx,dy}); last={x:e.clientX,y:e.clientY}; }
     },{passive:false});
-    const end=e=>{ active.delete(e.pointerId); if(active.size<2) pinchDistance=0; if(!active.size){drag=false;last=null;} };
+    const end=e=>{ active.delete(e.pointerId); if(active.size<2) pinchDistance=0; if(active.size===1){const p=[...active.values()][0];last={x:p.x,y:p.y};drag=false;} else if(!active.size){drag=false;last=null;} };
     addEventListener('pointerup',end); addEventListener('pointercancel',end);
-    addEventListener('message',e=>{ if(e.data&&e.data.type==='DEBOOGER_CAPTURE'){ if(typeof html2canvas!=='function'){send({event:'snapshot-error',message:'Snapshot library unavailable'});return;} html2canvas(document.documentElement,{backgroundColor:null,useCORS:true,logging:false,scale:Math.min(2,1600/Math.max(document.documentElement.scrollWidth,1))}).then(c=>send({event:'snapshot',dataUrl:c.toDataURL('image/jpeg',.92)})).catch(err=>send({event:'snapshot-error',message:String(err&&err.message||err)})); }});
+    const loadCapture=()=>{ if(typeof html2canvas==='function') return Promise.resolve(); if(capturePromise) return capturePromise; capturePromise=new Promise((resolve,reject)=>{ const script=document.createElement('script'); const timer=setTimeout(()=>reject(new Error('Snapshot library timed out')),15000); script.src='https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js'; script.onload=()=>{clearTimeout(timer);typeof html2canvas==='function'?resolve():reject(new Error('Snapshot library did not initialize'));}; script.onerror=()=>{clearTimeout(timer);reject(new Error('Snapshot library could not load'));}; document.head.appendChild(script); }).finally(()=>{capturePromise=null;}); return capturePromise; };
+    addEventListener('message',e=>{ if(e.data&&e.data.type==='DEBOOGER_CAPTURE'){ loadCapture().then(()=>html2canvas(document.documentElement,{backgroundColor:null,useCORS:true,logging:false,scale:Math.min(2,1600/Math.max(document.documentElement.scrollWidth,1))})).then(c=>send({event:'snapshot',dataUrl:c.toDataURL('image/jpeg',.92)})).catch(err=>send({event:'snapshot-error',message:String(err&&err.message||err)})); }});
   })();<\/script>`;
 }
 
@@ -117,23 +133,15 @@ export function buildPortableHtmlDocument(files, entryPath) {
   const entry = files?.[entryPath];
   if (!entry || entry.binary) throw new Error('The selected preview entry is not readable HTML.');
   const materialize = createMaterializer(files);
-  let html = String(entry.content || '');
-  html = html.replace(/\b(src|href)\s*=\s*(['"])([^'"]+)\2/gi, (match, attr, quote, request) => {
-    const target = resolveProjectPath(entryPath, request);
-    if (!target || !files[target]) return match;
-    return `${attr}=${quote}${materialize(target)}${quote}`;
-  });
-  return html;
+  return rewriteHtml(entry.content, entryPath, files, materialize);
 }
 
 export function buildStaticPreviewDocument(files, entryPath) {
   let html = buildPortableHtmlDocument(files, entryPath);
-  const injected = `<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"><\/script>${bridgeScript()}`;
+  const injected = bridgeScript();
   if (/<head[\s>]/i.test(html)) html = html.replace(/<head([^>]*)>/i, `<head$1>${injected}`);
+  else if (/<html[\s>]/i.test(html)) html = html.replace(/<html([^>]*)>/i, `<html$1>${injected}`);
+  else if (/<!doctype[^>]*>/i.test(html)) html = html.replace(/(<!doctype[^>]*>)/i, `$1${injected}`);
   else html = injected + html;
   return html;
-}
-
-export function decodeVirtualBinary(file) {
-  return decodeBase64ToUint8Array(file?.content || '');
 }

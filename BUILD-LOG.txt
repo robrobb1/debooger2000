@@ -1,14 +1,12 @@
 DEBOOGER2000 BUILD LOG
 
-Version: deboogs9
-Source: deboogs8
-Phase: 7 — Storage, history, conversion and export (verification repair)
+Version: deboogs12
+Source: deboogs11
+Phase: 8 — Full integration verified
 Changes:
-- Preserved recent-project history, stable reopen order, delete behavior, project ZIP export and truthful standalone HTML export.
-- Removed the startup CDN dependency on JSZip.
-- Added an internal standard ZIP reader with CRC, path, size and compression-ratio checks.
-- Added dependency-free STORE ZIP export.
-- Deflated ZIP entries use the browser's native DecompressionStream and fail truthfully when unavailable.
-Tests: pending strict Phase 7 verification.
-Result: pending verification.
-Source of truth: no until verification passes.
+- Final verified Phase 8 build; production behavior is unchanged from deboogs11 except the build version marker.
+- Includes dependency-free standard ZIP read/export, stable project history, truthful standalone HTML conversion, improved multi-page resource materialization, consolidated package parsing, true viewer Exit, lazy Snapshot loading and cleaned responsive CSS.
+Tests: one strict final pass on this exact build — JS syntax/import audit, HTML/accessibility/reference audit, dead/duplicate/stale-code audit, all-button wiring audit, project/runtime/paste/audit/share/ZIP/export tests, independent Python ZIP validation, viewer control tests and multi-page preview rewriting tests.
+Result: PASS.
+Known limitation: the available local Chromium is blocked by administrator policy, so a live rendered browser/console screenshot pass could not run in this environment. Runtime behavior was tested through module/integration fixtures instead.
+Source of truth: yes.

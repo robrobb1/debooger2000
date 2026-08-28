@@ -72,6 +72,8 @@ body.viewer-wide .viewer-toolbar { padding-top: max(8px, env(safe-area-inset-top
   .viewer-shell { inset: 6px; }
   .viewer-toolbar { align-items: flex-start; }
   #viewer-status { max-width: 35%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .history-row { align-items: flex-start; flex-direction: column; }
+  .history-actions, .project-actions { width: 100%; justify-content: flex-start; }
 }
 .history-panel { margin-top: 14px; padding: 14px 16px; }
 .history-heading { margin-bottom: 10px; }
@@ -85,7 +87,3 @@ body.viewer-wide .viewer-toolbar { padding-top: max(8px, env(safe-area-inset-top
 .history-actions button { border: 1px solid var(--line); border-radius: 8px; background: #fff; padding: 6px 9px; font-size: 11px; }
 .history-actions .history-delete { color: var(--danger); }
 .button:disabled { cursor: not-allowed; opacity: .5; }
-@media (max-width: 620px) {
-  .history-row { align-items: flex-start; flex-direction: column; }
-  .history-actions, .project-actions { width: 100%; justify-content: flex-start; }
-}

@@ -38,7 +38,8 @@ const viewer = new ViewerController({
 }, {
   onRuntimeError: (item) => { state.runtimeErrors.push({ message: String(item.message || 'Runtime error'), file: String(item.source || 'preview'), line: Number(item.line || 0) }); refreshAudit(); },
   onSnapshot: (dataUrl) => { snapshotImage.src = dataUrl; snapshotSave.href = dataUrl; snapshotDialog.hidden = false; },
-  onSnapshotError: (message) => setStatus(`Snapshot failed: ${message}`, true)
+  onSnapshotError: (message) => setStatus(`Snapshot failed: ${message}`, true),
+  onExit: async () => { await webcontainer.dispose(); viewer.hide(); setStatus('Viewer closed.'); }
 });
 
 const webcontainer = new WebContainerEngine((message) => { state.runtimeErrors.push({ message, file: 'WebContainer', line: 0 }); viewer.setStatus(message); refreshAudit(); });
