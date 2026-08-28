@@ -14,30 +14,45 @@
 <body>
   <main class="app-shell">
     <header class="topbar files-topbar">
-      <div>
-        <p class="eyebrow">DEBOOGER2000</p>
-        <h1>Files</h1>
-      </div>
-      <span id="build-badge" class="badge">deboogs13</span>
+      <div><p class="eyebrow">DEBOOGER2000</p><h1>Files</h1></div>
+      <span id="build-badge" class="badge">deboogs14</span>
     </header>
 
-    <section class="files-actions" aria-label="Add files">
+    <section class="files-actions" aria-label="Add and organize files">
       <label class="button files-primary" for="file-input">Import</label>
       <input id="file-input" class="visually-hidden" type="file" multiple>
       <button id="open-paste" class="button secondary" type="button">Paste code</button>
+      <button id="new-folder" class="button secondary" type="button">New folder</button>
     </section>
     <p id="status" class="status files-status" role="status" aria-live="polite">Ready.</p>
 
     <section id="library-panel" class="panel files-library" aria-labelledby="library-title">
-      <div class="section-heading files-library-heading">
-        <div>
-          <h2 id="library-title">My Files</h2>
-          <p id="library-summary">Saved files and projects appear here automatically after import and audit.</p>
+      <div class="files-library-top">
+        <div class="files-view-tabs" role="group" aria-label="Library view">
+          <button id="view-files" class="files-tab active" type="button">Files</button>
+          <button id="view-recents" class="files-tab" type="button">Recents</button>
         </div>
+        <button id="folder-options" class="files-folder-options" type="button" hidden>Folder options</button>
       </div>
-      <div id="library-list" class="files-list">
-        <p class="history-empty">No saved files yet.</p>
+      <div id="folder-list" class="folder-list" aria-label="Folders"></div>
+      <div class="files-controls">
+        <label class="files-search"><span class="visually-hidden">Search files</span><input id="library-search" type="search" placeholder="Search files"></label>
+        <select id="library-filter" aria-label="Filter by type">
+          <option value="all">All types</option>
+          <option value="html">HTML / Static</option>
+          <option value="react">React / Vite / Next</option>
+          <option value="node">Node / Electron / Backend</option>
+        </select>
+        <select id="library-sort" aria-label="Sort files">
+          <option value="saved-desc">Newest</option>
+          <option value="saved-asc">Oldest</option>
+          <option value="name-asc">Name</option>
+          <option value="size-desc">Size</option>
+          <option value="score-desc">Audit score</option>
+        </select>
       </div>
+      <div class="section-heading files-library-heading"><div><h2 id="library-title">My Files</h2><p id="library-summary">Loading saved items…</p></div></div>
+      <div id="library-list" class="files-list"><p class="history-empty">No saved files yet.</p></div>
     </section>
 
     <section id="project-panel" class="panel project-panel" hidden aria-labelledby="project-title">
@@ -50,62 +65,38 @@
           <button id="clear-project" class="button secondary" type="button">Close details</button>
         </div>
       </div>
-      <dl class="project-meta">
+      <dl class="project-meta files-project-meta">
         <div><dt>Files</dt><dd id="file-count">0</dd></div>
         <div><dt>Main entry</dt><dd id="entry-file">—</dd></div>
         <div><dt>Total size</dt><dd id="total-size">0 KB</dd></div>
+        <div><dt>Saved</dt><dd id="saved-date">—</dd></div>
+        <div><dt>Audit</dt><dd id="audit-state">—</dd></div>
       </dl>
       <div class="file-list-wrap"><h3>Project files</h3><ul id="file-list" class="file-list"></ul></div>
     </section>
 
     <section id="audit-card" class="panel audit-card" hidden aria-labelledby="audit-title">
-      <div class="audit-summary">
-        <div><h2 id="audit-title">Automatic audit</h2><p id="audit-count">0 findings</p></div>
-        <div id="audit-score" class="audit-score">100</div>
-      </div>
-      <div class="audit-actions">
-        <button id="audit-copy" class="button secondary" type="button">Copy AI Repair Prompt</button>
-        <button id="audit-download" class="button secondary" type="button">Download Audit Report</button>
-      </div>
+      <div class="audit-summary"><div><h2 id="audit-title">Automatic audit</h2><p id="audit-count">0 findings</p></div><div id="audit-score" class="audit-score">100</div></div>
+      <div class="audit-actions"><button id="audit-copy" class="button secondary" type="button">Copy AI Repair Prompt</button><button id="audit-download" class="button secondary" type="button">Download Audit Report</button></div>
       <div id="audit-list" class="audit-list"></div>
     </section>
   </main>
 
   <section id="viewer-shell" class="viewer-shell" hidden aria-label="Project preview">
-    <div class="viewer-toolbar">
-      <span id="viewer-status">Preview</span>
-      <div class="viewer-controls">
-        <button id="viewer-zoom-out" type="button" aria-label="Zoom out">−</button>
-        <button id="viewer-zoom-in" type="button" aria-label="Zoom in">+</button>
-        <button id="viewer-fit" type="button">Fit</button>
-        <button id="viewer-snapshot" type="button">Snapshot</button>
-        <button id="viewer-full" type="button">Full</button>
-        <button id="viewer-exit" type="button">Exit</button>
-      </div>
-    </div>
-    <div id="viewer-stage" class="viewer-stage">
-      <div id="viewer-surface" class="viewer-surface"><iframe id="viewer-frame" title="Project preview"></iframe></div>
-    </div>
+    <div class="viewer-toolbar"><span id="viewer-status">Preview</span><div class="viewer-controls"><button id="viewer-zoom-out" type="button" aria-label="Zoom out">−</button><button id="viewer-zoom-in" type="button" aria-label="Zoom in">+</button><button id="viewer-fit" type="button">Fit</button><button id="viewer-snapshot" type="button">Snapshot</button><button id="viewer-full" type="button">Full</button><button id="viewer-exit" type="button">Exit</button></div></div>
+    <div id="viewer-stage" class="viewer-stage"><div id="viewer-surface" class="viewer-surface"><iframe id="viewer-frame" title="Project preview"></iframe></div></div>
   </section>
 
-  <div id="snapshot-dialog" class="snapshot-dialog" hidden>
-    <div class="snapshot-card" role="dialog" aria-modal="true" aria-labelledby="snapshot-title">
-      <div class="snapshot-head"><h2 id="snapshot-title">Snapshot</h2><button id="snapshot-close" type="button">Close</button></div>
-      <img id="snapshot-image" alt="Project snapshot">
-      <a id="snapshot-save" class="button snapshot-save" download="debooger-snapshot.jpg">Save JPEG</a>
-    </div>
-  </div>
+  <div id="snapshot-dialog" class="snapshot-dialog" hidden><div class="snapshot-card" role="dialog" aria-modal="true" aria-labelledby="snapshot-title"><div class="snapshot-head"><h2 id="snapshot-title">Snapshot</h2><button id="snapshot-close" type="button">Close</button></div><img id="snapshot-image" alt="Project snapshot"><a id="snapshot-save" class="button snapshot-save" download="debooger-snapshot.jpg">Save JPEG</a></div></div>
 
-  <div id="paste-dialog" class="paste-dialog" hidden>
-    <div class="paste-card" role="dialog" aria-modal="true" aria-labelledby="paste-title">
-      <div class="paste-head"><div><h2 id="paste-title">Paste code</h2><p id="paste-type">TEXT · .txt</p></div><button id="paste-close" type="button">Close</button></div>
-      <textarea id="paste-editor" spellcheck="false" autocapitalize="off" autocomplete="off" placeholder="Paste code here…"></textarea>
-      <div class="paste-actions">
-        <button id="paste-preview" class="button secondary" type="button">Preview</button>
-        <button id="paste-download" class="button secondary" type="button">Download .txt</button>
-        <button id="paste-save" class="button files-primary" type="button">Save to Files</button>
-      </div>
-    </div>
-  </div>
+  <div id="paste-dialog" class="paste-dialog" hidden><div class="paste-card" role="dialog" aria-modal="true" aria-labelledby="paste-title"><div class="paste-head"><div><h2 id="paste-title">Paste code</h2><p id="paste-type">TEXT · .txt</p></div><button id="paste-close" type="button">Close</button></div><textarea id="paste-editor" spellcheck="false" autocapitalize="off" autocomplete="off" placeholder="Paste code here…"></textarea><div class="paste-actions"><button id="paste-preview" class="button secondary" type="button">Preview</button><button id="paste-download" class="button secondary" type="button">Download .txt</button><button id="paste-save" class="button files-primary" type="button">Save to Files</button></div></div></div>
+
+  <div id="item-menu-dialog" class="files-modal" hidden><div class="files-modal-card" role="dialog" aria-modal="true" aria-labelledby="item-menu-title"><div class="files-modal-head"><h2 id="item-menu-title">File actions</h2><button id="item-menu-close" type="button">Close</button></div><div class="files-modal-actions"><button id="item-rename" type="button">Rename</button><button id="item-move" type="button">Move</button><button id="item-duplicate" type="button">Duplicate</button><button id="item-delete" class="danger" type="button">Delete</button></div></div></div>
+
+  <div id="name-dialog" class="files-modal" hidden><div class="files-modal-card" role="dialog" aria-modal="true" aria-labelledby="name-dialog-title"><div class="files-modal-head"><h2 id="name-dialog-title">Name</h2><button id="name-dialog-close" type="button">Close</button></div><label class="files-field"><span id="name-dialog-label">Name</span><input id="name-dialog-input" type="text" maxlength="120"></label><div class="files-modal-actions"><button id="name-dialog-save" class="files-primary" type="button">Save</button></div></div></div>
+
+  <div id="move-dialog" class="files-modal" hidden><div class="files-modal-card" role="dialog" aria-modal="true" aria-labelledby="move-dialog-title"><div class="files-modal-head"><h2 id="move-dialog-title">Move item</h2><button id="move-dialog-close" type="button">Close</button></div><div id="move-folder-list" class="files-modal-actions"></div></div></div>
+
+  <div id="folder-dialog" class="files-modal" hidden><div class="files-modal-card" role="dialog" aria-modal="true" aria-labelledby="folder-dialog-title"><div class="files-modal-head"><h2 id="folder-dialog-title">Folder options</h2><button id="folder-dialog-close" type="button">Close</button></div><div class="files-modal-actions"><button id="folder-rename" type="button">Rename folder</button><button id="folder-delete" class="danger" type="button">Delete folder</button></div></div></div>
 </body>
 </html>
