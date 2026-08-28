@@ -1,14 +1,16 @@
 DEBOOGER2000 BUILD LOG
 
-Version: deboogs1
-Source: D2-B015-WebContainer-Resume-v8-TruthfulPreview.html
-Phase: 1 — Core extraction
+Version: deboogs2
+Source: deboogs1
+Phase: 2 — ZIP/project engine
 Changes:
-- Created clean multi-file project shell.
-- Separated project state, file utilities, project ingestion/detection, browser storage and UI controller.
-- Preserved v8 project-type detection, main-entry scoring and IndexedDB persistence concepts.
-- Excluded the deboog6 viewer and all old pan/zoom code.
-Tests: one clean Phase 1 pass — module import/detection tests, single HTML intake, React/Vite detection, compiled dist entry preference, duplicate ID/label-target audit, scoped duplicate CSS selector audit, forbidden debug/old-viewer token audit, unused dependency check.
+- Added v8 ZIP safety limits, path checks, in-memory extraction and binary/text handling.
+- Added project-root normalization after ZIP extraction.
+- Added compiled dist/build/out preference and truthful preview route selection.
+- Added React/Vite/Next/Node WebContainer eligibility selection with static fallback when a real HTML entry exists.
+- Electron is limited to renderer-compatible browser content; backend-only projects are analysis-only.
+- Uses pinned JSZip 3.10.1 from CDN only for real ZIP intake; no large library is duplicated inside production modules.
+Tests: one clean Phase 2 pass — ZIP extraction, ZIP safety/path checks, project-root normalization, React/Vite detection, compiled dist preference, WebContainer route eligibility/fallback, backend analysis-only routing, duplicate/static clean-code audit.
 Result: PASS
-Known limitation: ZIP intake and live preview are intentionally not wired until later phases.
-Source of truth: yes — Phase 1 verified.
+Known limitation: live WebContainer boot and viewer are added in later phases. Browser ZIP loading needs network access while JSZip remains CDN-loaded during multi-file development.
+Source of truth: yes — Phase 2 verified.

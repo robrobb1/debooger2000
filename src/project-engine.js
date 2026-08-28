@@ -13,7 +13,6 @@ export async function ingestFileList(fileList) {
     return path && !IGNORED_PATH.test(path) && !IGNORED_FILE.test(path) && !path.startsWith('__MACOSX/');
   });
   if (!usable.length) throw new Error('No usable project files were found.');
-
   for (const file of usable) {
     const path = normalizeVirtualPath(file.webkitRelativePath || file.name);
     const type = getFileTypeFromName(path);
@@ -25,7 +24,6 @@ export async function ingestFileList(fileList) {
       nextFiles[path] = { content, size: file.size, type, binary: true, encoding: 'base64', modified: false };
     }
   }
-
   state.files = stripCommonProjectRoot(nextFiles);
   state.projectName = deriveProjectName(selected, state.files);
   detectProjectTypeAndEntry();
@@ -53,6 +51,13 @@ function deriveProjectName(selected, files) {
   return first.name ? `${first.name} +${Math.max(0, selected.length - 1)}` : 'project';
 }
 
+export function applyVirtualProject(files, projectName = 'project') {
+  state.files = stripCommonProjectRoot(files || Object.create(null));
+  state.projectName = String(projectName || 'project');
+  detectProjectTypeAndEntry();
+  return state;
+}
+
 export function isReactProjectFiles(files = state.files) {
   const keys = Object.keys(files || {});
   if (keys.some((key) => /\.(?:tsx|jsx)$/i.test(key))) return true;
@@ -61,9 +66,7 @@ export function isReactProjectFiles(files = state.files) {
   try {
     const pkg = JSON.parse(String(files[pkgKey].content || '{}'));
     return Boolean(pkg?.dependencies?.react || pkg?.dependencies?.['react-dom'] || pkg?.devDependencies?.react || pkg?.devDependencies?.['react-dom']);
-  } catch {
-    return false;
-  }
+  } catch { return false; }
 }
 
 export function detectProjectTypeAndEntry() {
@@ -73,13 +76,11 @@ export function detectProjectTypeAndEntry() {
   if (packageKey && !state.files[packageKey]?.binary) {
     try { pkg = JSON.parse(String(state.files[packageKey].content || '{}')); } catch { pkg = null; }
   }
-
   const hasElectron = Boolean(pkg && (pkg?.devDependencies?.electron || pkg?.dependencies?.electron || (pkg.main && /(?:^|\/)(?:electron|main)\.(?:c?js|mjs|ts)$/i.test(String(pkg.main)))));
   const hasNext = Boolean(pkg && (pkg?.dependencies?.next || pkg?.devDependencies?.next));
   const hasReact = isReactProjectFiles(state.files);
   const hasNode = Boolean(pkg && (pkg?.dependencies?.express || pkg?.dependencies?.fastify || pkg?.dependencies?.koa || pkg?.dependencies?.hapi));
   const lowerKeys = keys.map((key) => key.toLowerCase());
-
   if (hasElectron) state.projectType = 'electron';
   else if (hasNext) state.projectType = 'nextjs';
   else if (hasReact) state.projectType = 'react-vite';
@@ -87,7 +88,6 @@ export function detectProjectTypeAndEntry() {
   else if (lowerKeys.some((key) => /\.(?:py|vbs|sh|db|sqlite|sqlite3)$/.test(key)) && !lowerKeys.some((key) => /\.html?$/.test(key))) state.projectType = 'backend-service';
   else if (keys.length === 1 && /\.html?$/i.test(keys[0])) state.projectType = 'single-html';
   else state.projectType = 'html-static';
-
   state.entryFile = chooseVisualEntry(keys) || keys[0] || '';
   return { projectType: state.projectType, entryFile: state.entryFile };
 }

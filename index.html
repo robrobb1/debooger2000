@@ -6,6 +6,7 @@
   <meta name="theme-color" content="#f4f6f4">
   <title>DEBOOGER2000</title>
   <link rel="stylesheet" href="./styles.css">
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
   <script type="module" src="./src/app.js"></script>
 </head>
 <body>
@@ -15,42 +16,18 @@
         <p class="eyebrow">DEBOOGER2000</p>
         <h1>Project Viewer + Debugger</h1>
       </div>
-      <span id="build-badge" class="badge">deboogs1</span>
+      <span id="build-badge" class="badge">deboogs2</span>
     </header>
-
     <section class="panel intake-panel" aria-labelledby="intake-title">
-      <div class="section-heading">
-        <div>
-          <h2 id="intake-title">Open project files</h2>
-          <p>Choose one file or several project files. ZIP intake is added in the next phase.</p>
-        </div>
-      </div>
-      <label class="dropzone" for="file-input">
-        <span class="drop-icon" aria-hidden="true">+</span>
-        <strong>Choose files</strong>
-        <span>HTML, CSS, JavaScript, JSON, images and project source files</span>
-      </label>
+      <div class="section-heading"><div><h2 id="intake-title">Open project files</h2><p>Choose a ZIP, one file, or several project files. ZIPs are inspected and unpacked internally.</p></div></div>
+      <label class="dropzone" for="file-input"><span class="drop-icon" aria-hidden="true">+</span><strong>Choose files</strong><span>ZIP, HTML, CSS, JavaScript, JSON, images and project source files</span></label>
       <input id="file-input" class="visually-hidden" type="file" multiple>
       <p id="status" class="status" role="status" aria-live="polite">Ready.</p>
     </section>
-
     <section id="project-panel" class="panel project-panel" hidden aria-labelledby="project-title">
-      <div class="section-heading project-heading">
-        <div>
-          <p id="project-type" class="eyebrow">UNKNOWN</p>
-          <h2 id="project-title">No project loaded</h2>
-        </div>
-        <button id="clear-project" class="button secondary" type="button">Clear</button>
-      </div>
-      <dl class="project-meta">
-        <div><dt>Files</dt><dd id="file-count">0</dd></div>
-        <div><dt>Main entry</dt><dd id="entry-file">—</dd></div>
-        <div><dt>Total size</dt><dd id="total-size">0 KB</dd></div>
-      </dl>
-      <div class="file-list-wrap">
-        <h3>Project files</h3>
-        <ul id="file-list" class="file-list"></ul>
-      </div>
+      <div class="section-heading project-heading"><div><p id="project-type" class="eyebrow">UNKNOWN</p><h2 id="project-title">No project loaded</h2></div><button id="clear-project" class="button secondary" type="button">Clear</button></div>
+      <dl class="project-meta"><div><dt>Files</dt><dd id="file-count">0</dd></div><div><dt>Main entry</dt><dd id="entry-file">—</dd></div><div><dt>Total size</dt><dd id="total-size">0 KB</dd></div></dl>
+      <div class="file-list-wrap"><h3>Project files</h3><ul id="file-list" class="file-list"></ul></div>
     </section>
   </main>
 </body>
