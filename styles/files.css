@@ -1,18 +1,38 @@
 .files-topbar { margin-bottom: 12px; }
-.files-actions { display: flex; align-items: center; gap: 8px; }
+.files-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .files-primary { display: inline-flex; align-items: center; justify-content: center; background: var(--text); color: #fff; border: 1px solid var(--text); }
 .files-status { margin: 8px 0 12px; }
 .files-library { padding: 14px 16px; }
-.files-library-heading { margin-bottom: 10px; }
+.files-library-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.files-view-tabs { display: flex; gap: 4px; padding: 3px; border: 1px solid var(--line); border-radius: 10px; background: var(--panel-soft); }
+.files-tab { border: 0; border-radius: 7px; background: transparent; padding: 6px 10px; color: var(--muted); font-size: 12px; }
+.files-tab.active { background: #fff; color: var(--text); box-shadow: 0 1px 3px rgba(24,34,27,.08); }
+.files-folder-options { border: 1px solid var(--line); border-radius: 8px; background: #fff; padding: 6px 9px; color: var(--muted); font-size: 11px; }
+.folder-list { display: flex; gap: 7px; margin-top: 10px; overflow-x: auto; padding-bottom: 2px; scrollbar-width: thin; }
+.folder-chip { flex: 0 0 auto; border: 1px solid var(--line); border-radius: 999px; background: #fff; padding: 7px 10px; color: var(--text); font-size: 11px; }
+.folder-chip.active { background: var(--text); border-color: var(--text); color: #fff; }
+.files-controls { display: grid; grid-template-columns: minmax(170px, 1fr) auto auto; gap: 7px; margin-top: 10px; }
+.files-search input, .files-controls select, .files-field input { width: 100%; min-height: 34px; border: 1px solid var(--line); border-radius: 9px; background: #fff; color: var(--text); padding: 6px 9px; outline: none; }
+.files-search input:focus, .files-controls select:focus, .files-field input:focus { border-color: #9cad9f; box-shadow: 0 0 0 3px rgba(63,143,47,.08); }
+.files-library-heading { margin: 12px 0 10px; }
 .files-list { display: grid; gap: 8px; }
 .files-row { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; border: 1px solid var(--line); border-radius: 11px; background: #fff; padding: 10px 11px; }
-.files-main { min-width: 0; flex: 1 1 300px; }
+.files-main { min-width: 0; flex: 1 1 300px; cursor: pointer; }
 .files-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13px; font-weight: 650; }
 .files-meta { margin-top: 3px; color: var(--muted); font-size: 11px; line-height: 1.35; }
 .files-actions-row { display: flex; flex: 0 0 auto; align-items: center; gap: 6px; flex-wrap: wrap; }
 .files-actions-row button { border: 1px solid var(--line); border-radius: 8px; background: #fff; padding: 6px 9px; color: var(--text); font-size: 11px; }
-.files-actions-row .files-delete { color: var(--danger); }
 .files-score { display: inline-flex; align-items: center; justify-content: center; min-width: 34px; height: 24px; border: 1px solid var(--line); border-radius: 999px; padding: 0 8px; background: var(--panel-soft); color: var(--muted); font-size: 11px; font-weight: 700; }
 .files-score.good { color: var(--accent); }
 .files-score.warn { color: #9a681c; }
 .files-score.bad { color: var(--danger); }
+.files-project-meta { grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); }
+.files-modal { position: fixed; inset: 0; z-index: 7200; display: grid; place-items: center; padding: 16px; background: rgba(20,24,22,.4); }
+.files-modal[hidden] { display: none; }
+.files-modal-card { width: min(420px, 100%); border: 1px solid var(--line); border-radius: 14px; background: #fff; padding: 12px; box-shadow: 0 20px 60px rgba(0,0,0,.18); }
+.files-modal-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 12px; }
+.files-modal-head button { border: 1px solid var(--line); border-radius: 8px; background: #fff; padding: 6px 9px; }
+.files-modal-actions { display: grid; gap: 7px; }
+.files-modal-actions button { min-height: 36px; border: 1px solid var(--line); border-radius: 9px; background: #fff; color: var(--text); padding: 7px 10px; text-align: left; }
+.files-modal-actions .danger { color: var(--danger); }
+.files-field { display: grid; gap: 5px; color: var(--muted); font-size: 11px; }
