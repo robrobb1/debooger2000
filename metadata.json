@@ -1,6 +1,0 @@
-{
-  "name": "DEBOOGER2000",
-  "description": "Advanced project diagnostics, deep auditor, runtime tester, safe repair system, and converter.",
-  "requestFramePermissions": [],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
-}
