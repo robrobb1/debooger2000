@@ -1,4 +1,4 @@
-const CACHE_NAME = 'debooger-shell-deboogs15';
+const CACHE_NAME = 'debooger-shell-deboogs16';
 const APP_SHELL = [
   './',
   './index.html',
@@ -17,6 +17,7 @@ const APP_SHELL = [
   './src/preview-engine.js',
   './src/project-engine.js',
   './src/pwa.js',
+  './src/native-intake.js',
   './src/runtime-router.js',
   './src/share-intake.js',
   './src/state.js',
