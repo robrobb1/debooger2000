@@ -6,7 +6,7 @@ import { applyVirtualProject, detectProjectTypeAndEntry, ingestFileList } from '
 import { buildStaticPreviewDocument } from './preview-engine.js';
 import { appendClipboardText, buildPastedPreviewDocument, createDownloadBlob, detectPastedType, filenameForPasted } from './paste-engine.js';
 import { currentWebContainerEnvironment, selectPreviewRoute } from './runtime-router.js';
-import { clearProjectSnapshot, loadProjectHistory, loadProjectSnapshot, removeProjectHistory, saveProjectSnapshot } from './storage.js';
+import { deleteLibraryItem, getLibraryItem, listLibraryItems, requestPersistentStorage, saveLibraryItem, updateLibraryItem } from './storage.js';
 import { clearSharePayloadFromAddress, readSharePayload } from './share-intake.js';
 import { ViewerController } from './viewer.js';
 import { WebContainerEngine } from './webcontainer-engine.js';
@@ -23,49 +23,68 @@ const pasteDialog = document.getElementById('paste-dialog');
 const pasteEditor = document.getElementById('paste-editor');
 const pasteType = document.getElementById('paste-type');
 const pasteDownload = document.getElementById('paste-download');
+const pasteSave = document.getElementById('paste-save');
 const auditCard = document.getElementById('audit-card');
 const auditList = document.getElementById('audit-list');
-const historyList = document.getElementById('history-list');
+const libraryList = document.getElementById('library-list');
+const librarySummary = document.getElementById('library-summary');
 const projectHtml = document.getElementById('project-html');
 const projectExport = document.getElementById('project-export');
+const projectOpen = document.getElementById('project-open');
 
 document.getElementById('build-badge').textContent = BUILD_VERSION;
 
-function setStatus(message, isError = false) { status.textContent = message; status.classList.toggle('error', isError); }
-
-const viewer = new ViewerController({
-  shell: document.getElementById('viewer-shell'), stage: document.getElementById('viewer-stage'), surface: document.getElementById('viewer-surface'), frame: document.getElementById('viewer-frame'), status: document.getElementById('viewer-status'), zoomOut: document.getElementById('viewer-zoom-out'), zoomIn: document.getElementById('viewer-zoom-in'), fit: document.getElementById('viewer-fit'), snapshot: document.getElementById('viewer-snapshot'), full: document.getElementById('viewer-full'), exit: document.getElementById('viewer-exit')
-}, {
-  onRuntimeError: (item) => { state.runtimeErrors.push({ message: String(item.message || 'Runtime error'), file: String(item.source || 'preview'), line: Number(item.line || 0) }); refreshAudit(); },
-  onSnapshot: (dataUrl) => { snapshotImage.src = dataUrl; snapshotSave.href = dataUrl; snapshotDialog.hidden = false; },
-  onSnapshotError: (message) => setStatus(`Snapshot failed: ${message}`, true),
-  onExit: async () => { await webcontainer.dispose(); viewer.hide(); setStatus('Viewer closed.'); }
-});
-
-const webcontainer = new WebContainerEngine((message) => { state.runtimeErrors.push({ message, file: 'WebContainer', line: 0 }); viewer.setStatus(message); refreshAudit(); });
-
-function downloadBlob(blob, filename) {
-  const url = URL.createObjectURL(blob);
-  const anchor = document.createElement('a');
-  anchor.href = url;
-  anchor.download = filename;
-  document.body.appendChild(anchor);
-  anchor.click();
-  anchor.remove();
-  setTimeout(() => URL.revokeObjectURL(url), 1000);
+function setStatus(message, isError = false) {
+  status.textContent = message;
+  status.classList.toggle('error', isError);
 }
 
-function newSnapshotId() {
+function newLibraryId() {
   try { if (crypto?.randomUUID) return crypto.randomUUID(); } catch {}
   return `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+}
+
+function stateSize() {
+  return Object.values(state.files || {}).reduce((sum, file) => sum + Number(file?.size || 0), 0);
+}
+
+function libraryItemFromState(id = state.libraryItemId || newLibraryId()) {
+  const now = Date.now();
+  return {
+    id,
+    name: String(state.projectName || 'Project'),
+    projectName: String(state.projectName || 'Project'),
+    projectType: String(state.projectType || 'unknown'),
+    entryFile: String(state.entryFile || ''),
+    files: state.files,
+    fileCount: Object.keys(state.files || {}).length,
+    size: stateSize(),
+    savedAt: now,
+    updatedAt: now,
+    folderId: 'root',
+    auditFindings: state.auditFindings,
+    auditScore: auditScore(state.auditFindings),
+    auditStatus: state.auditFindings.some((item) => item.severity === 'critical' || item.severity === 'error') ? 'issues' : 'clean'
+  };
+}
+
+function loadItemIntoState(item) {
+  resetState();
+  state.libraryItemId = String(item.id || '');
+  state.projectName = String(item.projectName || item.name || 'Project');
+  state.files = item.files || Object.create(null);
+  state.runtimeErrors = [];
+  detectProjectTypeAndEntry();
+  state.auditFindings = Array.isArray(item.auditFindings) ? item.auditFindings : [];
 }
 
 function refreshExportActions() {
   const hasProject = Boolean(Object.keys(state.files).length);
   projectExport.disabled = !hasProject;
+  projectOpen.disabled = !hasProject;
   const plan = hasProject ? standaloneHtmlPlan(state.files, state.projectType) : { supported: false, reason: 'Load a project first.' };
   projectHtml.disabled = !plan.supported;
-  projectHtml.title = plan.supported ? plan.reason : plan.reason;
+  projectHtml.title = plan.reason;
 }
 
 function renderProject() {
@@ -75,13 +94,19 @@ function renderProject() {
   document.getElementById('project-type').textContent = String(state.projectType || 'unknown').toUpperCase();
   document.getElementById('file-count').textContent = String(keys.length);
   document.getElementById('entry-file').textContent = state.entryFile || '—';
-  document.getElementById('total-size').textContent = formatBytes(keys.reduce((sum, path) => sum + Number(state.files[path]?.size || 0), 0));
+  document.getElementById('total-size').textContent = formatBytes(stateSize());
   const list = document.getElementById('file-list');
-  list.replaceChildren(...keys.sort().map((path) => { const item = document.createElement('li'); const code = document.createElement('code'); const size = document.createElement('span'); code.textContent = path; size.textContent = formatBytes(state.files[path]?.size || 0); item.append(code, size); return item; }));
+  list.replaceChildren(...keys.sort().map((path) => {
+    const item = document.createElement('li');
+    const code = document.createElement('code');
+    const size = document.createElement('span');
+    code.textContent = path;
+    size.textContent = formatBytes(state.files[path]?.size || 0);
+    item.append(code, size);
+    return item;
+  }));
   refreshExportActions();
 }
-
-
 
 function refreshAudit() {
   state.auditFindings = runProjectAudit(state.files, { projectType: state.projectType, runtimeErrors: state.runtimeErrors });
@@ -114,6 +139,126 @@ function refreshAudit() {
   }));
 }
 
+async function persistCurrentAudit() {
+  if (!state.libraryItemId) return;
+  const score = auditScore(state.auditFindings);
+  const auditStatus = state.auditFindings.some((item) => item.severity === 'critical' || item.severity === 'error') ? 'issues' : 'clean';
+  try {
+    await updateLibraryItem(state.libraryItemId, { auditFindings: state.auditFindings, auditScore: score, auditStatus });
+    await renderLibrary();
+  } catch {}
+}
+
+const viewer = new ViewerController({
+  shell: document.getElementById('viewer-shell'),
+  stage: document.getElementById('viewer-stage'),
+  surface: document.getElementById('viewer-surface'),
+  frame: document.getElementById('viewer-frame'),
+  status: document.getElementById('viewer-status'),
+  zoomOut: document.getElementById('viewer-zoom-out'),
+  zoomIn: document.getElementById('viewer-zoom-in'),
+  fit: document.getElementById('viewer-fit'),
+  snapshot: document.getElementById('viewer-snapshot'),
+  full: document.getElementById('viewer-full'),
+  exit: document.getElementById('viewer-exit')
+}, {
+  onRuntimeError: (item) => {
+    state.runtimeErrors.push({ message: String(item.message || 'Runtime error'), file: String(item.source || 'preview'), line: Number(item.line || 0) });
+    refreshAudit();
+    persistCurrentAudit();
+  },
+  onSnapshot: (dataUrl) => { snapshotImage.src = dataUrl; snapshotSave.href = dataUrl; snapshotDialog.hidden = false; },
+  onSnapshotError: (message) => setStatus(`Snapshot failed: ${message}`, true),
+  onExit: async () => { await webcontainer.dispose(); viewer.hide(); setStatus('Viewer closed.'); }
+});
+
+const webcontainer = new WebContainerEngine((message) => {
+  state.runtimeErrors.push({ message, file: 'WebContainer', line: 0 });
+  viewer.setStatus(message);
+  refreshAudit();
+  persistCurrentAudit();
+});
+
+function downloadBlob(blob, filename) {
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement('a');
+  anchor.href = url;
+  anchor.download = filename;
+  document.body.appendChild(anchor);
+  anchor.click();
+  anchor.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+function scoreClass(score) {
+  if (!Number.isFinite(score)) return '';
+  if (score >= 90) return 'good';
+  if (score >= 70) return 'warn';
+  return 'bad';
+}
+
+async function renderLibrary() {
+  let items = [];
+  try { items = await listLibraryItems(); }
+  catch (error) {
+    libraryList.replaceChildren();
+    const row = document.createElement('p');
+    row.className = 'history-empty';
+    row.textContent = error?.message || 'Files library is unavailable.';
+    libraryList.append(row);
+    librarySummary.textContent = 'Local storage could not be read.';
+    return;
+  }
+  librarySummary.textContent = `${items.length} saved item${items.length === 1 ? '' : 's'} · newest saves first`;
+  if (!items.length) {
+    const empty = document.createElement('p');
+    empty.className = 'history-empty';
+    empty.textContent = 'No saved files yet. Import a file, ZIP or project to add it here.';
+    libraryList.replaceChildren(empty);
+    return;
+  }
+  libraryList.replaceChildren(...items.map((item) => {
+    const row = document.createElement('div');
+    row.className = 'files-row';
+    row.dataset.libraryId = item.id;
+    const main = document.createElement('div');
+    main.className = 'files-main';
+    const name = document.createElement('div');
+    name.className = 'files-name';
+    name.textContent = item.name || item.projectName || 'Project';
+    const meta = document.createElement('div');
+    meta.className = 'files-meta';
+    const when = item.savedAt ? new Date(item.savedAt).toLocaleString() : 'Saved';
+    const count = Number(item.fileCount || Object.keys(item.files || {}).length);
+    meta.textContent = `${String(item.projectType || 'unknown').toUpperCase()} · ${count} file${count === 1 ? '' : 's'} · ${formatBytes(item.size || 0)} · ${when}`;
+    main.append(name, meta);
+
+    const actions = document.createElement('div');
+    actions.className = 'files-actions-row';
+    const score = document.createElement('span');
+    score.className = `files-score ${scoreClass(Number(item.auditScore))}`.trim();
+    score.textContent = Number.isFinite(Number(item.auditScore)) && item.auditScore !== null ? String(item.auditScore) : 'Audit';
+    score.title = 'Saved audit score';
+    const open = document.createElement('button');
+    open.type = 'button';
+    open.textContent = 'Open';
+    open.addEventListener('click', () => openLibraryItem(item.id));
+    const remove = document.createElement('button');
+    remove.type = 'button';
+    remove.className = 'files-delete';
+    remove.textContent = 'Delete';
+    remove.addEventListener('click', async () => {
+      await deleteLibraryItem(item.id);
+      if (state.libraryItemId === item.id) closeCurrentDetails();
+      await renderLibrary();
+      setStatus('Selected item deleted.');
+    });
+    actions.append(score, open, remove);
+    row.append(main, actions);
+    return row;
+  }));
+}
+
 async function copyRepairPrompt() {
   const prompt = buildRepairPrompt(state.auditFindings);
   try { await navigator.clipboard.writeText(prompt); setStatus('AI repair prompt copied.'); }
@@ -121,14 +266,8 @@ async function copyRepairPrompt() {
 }
 
 function downloadAudit() {
-  const url = URL.createObjectURL(new Blob([buildAuditReport(state.auditFindings)], { type: 'text/plain' }));
-  const anchor = document.createElement('a');
-  anchor.href = url;
-  anchor.download = 'debooger-audit-report.txt';
-  document.body.appendChild(anchor);
-  anchor.click();
-  anchor.remove();
-  setTimeout(() => URL.revokeObjectURL(url), 1000);
+  if (!Object.keys(state.files).length) return;
+  downloadBlob(new Blob([buildAuditReport(state.auditFindings)], { type: 'text/plain' }), 'debooger-audit-report.txt');
 }
 
 function currentPasteType() {
@@ -136,17 +275,6 @@ function currentPasteType() {
   pasteType.textContent = `${detected.label.toUpperCase()} · ${detected.extension}${detected.confidence === 'low' ? ' · LOW CONFIDENCE' : ''}`;
   pasteDownload.textContent = `Download ${detected.extension}`;
   return detected;
-}
-
-function renderPastePreview() {
-  const content = pasteEditor.value;
-  if (!content.trim()) return;
-  const detected = currentPasteType();
-  const previewContent = buildPastedPreviewDocument(content, detected);
-  const previewFiles = { 'preview.html': { content: previewContent, binary: false, type: 'html', size: new Blob([previewContent]).size } };
-  viewer.setFrameDocument(buildStaticPreviewDocument(previewFiles, 'preview.html'));
-  viewer.setStatus(`Pasted ${detected.label} · ${detected.extension}`);
-  setStatus(`Pasted content detected as ${detected.label}.`);
 }
 
 function openPasteDialog() {
@@ -175,13 +303,59 @@ function downloadPaste() {
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
-function snapshotFromState(id = newSnapshotId()) { return { id, projectName: state.projectName, projectType: state.projectType, entryFile: state.entryFile, files: state.files, savedAt: Date.now() }; }
+async function saveCurrentStateToLibrary() {
+  refreshAudit();
+  const item = libraryItemFromState();
+  state.libraryItemId = item.id;
+  await saveLibraryItem(item);
+  await requestPersistentStorage();
+  await renderLibrary();
+  renderProject();
+  setStatus(`Saved and audited ${item.name}.`);
+  return item;
+}
+
+async function savePastedContent({ openAfter = false } = {}) {
+  const content = pasteEditor.value;
+  if (!content.trim()) return null;
+  const detected = currentPasteType();
+  const filename = filenameForPasted(detected);
+  applyVirtualProject({
+    [filename]: {
+      content,
+      binary: false,
+      type: detected.label.toLowerCase(),
+      size: new Blob([content]).size,
+      modified: false
+    }
+  }, filename.replace(/\.[^.]+$/, '') || 'Pasted code');
+  state.libraryItemId = '';
+  const item = await saveCurrentStateToLibrary();
+  closePasteDialog();
+  if (openAfter) await openPreview();
+  return item;
+}
+
+function renderPastePreview() {
+  const content = pasteEditor.value;
+  if (!content.trim()) return;
+  const detected = currentPasteType();
+  const previewContent = buildPastedPreviewDocument(content, detected);
+  const previewFiles = { 'preview.html': { content: previewContent, binary: false, type: 'html', size: new Blob([previewContent]).size } };
+  viewer.setFrameDocument(buildStaticPreviewDocument(previewFiles, 'preview.html'));
+  viewer.setStatus(`Pasted ${detected.label} · ${detected.extension}`);
+  setStatus(`Pasted content previewed as ${detected.label}.`);
+}
 
 async function openPreview() {
   state.runtimeErrors = [];
   const route = selectPreviewRoute();
   viewer.setStatus(`${state.projectType} · ${route.mode}`);
-  if (!route.runnable) { viewer.hide(); setStatus(route.reason, true); return; }
+  if (!route.runnable) {
+    viewer.hide();
+    setStatus(route.reason, true);
+    return;
+  }
   if (route.mode === 'webcontainer') {
     viewer.setStatus('Starting real project runtime…');
     viewer.show();
@@ -197,7 +371,8 @@ async function openPreview() {
         viewer.setStatus(`${state.projectType} · static fallback`);
         setStatus(`Real runtime unavailable; opened browser-compatible fallback. ${error?.message || ''}`.trim());
       } else {
-        viewer.hide(); setStatus(error?.message || 'Real runtime could not start.', true);
+        viewer.hide();
+        setStatus(error?.message || 'Real runtime could not start.', true);
       }
     }
     return;
@@ -208,74 +383,47 @@ async function openPreview() {
 }
 
 async function handleFiles(files) {
-  setStatus('Reading project…');
+  setStatus('Importing and auditing…');
   try {
     const selected = Array.from(files || []);
-    if (selected.length === 1 && looksLikeZip(selected[0])) { const extracted = await parseZipArchive(selected[0]); applyVirtualProject(extracted.files, extracted.projectName); }
-    else await ingestFileList(files);
-    const snapshot = snapshotFromState();
-    await saveProjectSnapshot(snapshot).catch(() => undefined);
-    await renderHistory();
+    if (!selected.length) return;
+    await webcontainer.dispose();
+    viewer.hide();
+    resetState();
+    if (selected.length === 1 && looksLikeZip(selected[0])) {
+      const extracted = await parseZipArchive(selected[0]);
+      applyVirtualProject(extracted.files, extracted.projectName);
+    } else {
+      await ingestFileList(files);
+    }
+    await saveCurrentStateToLibrary();
+  } catch (error) {
+    setStatus(error?.message || 'Could not import the selected item.', true);
+    viewer.hide();
+  } finally {
+    fileInput.value = '';
+  }
+}
+
+async function openLibraryItem(id) {
+  try {
+    const item = await getLibraryItem(id);
+    if (!item?.files || !Object.keys(item.files).length) throw new Error('The selected item has no saved files.');
+    await webcontainer.dispose();
+    viewer.hide();
+    loadItemIntoState(item);
     renderProject();
     refreshAudit();
     await openPreview();
-  } catch (error) { setStatus(error?.message || 'Could not load the selected project.', true); viewer.hide(); }
-  finally { fileInput.value = ''; }
+  } catch (error) {
+    setStatus(error?.message || 'Could not open the selected item.', true);
+  }
 }
 
-async function openHistorySnapshot(snapshot) {
-  if (!snapshot?.files || !Object.keys(snapshot.files).length) return;
-  await webcontainer.dispose();
-  viewer.hide();
-  state.projectName = String(snapshot.projectName || 'Project');
-  state.files = snapshot.files;
-  state.runtimeErrors = [];
-  detectProjectTypeAndEntry();
-  await saveProjectSnapshot(snapshot, { addToHistory: false }).catch(() => undefined);
+function closeCurrentDetails() {
+  resetState();
   renderProject();
   refreshAudit();
-  await openPreview();
-}
-
-async function renderHistory() {
-  let history = [];
-  try { history = await loadProjectHistory(); } catch { history = []; }
-  if (!history.length) {
-    const empty = document.createElement('p');
-    empty.className = 'history-empty';
-    empty.textContent = 'No saved projects yet.';
-    historyList.replaceChildren(empty);
-    return;
-  }
-  historyList.replaceChildren(...history.map((snapshot) => {
-    const row = document.createElement('div');
-    row.className = 'history-row';
-    const main = document.createElement('div');
-    main.className = 'history-main';
-    const name = document.createElement('div');
-    name.className = 'history-name';
-    name.textContent = snapshot.projectName || 'Project';
-    const meta = document.createElement('div');
-    meta.className = 'history-meta';
-    const count = Object.keys(snapshot.files || {}).length;
-    const when = snapshot.savedAt ? new Date(snapshot.savedAt).toLocaleString() : 'Saved project';
-    meta.textContent = `${when} · ${count} file${count === 1 ? '' : 's'} · ${String(snapshot.projectType || 'unknown').toUpperCase()}`;
-    main.append(name, meta);
-    const actions = document.createElement('div');
-    actions.className = 'history-actions';
-    const open = document.createElement('button');
-    open.type = 'button';
-    open.textContent = 'Open';
-    open.addEventListener('click', () => openHistorySnapshot(snapshot));
-    const remove = document.createElement('button');
-    remove.type = 'button';
-    remove.className = 'history-delete';
-    remove.textContent = 'Delete';
-    remove.addEventListener('click', async () => { await removeProjectHistory(snapshot.id).catch(() => undefined); await renderHistory(); });
-    actions.append(open, remove);
-    row.append(main, actions);
-    return row;
-  }));
 }
 
 async function exportCurrentZip() {
@@ -295,31 +443,7 @@ function downloadStandaloneHtml() {
   } catch (error) { setStatus(error?.message || 'Standalone HTML could not be created.', true); }
 }
 
-fileInput.addEventListener('change', () => handleFiles(fileInput.files));
-
-document.getElementById('open-paste').addEventListener('click', openPasteDialog);
-document.getElementById('paste-close').addEventListener('click', closePasteDialog);
-document.getElementById('paste-preview').addEventListener('click', renderPastePreview);
-document.getElementById('audit-copy').addEventListener('click', copyRepairPrompt);
-document.getElementById('audit-download').addEventListener('click', downloadAudit);
-projectExport.addEventListener('click', exportCurrentZip);
-projectHtml.addEventListener('click', downloadStandaloneHtml);
-pasteDownload.addEventListener('click', downloadPaste);
-pasteEditor.addEventListener('input', currentPasteType);
-pasteEditor.addEventListener('paste', (event) => {
-  const text = event.clipboardData?.getData('text/plain');
-  if (typeof text !== 'string') return;
-  event.preventDefault();
-  appendClipboardText(pasteEditor, text);
-  currentPasteType();
-  renderPastePreview();
-});
-
-clearButton.addEventListener('click', async () => { await webcontainer.dispose(); viewer.hide(); resetState(); await clearProjectSnapshot().catch(() => undefined); renderProject(); refreshAudit(); setStatus('Ready.'); });
-document.getElementById('snapshot-close').addEventListener('click', () => { snapshotDialog.hidden = true; snapshotImage.removeAttribute('src'); snapshotSave.removeAttribute('href'); });
-
-
-function loadSharedText() {
+async function loadSharedText() {
   let shared = null;
   try { shared = readSharePayload(); }
   catch (error) { setStatus(error?.message || 'Shared text could not be loaded.', true); return; }
@@ -327,17 +451,30 @@ function loadSharedText() {
   pasteEditor.value = shared;
   if (!pasteEditor.value.endsWith('\n')) pasteEditor.value += '\n';
   clearSharePayloadFromAddress();
-  openPasteDialog();
-  renderPastePreview();
+  try { await savePastedContent({ openAfter: false }); }
+  catch (error) { setStatus(error?.message || 'Shared text could not be saved.', true); }
 }
 
-async function restoreLastProject() {
-  await renderHistory();
-  try {
-    const saved = await loadProjectSnapshot();
-    if (!saved?.files || !Object.keys(saved.files).length) return;
-    state.projectName = String(saved.projectName || 'Project'); state.files = saved.files; detectProjectTypeAndEntry(); renderProject(); refreshAudit();
-    setStatus('Restored last project.');
-  } catch { setStatus('Ready.'); }
-}
-restoreLastProject().finally(loadSharedText);
+fileInput.addEventListener('change', () => handleFiles(fileInput.files));
+document.getElementById('open-paste').addEventListener('click', openPasteDialog);
+document.getElementById('paste-close').addEventListener('click', closePasteDialog);
+document.getElementById('paste-preview').addEventListener('click', renderPastePreview);
+document.getElementById('audit-copy').addEventListener('click', copyRepairPrompt);
+document.getElementById('audit-download').addEventListener('click', downloadAudit);
+projectOpen.addEventListener('click', openPreview);
+projectExport.addEventListener('click', exportCurrentZip);
+projectHtml.addEventListener('click', downloadStandaloneHtml);
+pasteDownload.addEventListener('click', downloadPaste);
+pasteSave.addEventListener('click', () => savePastedContent({ openAfter: false }).catch((error) => setStatus(error?.message || 'Pasted code could not be saved.', true)));
+pasteEditor.addEventListener('input', currentPasteType);
+pasteEditor.addEventListener('paste', (event) => {
+  const text = event.clipboardData?.getData('text/plain');
+  if (typeof text !== 'string') return;
+  event.preventDefault();
+  appendClipboardText(pasteEditor, text);
+  currentPasteType();
+});
+clearButton.addEventListener('click', async () => { await webcontainer.dispose(); viewer.hide(); closeCurrentDetails(); setStatus('Ready.'); });
+document.getElementById('snapshot-close').addEventListener('click', () => { snapshotDialog.hidden = true; snapshotImage.removeAttribute('src'); snapshotSave.removeAttribute('href'); });
+
+renderLibrary().finally(loadSharedText);
