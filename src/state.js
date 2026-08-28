@@ -1,6 +1,7 @@
-export const BUILD_VERSION = 'deboogs12';
+export const BUILD_VERSION = 'deboogs13';
 
 export const state = {
+  libraryItemId: '',
   projectName: '',
   projectType: 'unknown',
   entryFile: '',
@@ -10,6 +11,7 @@ export const state = {
 };
 
 export function resetState() {
+  state.libraryItemId = '';
   state.projectName = '';
   state.projectType = 'unknown';
   state.entryFile = '';
