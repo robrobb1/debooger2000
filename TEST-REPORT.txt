@@ -1,18 +1,19 @@
-DEBOOGER2000 deboogs27 — PHASE 13 TEST REPORT
+DEBOOGER2000 deboogs28 — PHASE 14 TEST REPORT
 
 PASS
-- src/project-file-browser.js passed Node syntax validation.
-- projectFileCanPreview() accepted non-binary source/text and browser-safe image files and rejected unsupported binary files.
-- openProjectFile() generated a preview document and dispatched the scoped debooger-open-document event with the exact internal path.
-- Unsupported binary open attempts throw an explicit safe error.
-- ViewerController passed syntax validation and its debooger-open-document listener routed the supplied document through setFrameDocument(), updated viewer status and showed the existing viewer shell.
-- Existing viewer viewport/pan/zoom/bridge implementation remains one authoritative controller; no second viewer or pan state was introduced.
-- Internal file browser uses one delegated click listener, one delegated keydown listener and one child-list MutationObserver rather than per-render duplicate controller setup.
-- Previewable file rows receive role=button, tabindex=0 and a path-specific aria-label; unsupported binary rows remain non-interactive.
-- Existing app.js was intentionally left unchanged so project Open viewer/runtime routing remains the proven authoritative path.
-- styles.css adds only the previewable-row interaction cue; no duplicate selector block or !important rule was introduced.
-- service-worker.js app shell includes project-file-browser.js and cache version debooger-shell-deboogs27.
-- UI, state and service-worker build identifiers align to deboogs27.
+- src/project-file-browser.js passed Node syntax validation after the search extension.
+- Internal path search matched nested filenames case-insensitively.
+- Non-binary content search matched source text case-insensitively.
+- Binary files matched by path but did not search their encoded content.
+- Text content after the 256 KB safety cap was intentionally not matched, confirming bounded content scanning.
+- Empty search returns all files.
+- Search filtering updates visible/total counts and keeps hidden rows non-openable.
+- Existing project file preview checks remain clean for source/text, browser-safe images and unsupported binaries.
+- Search uses one debounced input listener and the existing list MutationObserver; no duplicate project list rendering path was added.
+- Project search input has an accessible label and the internal summary has a stable DOM id.
+- styles.css introduced no !important rule or duplicate project-search selector.
+- service-worker.js cache version is debooger-shell-deboogs28.
+- UI, state and service-worker build identifiers align to deboogs28.
 
 External limitation:
-Live visual click/keyboard behavior inside an installed PWA cannot be exercised here because local Chromium access is administrator-blocked. The module behavior and ViewerController document event were verified in isolated runtime harnesses.
+Live visual filtering inside the installed PWA cannot be exercised here because local Chromium access is administrator-blocked. Search matching and bounded-content behavior were verified directly.
