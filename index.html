@@ -11,15 +11,9 @@
 </head>
 <body>
   <main class="app-shell">
-    <header class="topbar">
-      <div>
-        <p class="eyebrow">DEBOOGER2000</p>
-        <h1>Project Viewer + Debugger</h1>
-      </div>
-      <span id="build-badge" class="badge">deboogs2</span>
-    </header>
+    <header class="topbar"><div><p class="eyebrow">DEBOOGER2000</p><h1>Project Viewer + Debugger</h1></div><span id="build-badge" class="badge">deboogs3</span></header>
     <section class="panel intake-panel" aria-labelledby="intake-title">
-      <div class="section-heading"><div><h2 id="intake-title">Open project files</h2><p>Choose a ZIP, one file, or several project files. ZIPs are inspected and unpacked internally.</p></div></div>
+      <div class="section-heading"><div><h2 id="intake-title">Open project files</h2><p>Choose a ZIP, one file, or several project files. Supported projects open directly in the viewer.</p></div></div>
       <label class="dropzone" for="file-input"><span class="drop-icon" aria-hidden="true">+</span><strong>Choose files</strong><span>ZIP, HTML, CSS, JavaScript, JSON, images and project source files</span></label>
       <input id="file-input" class="visually-hidden" type="file" multiple>
       <p id="status" class="status" role="status" aria-live="polite">Ready.</p>
@@ -30,5 +24,10 @@
       <div class="file-list-wrap"><h3>Project files</h3><ul id="file-list" class="file-list"></ul></div>
     </section>
   </main>
+  <section id="viewer-shell" class="viewer-shell" hidden aria-label="Project preview">
+    <div class="viewer-toolbar"><span id="viewer-status">Preview</span><div class="viewer-controls"><button id="viewer-zoom-out" type="button" aria-label="Zoom out">−</button><button id="viewer-zoom-in" type="button" aria-label="Zoom in">+</button><button id="viewer-fit" type="button">Fit</button><button id="viewer-snapshot" type="button">Snapshot</button><button id="viewer-full" type="button">Full</button><button id="viewer-exit" type="button">Exit</button></div></div>
+    <div id="viewer-stage" class="viewer-stage"><div id="viewer-surface" class="viewer-surface"><iframe id="viewer-frame" title="Project preview"></iframe></div></div>
+  </section>
+  <div id="snapshot-dialog" class="snapshot-dialog" hidden><div class="snapshot-card" role="dialog" aria-modal="true" aria-labelledby="snapshot-title"><div class="snapshot-head"><h2 id="snapshot-title">Snapshot</h2><button id="snapshot-close" type="button">Close</button></div><img id="snapshot-image" alt="Project snapshot"><a id="snapshot-save" class="button snapshot-save" download="debooger-snapshot.jpg">Save JPEG</a></div></div>
 </body>
 </html>

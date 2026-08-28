@@ -1,16 +1,14 @@
 DEBOOGER2000 BUILD LOG
 
-Version: deboogs2
-Source: deboogs1
-Phase: 2 — ZIP/project engine
+Version: deboogs3
+Source: deboogs2
+Phase: 3 — New viewer
 Changes:
-- Added v8 ZIP safety limits, path checks, in-memory extraction and binary/text handling.
-- Added project-root normalization after ZIP extraction.
-- Added compiled dist/build/out preference and truthful preview route selection.
-- Added React/Vite/Next/Node WebContainer eligibility selection with static fallback when a real HTML entry exists.
-- Electron is limited to renderer-compatible browser content; backend-only projects are analysis-only.
-- Uses pinned JSZip 3.10.1 from CDN only for real ZIP intake; no large library is duplicated inside production modules.
-Tests: one clean Phase 2 pass — ZIP extraction, ZIP safety/path checks, project-root normalization, React/Vite detection, compiled dist preference, WebContainer route eligibility/fallback, backend analysis-only routing, duplicate/static clean-code audit.
+- Added a new viewer written from scratch; no deboog6 viewer/pan implementation is reused.
+- Added direct static/compiled preview materialization for project HTML, CSS, JavaScript modules and binary assets.
+- Added one unified viewer controller for fit, zoom, wheel zoom, mouse/touch drag, iframe gesture bridge, portrait/landscape refit, wide full-screen mode, exit and snapshot.
+- Added real WebContainer boot/mount/install/start/server-ready path using the pinned v8 WebContainer API when the environment supports it, with truthful static fallback.
+Tests: one clean Phase 3 pass — static preview resource rewriting, relative-path resolution, iframe bridge injection, WebContainer mount-tree/start selection, viewer structure/listeners, syntax checks, duplicate/static clean-code audit.
 Result: PASS
-Known limitation: live WebContainer boot and viewer are added in later phases. Browser ZIP loading needs network access while JSZip remains CDN-loaded during multi-file development.
-Source of truth: yes — Phase 2 verified.
+Known limitation: browser policy in the build environment prevents a real Chromium navigation test; module/static tests will be used here and the real browser path remains externally unverified.
+Source of truth: yes — Phase 3 verified within the available environment.

@@ -1,51 +1,19 @@
 import { BUILD_VERSION, resetState, state } from './state.js';
 import { formatBytes } from './file-utils.js';
 import { applyVirtualProject, detectProjectTypeAndEntry, ingestFileList } from './project-engine.js';
-import { selectPreviewRoute } from './runtime-router.js';
+import { buildStaticPreviewDocument } from './preview-engine.js';
+import { currentWebContainerEnvironment, selectPreviewRoute } from './runtime-router.js';
 import { clearProjectSnapshot, loadProjectSnapshot, saveProjectSnapshot } from './storage.js';
+import { ViewerController } from './viewer.js';
+import { WebContainerEngine } from './webcontainer-engine.js';
 import { looksLikeZip, parseZipArchive } from './zip-engine.js';
-
-const fileInput = document.getElementById('file-input');
-const status = document.getElementById('status');
-const projectPanel = document.getElementById('project-panel');
-const clearButton = document.getElementById('clear-project');
-document.getElementById('build-badge').textContent = BUILD_VERSION;
-
-function setStatus(message, isError = false) { status.textContent = message; status.classList.toggle('error', isError); }
-function renderProject() {
-  const keys = Object.keys(state.files);
-  projectPanel.hidden = !keys.length;
-  document.getElementById('project-title').textContent = state.projectName || 'Project';
-  document.getElementById('project-type').textContent = String(state.projectType || 'unknown').toUpperCase();
-  document.getElementById('file-count').textContent = String(keys.length);
-  document.getElementById('entry-file').textContent = state.entryFile || '—';
-  document.getElementById('total-size').textContent = formatBytes(keys.reduce((sum, path) => sum + Number(state.files[path]?.size || 0), 0));
-  const list = document.getElementById('file-list');
-  list.replaceChildren(...keys.sort().map((path) => { const item = document.createElement('li'); const code = document.createElement('code'); const size = document.createElement('span'); code.textContent = path; size.textContent = formatBytes(state.files[path]?.size || 0); item.append(code, size); return item; }));
-}
-function snapshotFromState() { return { projectName: state.projectName, projectType: state.projectType, entryFile: state.entryFile, files: state.files, savedAt: Date.now() }; }
-
-async function handleFiles(files) {
-  setStatus('Reading project…');
-  try {
-    const selected = Array.from(files || []);
-    if (selected.length === 1 && looksLikeZip(selected[0])) { const extracted = await parseZipArchive(selected[0]); applyVirtualProject(extracted.files, extracted.projectName); }
-    else await ingestFileList(files);
-    await saveProjectSnapshot(snapshotFromState());
-    renderProject();
-    const route = selectPreviewRoute();
-    setStatus(`${Object.keys(state.files).length} files loaded. Preview route: ${route.mode}.`);
-  } catch (error) { setStatus(error?.message || 'Could not load the selected project.', true); }
-  finally { fileInput.value = ''; }
-}
-fileInput.addEventListener('change', () => handleFiles(fileInput.files));
-clearButton.addEventListener('click', async () => { resetState(); await clearProjectSnapshot().catch(() => undefined); renderProject(); setStatus('Ready.'); });
-async function restoreLastProject() {
-  try {
-    const saved = await loadProjectSnapshot();
-    if (!saved?.files || !Object.keys(saved.files).length) return;
-    state.projectName = String(saved.projectName || 'Project'); state.files = saved.files; detectProjectTypeAndEntry(); renderProject();
-    const route = selectPreviewRoute(); setStatus(`Restored last project. Preview route: ${route.mode}.`);
-  } catch { setStatus('Ready.'); }
-}
-restoreLastProject();
+const fileInput=document.getElementById('file-input'),status=document.getElementById('status'),projectPanel=document.getElementById('project-panel'),clearButton=document.getElementById('clear-project'),snapshotDialog=document.getElementById('snapshot-dialog'),snapshotImage=document.getElementById('snapshot-image'),snapshotSave=document.getElementById('snapshot-save');document.getElementById('build-badge').textContent=BUILD_VERSION;
+function setStatus(message,isError=false){status.textContent=message;status.classList.toggle('error',isError);}
+const viewer=new ViewerController({shell:document.getElementById('viewer-shell'),stage:document.getElementById('viewer-stage'),surface:document.getElementById('viewer-surface'),frame:document.getElementById('viewer-frame'),status:document.getElementById('viewer-status'),zoomOut:document.getElementById('viewer-zoom-out'),zoomIn:document.getElementById('viewer-zoom-in'),fit:document.getElementById('viewer-fit'),snapshot:document.getElementById('viewer-snapshot'),full:document.getElementById('viewer-full'),exit:document.getElementById('viewer-exit')},{onRuntimeError:item=>{state.runtimeErrors.push({message:String(item.message||'Runtime error'),file:String(item.source||'preview'),line:Number(item.line||0)});},onSnapshot:dataUrl=>{snapshotImage.src=dataUrl;snapshotSave.href=dataUrl;snapshotDialog.hidden=false;},onSnapshotError:message=>setStatus(`Snapshot failed: ${message}`,true)});
+const webcontainer=new WebContainerEngine(message=>{state.runtimeErrors.push({message,file:'WebContainer',line:0});viewer.setStatus(message);});
+function renderProject(){const keys=Object.keys(state.files);projectPanel.hidden=!keys.length;document.getElementById('project-title').textContent=state.projectName||'Project';document.getElementById('project-type').textContent=String(state.projectType||'unknown').toUpperCase();document.getElementById('file-count').textContent=String(keys.length);document.getElementById('entry-file').textContent=state.entryFile||'—';document.getElementById('total-size').textContent=formatBytes(keys.reduce((sum,path)=>sum+Number(state.files[path]?.size||0),0));const list=document.getElementById('file-list');list.replaceChildren(...keys.sort().map(path=>{const item=document.createElement('li'),code=document.createElement('code'),size=document.createElement('span');code.textContent=path;size.textContent=formatBytes(state.files[path]?.size||0);item.append(code,size);return item;}));}
+function snapshotFromState(){return{projectName:state.projectName,projectType:state.projectType,entryFile:state.entryFile,files:state.files,savedAt:Date.now()};}
+async function openPreview(){state.runtimeErrors=[];const route=selectPreviewRoute();viewer.setStatus(`${state.projectType} · ${route.mode}`);if(!route.runnable){viewer.hide();setStatus(route.reason,true);return;}if(route.mode==='webcontainer'){viewer.setStatus('Starting real project runtime…');viewer.show();try{const ready=await webcontainer.run(state.files,currentWebContainerEnvironment());viewer.setFrameUrl(ready.url);viewer.setStatus(`${state.projectType} · port ${ready.port}`);setStatus('Project opened in real browser runtime.');}catch(error){const fallback=selectPreviewRoute(state.files,state.projectType,{...currentWebContainerEnvironment(),embedded:true});if(fallback.entry){viewer.setFrameDocument(buildStaticPreviewDocument(state.files,fallback.entry));viewer.setStatus(`${state.projectType} · static fallback`);setStatus(`Real runtime unavailable; opened browser-compatible fallback. ${error?.message||''}`.trim());}else{viewer.hide();setStatus(error?.message||'Real runtime could not start.',true);}}return;}viewer.setFrameDocument(buildStaticPreviewDocument(state.files,route.entry));viewer.setStatus(`${state.projectType} · ${route.entry}`);setStatus('Project opened in viewer.');}
+async function handleFiles(files){setStatus('Reading project…');try{const selected=Array.from(files||[]);if(selected.length===1&&looksLikeZip(selected[0])){const extracted=await parseZipArchive(selected[0]);applyVirtualProject(extracted.files,extracted.projectName);}else await ingestFileList(files);await saveProjectSnapshot(snapshotFromState());renderProject();await openPreview();}catch(error){setStatus(error?.message||'Could not load the selected project.',true);viewer.hide();}finally{fileInput.value='';}}
+fileInput.addEventListener('change',()=>handleFiles(fileInput.files));clearButton.addEventListener('click',async()=>{await webcontainer.dispose();viewer.hide();resetState();await clearProjectSnapshot().catch(()=>undefined);renderProject();setStatus('Ready.');});document.getElementById('snapshot-close').addEventListener('click',()=>{snapshotDialog.hidden=true;snapshotImage.removeAttribute('src');snapshotSave.removeAttribute('href');});
+async function restoreLastProject(){try{const saved=await loadProjectSnapshot();if(!saved?.files||!Object.keys(saved.files).length)return;state.projectName=String(saved.projectName||'Project');state.files=saved.files;detectProjectTypeAndEntry();renderProject();setStatus('Restored last project.');}catch{setStatus('Ready.');}}restoreLastProject();
