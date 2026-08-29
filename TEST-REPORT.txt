@@ -1,18 +1,16 @@
-DEBOOGER2000 deboogs29 — PHASE 15 TEST REPORT
+DEBOOGER2000 deboogs30 — PHASE 16 TEST REPORT
 
 PASS
-- service-worker.js passed Node syntax validation in the isolated service-worker harness.
-- Install cached the app shell but did not call skipWaiting, preventing mid-session worker replacement.
-- Activation removed the previous DEBOOGER shell cache and claimed clients after cleanup.
-- Navigation under an active worker returned that worker's cached index.html without a network fetch, preserving one shell version per controlled session.
-- Missing same-origin non-navigation resources still fall back to network.
-- Non-GET and cross-origin requests remain outside the DEBOOGER cache handler.
-- IndexedDB library storage is not referenced by cache cleanup and therefore remains separate from service-worker shell versioning.
-- Existing APP_SHELL entries remain versioned together under debooger-shell-deboogs29.
-- UI, state and service-worker build identifiers align to deboogs29.
-
-Behavior note:
-A newly deployed PWA shell applies cleanly after existing DEBOOGER windows are closed and the waiting service worker activates. This is intentional to avoid mixed old/new UI code in one session.
+- src/pwa.js passed Node syntax validation.
+- Mocked HTTPS service-worker registration still used ./service-worker.js with scope ./.
+- An existing waiting service worker with an active controller triggers the update-ready path.
+- A newly installing worker triggers the notice only after it reaches installed state while an existing controller is present.
+- The idle status message becomes: “Update ready. Close and reopen DEBOOGER to apply safely.”
+- Focus restores the notice after the update-ready state has already been detected.
+- Existing error status is not overwritten by the update notice.
+- service-worker.js retains the deboogs29 atomic lifecycle behavior: no skipWaiting on install and cached active-shell navigation.
+- UI badge, BUILD_VERSION and service-worker cache now align to deboogs30.
+- No native iOS/app bridge code was introduced.
 
 External limitation:
-A real browser service-worker lifecycle across an installed PWA restart cannot be exercised here because local Chromium access is administrator-blocked. Install/activate/fetch behavior was verified in an isolated runtime harness.
+A real installed-PWA update lifecycle across Safari/Chromium restart cannot be exercised here because local Chromium access is administrator-blocked. The update detection behavior was verified with an isolated service-worker registration/worker-state harness.
