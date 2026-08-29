@@ -288,7 +288,7 @@ async function renderLibrary() {
   await renderFolders(folders);
   let visible = items;
   if (libraryUi.view === 'files') visible = visible.filter((item) => String(item.folderId || 'root') === libraryUi.folderId);
-  else visible = [...visible].sort((a, b) => Number(b.updatedAt || b.savedAt || 0) - Number(a.updatedAt || a.savedAt || 0)).slice(0, 20);
+  else visible = [...visible].sort((a, b) => Number(b.savedAt || 0) - Number(a.savedAt || 0)).slice(0, 20);
   visible = visible.filter(itemMatchesType).filter(itemMatchesSearch);
   visible = libraryUi.view === 'recents' ? visible : sortItems(visible);
   const label = libraryUi.view === 'recents' ? 'recent item' : 'item';
