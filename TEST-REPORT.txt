@@ -1,16 +1,16 @@
-DEBOOGER2000 deboogs32 — PHASE 18 TEST REPORT
+DEBOOGER2000 deboogs33 — PHASE 19 TEST REPORT
 
 PASS
-- src/library-tools.js passed Node syntax validation.
-- Isolated DOM harness confirmed Library tools opens the dialog and moves focus to Close.
-- Close button hides the dialog.
-- Escape hides the dialog and returns focus to the Library tools button.
-- Backdrop close logic is scoped to clicks on the modal backdrop only.
-- Backup library, Restore backup and restore-library-input IDs remain present exactly once, so the existing backup/restore modules retain their authoritative bindings.
-- The main action row now exposes Import, Paste code, New folder and Library tools without duplicating backup/restore controls.
-- service-worker.js includes src/library-tools.js and uses cache debooger-shell-deboogs32.
-- UI badge, BUILD_VERSION and service-worker cache align to deboogs32.
-- No native iOS/app bridge code was introduced.
+- src/storage-health.js passed Node syntax validation.
+- Mocked persistent storage returned persistent=true correctly.
+- Mocked storage estimate returned real usage/quota values and formatted 5.0 MB used of 100.0 MB.
+- Percentage formatting is bounded to 0–100%.
+- Missing navigator.storage returns an explicit unsupported result and unavailable fallback text.
+- Storage API failures are contained and do not throw into the Files UI.
+- index.html contains one storage-health status target inside Library tools.
+- service-worker.js includes src/storage-health.js and uses cache debooger-shell-deboogs33.
+- UI badge, BUILD_VERSION and service-worker cache align to deboogs33.
+- No library records are modified by storage-health.js.
 
 External limitation:
-Final visual spacing and tap feel on a real installed iPhone/iPad PWA still require device-level verification; local Chromium rendering is administrator-blocked in this environment.
+Actual quota and persistence values are browser/device controlled, so exact iPhone/iPad values require real-device verification.
