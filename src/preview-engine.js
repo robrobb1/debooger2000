@@ -22,6 +22,7 @@ function mimeFor(path) {
   if (lower.endsWith('.css')) return 'text/css';
   if (/\.(?:js|mjs|cjs|jsx|ts|tsx)$/.test(lower)) return 'text/javascript';
   if (lower.endsWith('.json')) return 'application/json';
+  if (lower.endsWith('.pdf')) return 'application/pdf';
   if (lower.endsWith('.svg')) return 'image/svg+xml';
   if (lower.endsWith('.png')) return 'image/png';
   if (/\.jpe?g$/.test(lower)) return 'image/jpeg';
@@ -165,6 +166,14 @@ function buildImagePreview(files, path) {
   </style></head><body><div class="file-head">${title}</div><div class="image-wrap"><img src="${url}" alt="${title}"></div></body></html>`;
 }
 
+function buildPdfPreview(files, path) {
+  const title = escapeHtml(path);
+  const url = createMaterializer(files)(path);
+  return `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>
+    *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;background:#2a2e31}.file-head{height:40px;display:flex;align-items:center;padding:0 12px;background:#f8faf8;border-bottom:1px solid #d7ddd8;color:#505b54;font:12px/1.3 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}.pdf-wrap{height:calc(100% - 40px)}.pdf-wrap object{display:block;width:100%;height:100%;border:0;background:#fff}.pdf-fallback{margin:0;padding:18px;background:#fff;color:#202529;font:14px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}.pdf-fallback a{color:#285d22}
+  </style></head><body><div class="file-head">${title}</div><div class="pdf-wrap"><object data="${url}" type="application/pdf"><p class="pdf-fallback">This browser cannot display the PDF inline. <a href="${url}" target="_blank" rel="noopener">Open PDF</a></p></object></div></body></html>`;
+}
+
 export function buildPortableHtmlDocument(files, entryPath) {
   const entry = files?.[entryPath];
   if (!entry || entry.binary) throw new Error('The selected preview entry is not readable HTML.');
@@ -177,6 +186,7 @@ export function buildStaticPreviewDocument(files, entryPath) {
   if (!entry) throw new Error('The selected preview file is missing.');
   if (/\.html?$/i.test(entryPath)) return injectBridge(buildPortableHtmlDocument(files, entryPath));
   if (/\.(?:svg|png|jpe?g|gif|webp|ico)$/i.test(entryPath)) return injectBridge(buildImagePreview(files, entryPath));
+  if (/\.pdf$/i.test(entryPath) && entry.binary) return injectBridge(buildPdfPreview(files, entryPath));
   if (!entry.binary) return injectBridge(buildSourcePreview(entryPath, entry));
   throw new Error('This binary file type does not have a safe browser preview in DEBOOGER yet.');
 }
