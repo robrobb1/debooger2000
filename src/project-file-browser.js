@@ -1,7 +1,7 @@
 import { state } from './state.js';
 import { buildStaticPreviewDocument } from './preview-engine.js';
 
-const BROWSER_BINARY_FILE = /\.(?:svg|png|jpe?g|gif|webp|ico|pdf)$/i;
+const BROWSER_BINARY_FILE = /\.(?:svg|png|jpe?g|gif|webp|ico|pdf|mp3|wav|m4a|aac|ogg|oga|mp4|m4v|mov|webm|ogv)$/i;
 const CONTENT_SEARCH_CHARS = 256 * 1024;
 
 export function projectFileCanPreview(path, file) {
