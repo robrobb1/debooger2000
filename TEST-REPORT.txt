@@ -1,23 +1,17 @@
-DEBOOGER2000 deboogs34 — PHASE 20 TEST REPORT
+DEBOOGER2000 deboogs36 — PHASE 21 TEST REPORT
 
 PASS
-- src/storage.js and src/recently-deleted.js passed Node syntax validation.
-- IndexedDB upgrade path creates deleted-items without replacing the existing library-items or folders stores.
-- Save → Delete moved the complete item out of the active library and into Recently Deleted with deletedAt and originalFolderId metadata.
-- Deleting the original folder and then restoring the item correctly returned it to On My DEBOOGER rather than referencing a missing folder.
-- Restore removed the item from Recently Deleted and returned it to the active library in the same transaction.
-- A restore id collision uses add() and aborts rather than silently overwriting an existing library record.
-- Delete forever removes only the selected Recently Deleted item.
-- No bulk empty-trash control or storage function remains in production.
-- Recently Deleted UI harness passed open, render, Restore, main-library refresh request and status behavior.
-- PDF route regression passed: a single saved .pdf resolves to file-document while existing source and image direct routes remain intact and unsupported binary ZIP remains non-previewable.
-- PDF preview unit passed application/pdf data-URL generation plus the explicit Open PDF fallback.
-- Project-file preview allowlist now accepts PDF while binary content search remains disabled for PDF data.
-- index.html contains unique Recently Deleted ids and one copy each of the existing backup/restore controls.
-- service-worker.js includes src/recently-deleted.js and uses cache debooger-shell-deboogs34.
-- UI badge, BUILD_VERSION and service-worker cache align to deboogs34.
-- No native iOS/app bridge code was introduced.
+- Direct media route coverage passed for MP3, WAV, M4A, AAC, OGG/OGA, MP4, M4V, MOV, WebM and OGV.
+- MIME mapping passed for audio/mpeg, audio/wav, audio/mp4, audio/aac, audio/ogg, video/mp4, video/quicktime, video/webm and video/ogg.
+- Audio preview generation uses browser-native <audio controls> with metadata preload.
+- Video preview generation uses browser-native <video controls playsinline> with metadata preload.
+- Media data URLs use the correct MIME type and saved base64 payload.
+- Project-file preview allowlist accepts the supported audio/video extensions while unsupported binary ZIP remains non-previewable.
+- Regression checks passed for PDF direct routing, image direct routing and source/text routing.
+- Existing Recently Deleted storage regression remains unchanged from deboogs34.
+- index.html badge, BUILD_VERSION and service-worker cache align to deboogs36.
+- service-worker shell still contains the existing Files/PWA modules; no native iOS/app bridge code was introduced.
 
 External limitations:
-- Exact inline PDF rendering depends on browser/device native PDF support.
-- Live modal/tap/PDF behavior in an installed iPhone/iPad PWA still requires real-device verification; local Chromium rendering is administrator-blocked in this environment.
+- Codec support varies by browser/device; DEBOOGER exposes only browser-native playback and does not claim every encoded file will play.
+- Live audio/video playback in the installed PWA requires real-device verification because local Chromium access is administrator-blocked in this environment.
