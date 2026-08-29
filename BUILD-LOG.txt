@@ -1,16 +1,15 @@
 DEBOOGER2000 BUILD LOG
 
-Version: deboogs30
-Source: deboogs29
-Phase: Files App 16 — safe PWA update notice
+Version: deboogs31
+Source: deboogs30
+Phase: Files App 17 — iPhone PWA Home Screen icon
 Changes:
-- Preserved the atomic service-worker update model from deboogs29: no mid-session skipWaiting and no mixed old/new shell takeover.
-- Added update-ready detection in src/pwa.js for an already-waiting worker and for a newly installed waiting worker.
-- When DEBOOGER is otherwise idle, the status line now tells the user that an update is ready and to close/reopen the PWA to apply it safely.
-- The notice is intentionally non-destructive: it does not reload the page, activate a waiting worker, overwrite current status errors, or modify IndexedDB library data.
-- Focus handling restores the update-ready notice after returning to an idle DEBOOGER session.
-- UI, state and service-worker build identifiers are aligned to deboogs30.
+- Added a dedicated opaque 180×180 PNG touch icon for iPhone/iPad Home Screen installation.
+- The icon reuses the existing DEBOOGER folder/code visual but uses a full opaque square background so iOS can apply its own icon mask cleanly.
+- Added rel=apple-touch-icon metadata in index.html without changing the existing standards-based manifest icon.
+- Added the touch icon to the versioned offline app shell so an installed PWA does not depend on a later network fetch for the asset.
+- Preserved the PWA-only architecture; no native iOS app, wrapper or Share Extension code was added.
+- UI, state and service-worker build identifiers are aligned to deboogs31.
 Tests: strict phase verification completed; see TEST-REPORT.txt.
 Result: PASS.
-Known limitation: a real installed-PWA service-worker lifecycle cannot be exercised in this environment because local Chromium access is administrator-blocked.
-Source of truth: yes for Phase 16.
+Source of truth: yes for Phase 17.
