@@ -1,4 +1,4 @@
-import { deleteDeletedLibraryItem, emptyDeletedLibraryItems, listDeletedLibraryItems, restoreDeletedLibraryItem } from './storage.js';
+import { deleteDeletedLibraryItem, listDeletedLibraryItems, restoreDeletedLibraryItem } from './storage.js';
 
 function formatDeletedDate(value) {
   const time = Number(value || 0);
@@ -78,8 +78,7 @@ export function registerRecentlyDeleted(doc = globalThis.document) {
   const open = doc?.getElementById?.('open-recently-deleted');
   const dialog = doc?.getElementById?.('recently-deleted-dialog');
   const close = doc?.getElementById?.('recently-deleted-close');
-  const empty = doc?.getElementById?.('empty-recently-deleted');
-  if (!open || !dialog || !close || !empty) return false;
+  if (!open || !dialog || !close) return false;
   open.addEventListener('click', async () => {
     dialog.hidden = false;
     await renderRecentlyDeleted(doc);
@@ -93,13 +92,6 @@ export function registerRecentlyDeleted(doc = globalThis.document) {
       dialog.hidden = true;
       open.focus();
     }
-  });
-  empty.addEventListener('click', async () => {
-    try {
-      await emptyDeletedLibraryItems();
-      await renderRecentlyDeleted(doc);
-      setStatus('Recently Deleted emptied.', false, doc);
-    } catch (error) { setStatus(error?.message || 'Could not empty Recently Deleted.', true, doc); }
   });
   return true;
 }
