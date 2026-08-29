@@ -1,18 +1,20 @@
 DEBOOGER2000 BUILD LOG
 
-Version: deboogs36
-Source: deboogs34
-Phase: Files App 21 — browser-native audio/video preview
+Version: deboogs38
+Source: deboogs36
+Phase: Files App 22 — stable Recents ordering
 Changes:
-- Added browser-safe audio/video preview for MP3, WAV, M4A, AAC, OGG/OGA, MP4, M4V, MOV, WebM and OGV files.
-- Single saved media files now route directly to the existing viewer instead of being treated as unsupported binary files.
-- Media files inside ZIP/projects are now previewable from the Project files list.
-- Audio uses the browser's native audio controls; video uses native video controls with playsinline for PWA/mobile behavior.
-- MIME routing is explicit for each supported extension. Codec playback is still determined by the browser/device and is not falsely guaranteed.
-- Existing PDF, image, HTML, source/text, React/Vite, Electron/backend, ZIP, audit, Recently Deleted, backup/restore and PWA behavior remains unchanged.
-- No second viewer, media library, external player or native iOS code was introduced.
-- UI, state and service-worker build identifiers are aligned to deboogs36.
+- Fixed Recents at the source so it is ordered only by savedAt, the original save/import date.
+- Opening an older file no longer moves it toward the top of Recents.
+- Automatic re-auditing/runtime-error persistence no longer affects Recents order even though updatedAt may change.
+- Renaming or moving an existing file no longer affects Recents order.
+- Restoring an older item from Recently Deleted keeps its original savedAt and therefore returns to its original chronological position.
+- Duplicating an item still creates a new savedAt value, so the newly created copy correctly appears as a new item.
+- Normal Files-view Newest/Oldest sorting already uses savedAt and remains unchanged.
+- Existing media/PDF/image/source/HTML viewer behavior, ZIP/project handling, audit, backup/restore, Recently Deleted and PWA behavior remains unchanged.
+- Stale/diverged deboogs37 was deliberately not used; deboogs38 was created directly from clean deboogs36.
+- UI, state and service-worker build identifiers align to deboogs38.
 Tests: strict phase verification completed; see TEST-REPORT.txt.
 Result: PASS for all checks available in this environment.
-Known limitation: exact audio/video codec playback depends on the installed browser/device codec support; live installed-PWA media playback cannot be exercised here because local Chromium access is administrator-blocked.
-Source of truth: yes for Phase 21.
+Known limitation: live installed-PWA visual verification remains unavailable because local Chromium access is administrator-blocked.
+Source of truth: yes for Phase 22.
