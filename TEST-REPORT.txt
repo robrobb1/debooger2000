@@ -10,10 +10,14 @@ PASS
 - Delete forever removes only the selected Recently Deleted item.
 - No bulk empty-trash control or storage function remains in production.
 - Recently Deleted UI harness passed open, render, Restore, main-library refresh request and status behavior.
+- PDF route regression passed: a single saved .pdf resolves to file-document while existing source and image direct routes remain intact and unsupported binary ZIP remains non-previewable.
+- PDF preview unit passed application/pdf data-URL generation plus the explicit Open PDF fallback.
+- Project-file preview allowlist now accepts PDF while binary content search remains disabled for PDF data.
 - index.html contains unique Recently Deleted ids and one copy each of the existing backup/restore controls.
 - service-worker.js includes src/recently-deleted.js and uses cache debooger-shell-deboogs34.
 - UI badge, BUILD_VERSION and service-worker cache align to deboogs34.
 - No native iOS/app bridge code was introduced.
 
-External limitation:
-Live modal/tap behavior in an installed iPhone/iPad PWA still requires real-device verification; local Chromium rendering is administrator-blocked in this environment.
+External limitations:
+- Exact inline PDF rendering depends on browser/device native PDF support.
+- Live modal/tap/PDF behavior in an installed iPhone/iPad PWA still requires real-device verification; local Chromium rendering is administrator-blocked in this environment.
