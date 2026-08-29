@@ -1,17 +1,16 @@
 DEBOOGER2000 BUILD LOG
 
-Version: deboogs29
-Source: deboogs28
-Phase: Files App 15 — atomic PWA shell updates / stale-version protection
+Version: deboogs30
+Source: deboogs29
+Phase: Files App 16 — safe PWA update notice
 Changes:
-- Removed automatic skipWaiting during service-worker install so a newly deployed shell cannot take control halfway through an already-open DEBOOGER session.
-- Navigation is now served from the active service worker's cached index.html first, keeping HTML, CSS and JavaScript on one matching build version while that worker controls the app.
-- A newly installed service worker waits normally; after the old DEBOOGER clients close, the new worker activates, removes older DEBOOGER shell caches and claims the next session.
-- First-time installs still load normally from the network and populate the complete versioned app-shell cache.
-- Same-origin non-navigation resources remain cache-first with network fallback.
-- This deliberately favors version consistency over silently hot-swapping code inside an open session.
-- Existing IndexedDB library data is separate from the shell cache and is not deleted during service-worker version cleanup.
-- Build identifiers are aligned to deboogs29.
+- Preserved the atomic service-worker update model from deboogs29: no mid-session skipWaiting and no mixed old/new shell takeover.
+- Added update-ready detection in src/pwa.js for an already-waiting worker and for a newly installed waiting worker.
+- When DEBOOGER is otherwise idle, the status line now tells the user that an update is ready and to close/reopen the PWA to apply it safely.
+- The notice is intentionally non-destructive: it does not reload the page, activate a waiting worker, overwrite current status errors, or modify IndexedDB library data.
+- Focus handling restores the update-ready notice after returning to an idle DEBOOGER session.
+- UI, state and service-worker build identifiers are aligned to deboogs30.
 Tests: strict phase verification completed; see TEST-REPORT.txt.
 Result: PASS.
-Source of truth: yes for Phase 15.
+Known limitation: a real installed-PWA service-worker lifecycle cannot be exercised in this environment because local Chromium access is administrator-blocked.
+Source of truth: yes for Phase 16.
