@@ -1,18 +1,24 @@
 DEBOOGER2000 BUILD LOG
 
-Version: deboogs34
-Source: deboogs33
-Phase: Files App 20 — Recently Deleted safety
+Version: deboogs35
+Source: deboogs34
+Phase: Files App 21 — PWA release integration checkpoint
 Changes:
-- Upgraded IndexedDB to version 4 and added a dedicated deleted-items store.
-- Normal Delete now moves a saved item atomically from the active Files library into Recently Deleted instead of destroying it immediately.
-- Recently Deleted is available inside Library tools and lists the deleted item name and deletion time.
-- Restore is atomic and keeps the original item id/data/audit state; it returns to the original folder when that folder still exists, otherwise On My DEBOOGER.
-- Delete forever removes only the selected deleted item.
-- Deliberately removed the one-tap bulk empty-trash path so permanent deletion remains per-item and harder to trigger accidentally.
-- Existing folders, backup/restore, project viewer, ZIP/runtime routing and active-library storage remain authoritative and unchanged outside the deletion path.
-- Added recently-deleted.js to the offline app shell.
-- UI, state and service-worker build identifiers are aligned to deboogs34.
-Tests: strict phase verification completed; see TEST-REPORT.txt.
-Result: PASS.
-Source of truth: yes for Phase 20.
+- No new feature implementation was introduced in this phase; this is a strict integration/release checkpoint over the completed PWA feature set.
+- Confirmed the repository remains PWA-only with no native iOS app, Share Extension, App Group, native bridge or native-intake production tree.
+- Preserved Files as the home screen with persistent IndexedDB library, folders, Recents, search/filter/sort, rename, move, duplicate and Recently Deleted.
+- Preserved automatic type detection and evidence-based audit on import/save/restore, with saved audit score/status.
+- Preserved ZIP/project browsing, bounded internal project search, direct source/image/PDF preview, compiled React/Vite preference, truthful Electron/backend handling and WebContainer capability checks.
+- Preserved Desktop/Tablet/Mobile viewer presets, desktop default, Fit, zoom, drag, pinch, fullscreen, landscape refit, snapshot and Exit in one ViewerController.
+- Preserved PWA install/offline shell, iPhone/iPad touch icon, safe waiting-worker updates and the update-ready notice.
+- Preserved Library tools, storage health, full-library ZIP backup and atomic merge restore.
+- Preserved PDF preview through browser-native application/pdf support with an explicit Open PDF fallback; no fake parser or second viewer is used.
+- UI badge, BUILD_VERSION and service-worker cache are aligned to deboogs35.
+Tests: strict release integration verification completed; see TEST-REPORT.txt.
+Result: PASS for all checks available in this environment.
+Known limitations:
+- Live installed-PWA rendering/console/tap verification cannot run here because local Chromium access is administrator-blocked.
+- Exact inline PDF rendering depends on browser/device native PDF capability.
+- Safari/iOS does not provide PWA Web Share Target registration, so iPhone inbound sharing remains the supported Shortcut/browser URL path.
+- WebContainer/npm execution and lazy snapshot loading require compatible runtime/network availability and are not represented as guaranteed offline features.
+Source of truth: yes.
