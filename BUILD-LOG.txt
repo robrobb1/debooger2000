@@ -1,20 +1,18 @@
 DEBOOGER2000 BUILD LOG
 
-Version: deboogs34
-Source: deboogs33
-Phase: Files App 20 — Recently Deleted safety + PDF preview
+Version: deboogs36
+Source: deboogs34
+Phase: Files App 21 — browser-native audio/video preview
 Changes:
-- Upgraded IndexedDB to version 4 and added a dedicated deleted-items store.
-- Normal Delete now moves a saved item atomically from the active Files library into Recently Deleted instead of destroying it immediately.
-- Recently Deleted is available inside Library tools and lists the deleted item name and deletion time.
-- Restore is atomic and keeps the original item id/data/audit state; it returns to the original folder when that folder still exists, otherwise On My DEBOOGER.
-- Delete forever removes only the selected deleted item.
-- Deliberately removed the one-tap bulk empty-trash path so permanent deletion remains per-item and harder to trigger accidentally.
-- Added PDF as a browser-safe binary preview type. Single saved PDFs route directly to the existing viewer, and PDFs inside ZIP/projects can be opened from the Project files list.
-- PDF rendering uses browser-native application/pdf support with an explicit Open PDF fallback; no fake PDF parser or second viewer was added.
-- Existing folders, backup/restore, HTML/source/image preview, React/Vite, Electron/backend, ZIP/runtime routing and audit behavior remain authoritative.
-- recently-deleted.js is included in the offline app shell; UI, state and service-worker build identifiers align to deboogs34.
+- Added browser-safe audio/video preview for MP3, WAV, M4A, AAC, OGG/OGA, MP4, M4V, MOV, WebM and OGV files.
+- Single saved media files now route directly to the existing viewer instead of being treated as unsupported binary files.
+- Media files inside ZIP/projects are now previewable from the Project files list.
+- Audio uses the browser's native audio controls; video uses native video controls with playsinline for PWA/mobile behavior.
+- MIME routing is explicit for each supported extension. Codec playback is still determined by the browser/device and is not falsely guaranteed.
+- Existing PDF, image, HTML, source/text, React/Vite, Electron/backend, ZIP, audit, Recently Deleted, backup/restore and PWA behavior remains unchanged.
+- No second viewer, media library, external player or native iOS code was introduced.
+- UI, state and service-worker build identifiers are aligned to deboogs36.
 Tests: strict phase verification completed; see TEST-REPORT.txt.
 Result: PASS for all checks available in this environment.
-Known limitation: exact inline PDF rendering depends on the browser/device PDF capability; live installed-PWA rendering remains unavailable here because local Chromium access is administrator-blocked.
-Source of truth: yes for Phase 20.
+Known limitation: exact audio/video codec playback depends on the installed browser/device codec support; live installed-PWA media playback cannot be exercised here because local Chromium access is administrator-blocked.
+Source of truth: yes for Phase 21.
