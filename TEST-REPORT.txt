@@ -1,16 +1,19 @@
-DEBOOGER2000 deboogs33 — PHASE 19 TEST REPORT
+DEBOOGER2000 deboogs34 — PHASE 20 TEST REPORT
 
 PASS
-- src/storage-health.js passed Node syntax validation.
-- Mocked persistent storage returned persistent=true correctly.
-- Mocked storage estimate returned real usage/quota values and formatted 5.0 MB used of 100.0 MB.
-- Percentage formatting is bounded to 0–100%.
-- Missing navigator.storage returns an explicit unsupported result and unavailable fallback text.
-- Storage API failures are contained and do not throw into the Files UI.
-- index.html contains one storage-health status target inside Library tools.
-- service-worker.js includes src/storage-health.js and uses cache debooger-shell-deboogs33.
-- UI badge, BUILD_VERSION and service-worker cache align to deboogs33.
-- No library records are modified by storage-health.js.
+- src/storage.js and src/recently-deleted.js passed Node syntax validation.
+- IndexedDB upgrade path creates deleted-items without replacing the existing library-items or folders stores.
+- Save → Delete moved the complete item out of the active library and into Recently Deleted with deletedAt and originalFolderId metadata.
+- Deleting the original folder and then restoring the item correctly returned it to On My DEBOOGER rather than referencing a missing folder.
+- Restore removed the item from Recently Deleted and returned it to the active library in the same transaction.
+- A restore id collision uses add() and aborts rather than silently overwriting an existing library record.
+- Delete forever removes only the selected Recently Deleted item.
+- No bulk empty-trash control or storage function remains in production.
+- Recently Deleted UI harness passed open, render, Restore, main-library refresh request and status behavior.
+- index.html contains unique Recently Deleted ids and one copy each of the existing backup/restore controls.
+- service-worker.js includes src/recently-deleted.js and uses cache debooger-shell-deboogs34.
+- UI badge, BUILD_VERSION and service-worker cache align to deboogs34.
+- No native iOS/app bridge code was introduced.
 
 External limitation:
-Actual quota and persistence values are browser/device controlled, so exact iPhone/iPad values require real-device verification.
+Live modal/tap behavior in an installed iPhone/iPad PWA still requires real-device verification; local Chromium rendering is administrator-blocked in this environment.
