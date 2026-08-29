@@ -8,12 +8,19 @@ PASS
 - savedAt and updatedAt were preserved exactly for every item in the unit test, preventing re-audit from reordering Recents.
 - Existing item ids, project metadata, folders and file content were preserved while only audit fields changed.
 - Progress callback fired in item order and the batch yields periodically without starting parallel writes.
-- Library refresh remains delegated to the existing Files renderer through the library-search input event.
+- Library refresh remains delegated to the existing Files renderer.
+- Direct media route coverage inherited from the tested deboogs36 line passed for MP3, WAV, M4A, AAC, OGG/OGA, MP4, M4V, MOV, WebM and OGV.
+- MIME mapping passed for audio/mpeg, audio/wav, audio/mp4, audio/aac, audio/ogg, video/mp4, video/quicktime, video/webm and video/ogg.
+- Audio preview uses browser-native <audio controls> with metadata preload; video preview uses <video controls playsinline> with metadata preload.
+- Media data URLs use the appropriate MIME type and saved base64 payload.
+- Project-file preview allowlist accepts supported audio/video formats while binary content search remains disabled for media.
+- Regression coverage remains clean for PDF, image and source/text direct preview routes.
 - index.html contains one Re-audit library control and loads src/library-reaudit.js once.
 - service-worker.js includes src/library-reaudit.js and uses cache debooger-shell-deboogs37.
 - UI badge, BUILD_VERSION and service-worker cache align to deboogs37.
-- Existing release regression results from deboogs35 remain applicable because no project/viewer/runtime/ZIP/storage schema path was replaced in this phase.
+- Existing release regression results from deboogs35 remain applicable; no storage schema, Files renderer, viewer controller or ZIP engine was replaced.
 - No native iOS/app bridge code was introduced.
 
-External limitation:
-A very large real-device library still requires iPhone/iPad performance observation; the batch is deliberately sequential and yields periodically to reduce UI blocking.
+External limitations:
+- Codec support varies by browser/device; DEBOOGER exposes browser-native playback and does not claim every encoded media file will play.
+- Live audio/video playback and very-large-library re-audit performance require real-device verification because local Chromium access is administrator-blocked.
