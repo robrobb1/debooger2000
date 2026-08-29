@@ -1,7 +1,8 @@
 const DB_NAME = 'debooger2000';
-const DB_VERSION = 3;
+const DB_VERSION = 4;
 const LIBRARY_STORE = 'library-items';
 const FOLDER_STORE = 'folders';
+const DELETED_STORE = 'deleted-items';
 const LEGACY_STORE = 'project-cache';
 const LEGACY_ACTIVE_KEY = 'active';
 const LEGACY_HISTORY_KEY = 'history';
@@ -46,6 +47,10 @@ function openDatabase() {
         ? tx.objectStore(FOLDER_STORE)
         : db.createObjectStore(FOLDER_STORE, { keyPath: 'id' });
       if (!folders.indexNames.contains('name')) folders.createIndex('name', 'name');
+      const deleted = db.objectStoreNames.contains(DELETED_STORE)
+        ? tx.objectStore(DELETED_STORE)
+        : db.createObjectStore(DELETED_STORE, { keyPath: 'id' });
+      if (!deleted.indexNames.contains('deletedAt')) deleted.createIndex('deletedAt', 'deletedAt');
 
       if (db.objectStoreNames.contains(LEGACY_STORE)) {
         const legacy = tx.objectStore(LEGACY_STORE);
@@ -141,10 +146,67 @@ export async function updateLibraryItem(id, patch) {
 }
 
 export async function deleteLibraryItem(id) {
+  const key = String(id);
   const db = await openDatabase();
   try {
-    const tx = db.transaction(LIBRARY_STORE, 'readwrite');
-    tx.objectStore(LIBRARY_STORE).delete(String(id));
+    const tx = db.transaction([LIBRARY_STORE, DELETED_STORE], 'readwrite');
+    const library = tx.objectStore(LIBRARY_STORE);
+    const deleted = tx.objectStore(DELETED_STORE);
+    const existing = await requestResult(library.get(key), 'Could not read the selected library item.');
+    if (!existing) throw new Error('The selected library item no longer exists.');
+    deleted.put({ ...existing, deletedAt: Date.now(), originalFolderId: String(existing.folderId || 'root') });
+    library.delete(key);
+    await commitTransaction(tx);
+  } finally { db.close(); }
+}
+
+export async function listDeletedLibraryItems() {
+  const db = await openDatabase();
+  try {
+    const tx = db.transaction(DELETED_STORE, 'readonly');
+    const result = await requestResult(tx.objectStore(DELETED_STORE).getAll(), 'Could not read Recently Deleted.');
+    return (Array.isArray(result) ? result : []).sort((a, b) => Number(b.deletedAt || 0) - Number(a.deletedAt || 0));
+  } finally { db.close(); }
+}
+
+export async function restoreDeletedLibraryItem(id) {
+  const key = String(id);
+  const db = await openDatabase();
+  try {
+    const tx = db.transaction([DELETED_STORE, LIBRARY_STORE, FOLDER_STORE], 'readwrite');
+    const deleted = tx.objectStore(DELETED_STORE);
+    const library = tx.objectStore(LIBRARY_STORE);
+    const folders = tx.objectStore(FOLDER_STORE);
+    const existing = await requestResult(deleted.get(key), 'Could not read the deleted item.');
+    if (!existing) throw new Error('The deleted item no longer exists.');
+    let folderId = String(existing.originalFolderId || existing.folderId || 'root');
+    if (folderId !== 'root') {
+      const folder = await requestResult(folders.get(folderId), 'Could not verify the original folder.');
+      if (!folder) folderId = 'root';
+    }
+    const { deletedAt, originalFolderId, ...rest } = existing;
+    const restored = { ...rest, folderId, updatedAt: Date.now() };
+    library.add(restored);
+    deleted.delete(key);
+    await commitTransaction(tx);
+    return restored;
+  } finally { db.close(); }
+}
+
+export async function deleteDeletedLibraryItem(id) {
+  const db = await openDatabase();
+  try {
+    const tx = db.transaction(DELETED_STORE, 'readwrite');
+    tx.objectStore(DELETED_STORE).delete(String(id));
+    await commitTransaction(tx);
+  } finally { db.close(); }
+}
+
+export async function emptyDeletedLibraryItems() {
+  const db = await openDatabase();
+  try {
+    const tx = db.transaction(DELETED_STORE, 'readwrite');
+    tx.objectStore(DELETED_STORE).clear();
     await commitTransaction(tx);
   } finally { db.close(); }
 }
