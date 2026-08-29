@@ -1,14 +1,16 @@
-DEBOOGER2000 deboogs31 — PHASE 17 TEST REPORT
+DEBOOGER2000 deboogs32 — PHASE 18 TEST REPORT
 
 PASS
-- assets/debooger-touch-180.png was generated from the DEBOOGER icon artwork and verified as a real 180×180 PNG.
-- Every pixel in the touch icon is opaque; there are no transparent corner pixels for iOS to render unpredictably.
-- Repository assets listing confirms the PNG exists on deboogs31 with the expected binary blob and file size.
-- index.html references ./assets/debooger-touch-180.png through rel=apple-touch-icon with sizes=180x180.
-- service-worker.js passed Node syntax validation and includes the touch icon in APP_SHELL.
-- The service-worker cache remains atomic/cache-first and is versioned as debooger-shell-deboogs31.
-- UI badge, BUILD_VERSION and service-worker cache align to deboogs31.
+- src/library-tools.js passed Node syntax validation.
+- Isolated DOM harness confirmed Library tools opens the dialog and moves focus to Close.
+- Close button hides the dialog.
+- Escape hides the dialog and returns focus to the Library tools button.
+- Backdrop close logic is scoped to clicks on the modal backdrop only.
+- Backup library, Restore backup and restore-library-input IDs remain present exactly once, so the existing backup/restore modules retain their authoritative bindings.
+- The main action row now exposes Import, Paste code, New folder and Library tools without duplicating backup/restore controls.
+- service-worker.js includes src/library-tools.js and uses cache debooger-shell-deboogs32.
+- UI badge, BUILD_VERSION and service-worker cache align to deboogs32.
 - No native iOS/app bridge code was introduced.
 
 External limitation:
-The final Home Screen appearance still requires a real Safari Add to Home Screen install on iPhone/iPad; that device-level rendering cannot be exercised in this environment.
+Final visual spacing and tap feel on a real installed iPhone/iPad PWA still require device-level verification; local Chromium rendering is administrator-blocked in this environment.
