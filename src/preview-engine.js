@@ -29,6 +29,15 @@ function mimeFor(path) {
   if (lower.endsWith('.gif')) return 'image/gif';
   if (lower.endsWith('.webp')) return 'image/webp';
   if (lower.endsWith('.ico')) return 'image/x-icon';
+  if (lower.endsWith('.mp3')) return 'audio/mpeg';
+  if (lower.endsWith('.wav')) return 'audio/wav';
+  if (lower.endsWith('.m4a')) return 'audio/mp4';
+  if (lower.endsWith('.aac')) return 'audio/aac';
+  if (/\.(?:ogg|oga)$/.test(lower)) return 'audio/ogg';
+  if (/\.(?:mp4|m4v)$/.test(lower)) return 'video/mp4';
+  if (lower.endsWith('.mov')) return 'video/quicktime';
+  if (lower.endsWith('.webm')) return 'video/webm';
+  if (lower.endsWith('.ogv')) return 'video/ogg';
   if (lower.endsWith('.woff2')) return 'font/woff2';
   if (lower.endsWith('.woff')) return 'font/woff';
   if (lower.endsWith('.ttf')) return 'font/ttf';
@@ -174,6 +183,18 @@ function buildPdfPreview(files, path) {
   </style></head><body><div class="file-head">${title}</div><div class="pdf-wrap"><object data="${url}" type="application/pdf"><p class="pdf-fallback">This browser cannot display the PDF inline. <a href="${url}" target="_blank" rel="noopener">Open PDF</a></p></object></div></body></html>`;
 }
 
+function buildMediaPreview(files, path) {
+  const title = escapeHtml(path);
+  const url = createMaterializer(files)(path);
+  const video = /\.(?:mp4|m4v|mov|webm|ogv)$/i.test(path);
+  const media = video
+    ? `<video controls playsinline preload="metadata" src="${url}">This browser cannot play this video codec.</video>`
+    : `<audio controls preload="metadata" src="${url}">This browser cannot play this audio codec.</audio>`;
+  return `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>
+    *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;background:#202528}.file-head{height:40px;display:flex;align-items:center;padding:0 12px;background:#f8faf8;border-bottom:1px solid #d7ddd8;color:#505b54;font:12px/1.3 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}.media-wrap{height:calc(100% - 40px);display:grid;place-items:center;padding:24px}.media-wrap video{display:block;max-width:100%;max-height:100%;background:#000}.media-wrap audio{width:min(680px,100%)}
+  </style></head><body><div class="file-head">${title}</div><div class="media-wrap">${media}</div></body></html>`;
+}
+
 export function buildPortableHtmlDocument(files, entryPath) {
   const entry = files?.[entryPath];
   if (!entry || entry.binary) throw new Error('The selected preview entry is not readable HTML.');
@@ -187,6 +208,7 @@ export function buildStaticPreviewDocument(files, entryPath) {
   if (/\.html?$/i.test(entryPath)) return injectBridge(buildPortableHtmlDocument(files, entryPath));
   if (/\.(?:svg|png|jpe?g|gif|webp|ico)$/i.test(entryPath)) return injectBridge(buildImagePreview(files, entryPath));
   if (/\.pdf$/i.test(entryPath) && entry.binary) return injectBridge(buildPdfPreview(files, entryPath));
+  if (/\.(?:mp3|wav|m4a|aac|ogg|oga|mp4|m4v|mov|webm|ogv)$/i.test(entryPath) && entry.binary) return injectBridge(buildMediaPreview(files, entryPath));
   if (!entry.binary) return injectBridge(buildSourcePreview(entryPath, entry));
   throw new Error('This binary file type does not have a safe browser preview in DEBOOGER yet.');
 }
