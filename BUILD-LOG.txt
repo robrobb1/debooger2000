@@ -1,18 +1,21 @@
 DEBOOGER2000 BUILD LOG
 
 Version: deboogs37
-Source: deboogs35
-Phase: Files App 22 — full-library re-audit
+Source: deboogs35 + tested media work from deboogs36
+Phase: Files App 22 — full-library re-audit + browser-native media preview integration
 Changes:
 - Added Re-audit library under Library tools for refreshing saved audit results after audit-engine upgrades.
 - Re-audit uses the same authoritative runProjectAudit() and auditScore() implementation used by normal imports/saves; no second auditor was added.
 - Every saved item keeps its existing id, files, folder, savedAt and updatedAt values, so re-auditing does not move older items to the top of Recents.
 - Re-audit updates only auditFindings, auditScore and auditStatus and saves through the existing library store.
 - Processing runs sequentially, yields to the browser every eight items and reports progress through the existing status line.
-- After completion it requests the existing Files renderer to refresh through the current library-search event rather than introducing a duplicate renderer.
-- The control disables while running to prevent duplicate batch jobs.
-- Added library-reaudit.js to the offline app shell.
+- After completion it requests the existing Files renderer to refresh rather than introducing a duplicate renderer.
+- Integrated the already-tested deboogs36 browser-native media preview instead of leaving that parallel branch behind.
+- Supported media routes cover MP3, WAV, M4A, AAC, OGG/OGA, MP4/M4V, MOV, WebM and OGV using browser-native audio/video controls and MIME-specific data URLs.
+- Media inside ZIP/projects can open from the same Project files list; binary media content is not scanned as text by project search.
+- Codec support remains truthful and browser-dependent; no transcoder, fake codec support or second viewer was added.
+- Added library-reaudit.js to the offline app shell; existing media preview needs no extra external library.
 - UI badge, BUILD_VERSION and service-worker cache are aligned to deboogs37.
 Tests: strict phase verification completed; see TEST-REPORT.txt.
-Result: PASS.
+Result: PASS for all checks available in this environment.
 Source of truth: yes for Phase 22.
