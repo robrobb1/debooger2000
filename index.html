@@ -19,6 +19,7 @@
   <script type="module" src="./src/app.js"></script>
   <script type="module" src="./src/project-file-browser.js"></script>
   <script type="module" src="./src/file-launch.js"></script>
+  <script type="module" src="./src/library-tools.js"></script>
   <script type="module" src="./src/library-backup.js"></script>
   <script type="module" src="./src/library-restore.js"></script>
 </head>
@@ -26,7 +27,7 @@
   <main class="app-shell">
     <header class="topbar files-topbar">
       <div><p class="eyebrow">DEBOOGER2000</p><h1>Files</h1></div>
-      <span id="build-badge" class="badge">deboogs31</span>
+      <span id="build-badge" class="badge">deboogs32</span>
     </header>
 
     <section class="files-actions" aria-label="Add and organize files">
@@ -34,9 +35,7 @@
       <input id="file-input" class="visually-hidden" type="file" multiple>
       <button id="open-paste" class="button secondary" type="button">Paste code</button>
       <button id="new-folder" class="button secondary" type="button">New folder</button>
-      <button id="backup-library" class="button secondary" type="button">Backup library</button>
-      <button id="restore-library" class="button secondary" type="button">Restore backup</button>
-      <input id="restore-library-input" class="visually-hidden" type="file" accept=".zip,application/zip">
+      <button id="library-tools" class="button secondary" type="button">Library tools</button>
     </section>
     <p id="status" class="status files-status" role="status" aria-live="polite">Ready.</p>
 
@@ -116,5 +115,7 @@
   <div id="move-dialog" class="files-modal" hidden><div class="files-modal-card" role="dialog" aria-modal="true" aria-labelledby="move-dialog-title"><div class="files-modal-head"><h2 id="move-dialog-title">Move item</h2><button id="move-dialog-close" type="button">Close</button></div><div id="move-folder-list" class="files-modal-actions"></div></div></div>
 
   <div id="folder-dialog" class="files-modal" hidden><div class="files-modal-card" role="dialog" aria-modal="true" aria-labelledby="folder-dialog-title"><div class="files-modal-head"><h2 id="folder-dialog-title">Folder options</h2><button id="folder-dialog-close" type="button">Close</button></div><div class="files-modal-actions"><button id="folder-rename" type="button">Rename folder</button><button id="folder-delete" class="danger" type="button">Delete folder</button></div></div></div>
+
+  <div id="library-tools-dialog" class="files-modal" hidden><div class="files-modal-card" role="dialog" aria-modal="true" aria-labelledby="library-tools-title"><div class="files-modal-head"><h2 id="library-tools-title">Library tools</h2><button id="library-tools-close" type="button">Close</button></div><div class="files-modal-actions"><button id="backup-library" type="button">Backup library</button><button id="restore-library" type="button">Restore backup</button><input id="restore-library-input" class="visually-hidden" type="file" accept=".zip,application/zip"></div></div></div>
 </body>
 </html>
