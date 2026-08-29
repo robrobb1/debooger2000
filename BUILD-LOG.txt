@@ -1,16 +1,18 @@
 DEBOOGER2000 BUILD LOG
 
-Version: deboogs33
-Source: deboogs32
-Phase: Files App 19 — PWA storage health
+Version: deboogs34
+Source: deboogs33
+Phase: Files App 20 — Recently Deleted safety
 Changes:
-- Added a capability-checked storage health line inside Library tools.
-- When the browser supports the Storage API, DEBOOGER reports whether persistent storage is active and shows local usage/quota.
-- When the browser does not expose those values, DEBOOGER states that storage details are unavailable instead of inventing numbers.
-- Storage health refreshes when Library tools opens and does not alter, delete or migrate library data.
-- Existing automatic persistent-storage requests on save remain unchanged.
-- Added storage-health.js to the offline app shell.
-- UI, state and service-worker build identifiers are aligned to deboogs33.
+- Upgraded IndexedDB to version 4 and added a dedicated deleted-items store.
+- Normal Delete now moves a saved item atomically from the active Files library into Recently Deleted instead of destroying it immediately.
+- Recently Deleted is available inside Library tools and lists the deleted item name and deletion time.
+- Restore is atomic and keeps the original item id/data/audit state; it returns to the original folder when that folder still exists, otherwise On My DEBOOGER.
+- Delete forever removes only the selected deleted item.
+- Deliberately removed the one-tap bulk empty-trash path so permanent deletion remains per-item and harder to trigger accidentally.
+- Existing folders, backup/restore, project viewer, ZIP/runtime routing and active-library storage remain authoritative and unchanged outside the deletion path.
+- Added recently-deleted.js to the offline app shell.
+- UI, state and service-worker build identifiers are aligned to deboogs34.
 Tests: strict phase verification completed; see TEST-REPORT.txt.
 Result: PASS.
-Source of truth: yes for Phase 19.
+Source of truth: yes for Phase 20.
