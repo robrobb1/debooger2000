@@ -1,24 +1,18 @@
 DEBOOGER2000 BUILD LOG
 
-Version: deboogs35
-Source: deboogs34
-Phase: Files App 21 — PWA release integration checkpoint
+Version: deboogs37
+Source: deboogs35
+Phase: Files App 22 — full-library re-audit
 Changes:
-- No new feature implementation was introduced in this phase; this is a strict integration/release checkpoint over the completed PWA feature set.
-- Confirmed the repository remains PWA-only with no native iOS app, Share Extension, App Group, native bridge or native-intake production tree.
-- Preserved Files as the home screen with persistent IndexedDB library, folders, Recents, search/filter/sort, rename, move, duplicate and Recently Deleted.
-- Preserved automatic type detection and evidence-based audit on import/save/restore, with saved audit score/status.
-- Preserved ZIP/project browsing, bounded internal project search, direct source/image/PDF preview, compiled React/Vite preference, truthful Electron/backend handling and WebContainer capability checks.
-- Preserved Desktop/Tablet/Mobile viewer presets, desktop default, Fit, zoom, drag, pinch, fullscreen, landscape refit, snapshot and Exit in one ViewerController.
-- Preserved PWA install/offline shell, iPhone/iPad touch icon, safe waiting-worker updates and the update-ready notice.
-- Preserved Library tools, storage health, full-library ZIP backup and atomic merge restore.
-- Preserved PDF preview through browser-native application/pdf support with an explicit Open PDF fallback; no fake parser or second viewer is used.
-- UI badge, BUILD_VERSION and service-worker cache are aligned to deboogs35.
-Tests: strict release integration verification completed; see TEST-REPORT.txt.
-Result: PASS for all checks available in this environment.
-Known limitations:
-- Live installed-PWA rendering/console/tap verification cannot run here because local Chromium access is administrator-blocked.
-- Exact inline PDF rendering depends on browser/device native PDF capability.
-- Safari/iOS does not provide PWA Web Share Target registration, so iPhone inbound sharing remains the supported Shortcut/browser URL path.
-- WebContainer/npm execution and lazy snapshot loading require compatible runtime/network availability and are not represented as guaranteed offline features.
-Source of truth: yes.
+- Added Re-audit library under Library tools for refreshing saved audit results after audit-engine upgrades.
+- Re-audit uses the same authoritative runProjectAudit() and auditScore() implementation used by normal imports/saves; no second auditor was added.
+- Every saved item keeps its existing id, files, folder, savedAt and updatedAt values, so re-auditing does not move older items to the top of Recents.
+- Re-audit updates only auditFindings, auditScore and auditStatus and saves through the existing library store.
+- Processing runs sequentially, yields to the browser every eight items and reports progress through the existing status line.
+- After completion it requests the existing Files renderer to refresh through the current library-search event rather than introducing a duplicate renderer.
+- The control disables while running to prevent duplicate batch jobs.
+- Added library-reaudit.js to the offline app shell.
+- UI badge, BUILD_VERSION and service-worker cache are aligned to deboogs37.
+Tests: strict phase verification completed; see TEST-REPORT.txt.
+Result: PASS.
+Source of truth: yes for Phase 22.
