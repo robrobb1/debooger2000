@@ -1,25 +1,19 @@
-DEBOOGER2000 deboogs35 — PHASE 21 RELEASE INTEGRATION TEST REPORT
+DEBOOGER2000 deboogs37 — PHASE 22 TEST REPORT
 
 PASS
-- Final repository root inspection contains only the expected PWA files/directories; no ios directory, native bridge module, Share Extension or temporary planning/test file is present in production.
-- Final source inventory contains the proven app/audit/export/project/runtime/viewer/WebContainer/ZIP modules plus the intentional PWA Files modules for file launch, project-file browsing, Library tools, backup/restore, storage health and Recently Deleted.
-- Comparison with deboogs12 confirms the branch is a direct descendant of the proven engine line and retains the existing export/file-utils/package-utils/paste/WebContainer/ZIP foundations while adding the Files/PWA work.
-- Re-ran isolated regression harnesses for the waiting-worker update notice, Library tools modal, storage health, IndexedDB Recently Deleted storage and Recently Deleted UI; all passed.
-- Recently Deleted regression passed save → delete → deleted store → restore, missing-original-folder fallback to root and per-item delete forever.
-- IndexedDB v4 upgrade adds deleted-items without replacing the active library or folders stores.
-- PDF route/source inspection confirms a single binary .pdf resolves to file-document, preview materialization uses application/pdf, and the project-file browser allows PDF while keeping binary content search disabled.
-- Source/text/JSON direct preview remains escaped/non-executing; images and PDFs use browser-safe data URLs; unsupported binary files remain explicit non-preview cases.
-- Project-file search remains bounded to the first 256 KB of non-binary content plus full virtual paths.
-- Runtime routing remains truthful for compiled React/Vite, raw React/Vite, Electron, backend services and WebContainer capability limitations.
-- Viewer remains one authoritative ViewerController with Desktop 1280×800, Tablet 834×1112 and Mobile 390×844 presets plus Fit/zoom/drag/pinch/fullscreen/landscape/snapshot/Exit.
-- Backup/restore remains full-library ZIP based, validates before write, remaps restore ids/folders and commits restore data atomically without overwriting existing records.
-- PWA update model retains no install-time skipWaiting, cache-first navigation under the active worker and a waiting-worker update notice instead of mid-session shell mixing.
-- iPhone/iPad Home Screen touch icon remains a real opaque 180×180 PNG and is cached with the shell.
-- UI badge, BUILD_VERSION and service-worker cache align to deboogs35.
+- src/library-reaudit.js passed Node syntax validation.
+- Re-audit unit processed multiple saved items with injected audit/save callbacks and returned the expected processed/total counts.
+- Items with an error finding became auditStatus=issues; items without critical/error findings became auditStatus=clean.
+- auditScore was recalculated from the new findings.
+- savedAt and updatedAt were preserved exactly for every item in the unit test, preventing re-audit from reordering Recents.
+- Existing item ids, project metadata, folders and file content were preserved while only audit fields changed.
+- Progress callback fired in item order and the batch yields periodically without starting parallel writes.
+- Library refresh remains delegated to the existing Files renderer through the library-search input event.
+- index.html contains one Re-audit library control and loads src/library-reaudit.js once.
+- service-worker.js includes src/library-reaudit.js and uses cache debooger-shell-deboogs37.
+- UI badge, BUILD_VERSION and service-worker cache align to deboogs37.
+- Existing release regression results from deboogs35 remain applicable because no project/viewer/runtime/ZIP/storage schema path was replaced in this phase.
 - No native iOS/app bridge code was introduced.
 
-External limitations:
-- Live installed-PWA rendering, visual overflow, console, tap and restart lifecycle checks cannot run here because local Chromium access is administrator-blocked.
-- Exact inline PDF rendering depends on browser/device native PDF support.
-- Safari/iOS currently does not register installed PWAs as Web Share Targets; iPhone receiving uses the Shortcut/browser URL intake path.
-- WebContainer/npm execution and lazy snapshot-library loading depend on compatible runtime/network availability.
+External limitation:
+A very large real-device library still requires iPhone/iPad performance observation; the batch is deliberately sequential and yields periodically to reduce UI blocking.
