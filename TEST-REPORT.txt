@@ -1,17 +1,20 @@
-DEBOOGER2000 deboogs38 — PHASE 22 TEST REPORT
+DEBOOGER2000 deboogs39 — PHASE 23 INTEGRATION TEST REPORT
 
 PASS
-- src/app.js Recents branch now sorts by Number(b.savedAt || 0) - Number(a.savedAt || 0); updatedAt is not used in Recents ordering.
-- Regression fixture used an older item with a much newer updatedAt and a newer-saved item with an older updatedAt; the newer-saved item remained first.
-- Simulated re-audit/open activity changed only updatedAt and did not move the older item above a newer-saved item.
-- Simulated restore preserved the original savedAt and therefore preserved the original chronological position despite a newer updatedAt.
-- Duplicate semantics remain correct because duplicateLibraryItem assigns a new savedAt to the newly created copy.
-- Existing Files-view saved-desc and saved-asc sorting continues to use savedAt.
-- Git compare against clean deboogs36 confirms the app behavior change is limited to the Recents sort expression; the second app.js diff marker is only the end-of-file newline, not executable code.
-- Shared-text newline handling was re-read on both branches and is unchanged.
-- index.html badge, BUILD_VERSION and service-worker cache align to deboogs38.
-- No stale deboogs37 code was merged; deboogs38 is directly based on deboogs36.
-- No native iOS/app bridge code was introduced.
+- Git comparison confirms deboogs39 is a direct fast-forward descendant of clean deboogs38; before the reports, only index.html, service-worker.js and src/state.js changed, each only for the deboogs39 identifier/cache rotation.
+- Root-tree inspection found only BUILD-LOG.txt, TEST-REPORT.txt, assets, index.html, manifest.webmanifest, service-worker.js, src, styles.css and styles.
+- src-tree inspection found the expected PWA/browser modules and no native-intake, Swift, Xcode, iOS, App Group or native bridge production code.
+- assets contains the maskable SVG icon and the 180×180 Apple touch icon; both are referenced by the PWA/HTML shell as intended.
+- Component styles directory contains the expected audit.css, files.css and paste.css files; styles.css remains the shared viewer/base stylesheet.
+- service-worker APP_SHELL references the existing root assets/styles and current src modules, uses cache debooger-shell-deboogs39 and retains cached-active-shell navigation behavior.
+- src/pwa.js retains waiting-worker/update-ready detection without forcing a mid-session reload or skipWaiting update.
+- manifest.webmanifest parses structurally as a standalone scoped PWA manifest and retains launch_handler, capability-limited file_handlers, share_target and icon metadata.
+- index.html structural inspection shows one build badge, one Files/Recents control set, one project viewer, one Library tools modal and one Recently Deleted modal; no duplicate production layout was introduced in this phase.
+- Recents source inspection confirms ordering uses savedAt only, not updatedAt.
+- Existing Phase 21 browser-media and Phase 20 PDF/Recently Deleted implementations are unchanged from their PASS source commits.
+- Existing backup/restore, storage health, internal project search/opening, audit, ZIP, runtime router, viewer viewport/zoom/drag/pinch/fullscreen and Files management modules remain in the production tree.
+- UI badge, BUILD_VERSION and service-worker cache align to deboogs39.
 
-External limitation:
-Live installed-PWA visual/tap verification cannot run here because local Chromium access is administrator-blocked.
+External limitations:
+- Live installed-PWA rendering/console/tap verification cannot run in this environment because local Chromium access is administrator-blocked.
+- Browser-specific capabilities remain capability-dependent and are not represented as guaranteed on unsupported browsers/devices.
