@@ -1,15 +1,16 @@
 DEBOOGER2000 BUILD LOG
 
-Version: deboogs31
-Source: deboogs30
-Phase: Files App 17 — iPhone PWA Home Screen icon
+Version: deboogs32
+Source: deboogs31
+Phase: Files App 18 — cleaner Library tools menu
 Changes:
-- Added a dedicated opaque 180×180 PNG touch icon for iPhone/iPad Home Screen installation.
-- The icon reuses the existing DEBOOGER folder/code visual but uses a full opaque square background so iOS can apply its own icon mask cleanly.
-- Added rel=apple-touch-icon metadata in index.html without changing the existing standards-based manifest icon.
-- Added the touch icon to the versioned offline app shell so an installed PWA does not depend on a later network fetch for the asset.
-- Preserved the PWA-only architecture; no native iOS app, wrapper or Share Extension code was added.
-- UI, state and service-worker build identifiers are aligned to deboogs31.
+- Reduced the main Files action row from five controls to four by moving Backup library and Restore backup under one Library tools button.
+- Kept Import, Paste code and New folder directly visible because they are primary file actions.
+- Added one isolated library-tools controller for opening/closing the existing modal pattern; no second library implementation or patch layer was added.
+- Backup and restore keep their existing IDs and existing tested modules, so their storage/ZIP logic is unchanged.
+- Added Escape, backdrop close and focus behavior for the Library tools dialog.
+- Added library-tools.js to the offline app shell.
+- UI, state and service-worker build identifiers are aligned to deboogs32.
 Tests: strict phase verification completed; see TEST-REPORT.txt.
 Result: PASS.
-Source of truth: yes for Phase 17.
+Source of truth: yes for Phase 18.
