@@ -1,16 +1,16 @@
 DEBOOGER2000 BUILD LOG
 
-Version: deboogs32
-Source: deboogs31
-Phase: Files App 18 — cleaner Library tools menu
+Version: deboogs33
+Source: deboogs32
+Phase: Files App 19 — PWA storage health
 Changes:
-- Reduced the main Files action row from five controls to four by moving Backup library and Restore backup under one Library tools button.
-- Kept Import, Paste code and New folder directly visible because they are primary file actions.
-- Added one isolated library-tools controller for opening/closing the existing modal pattern; no second library implementation or patch layer was added.
-- Backup and restore keep their existing IDs and existing tested modules, so their storage/ZIP logic is unchanged.
-- Added Escape, backdrop close and focus behavior for the Library tools dialog.
-- Added library-tools.js to the offline app shell.
-- UI, state and service-worker build identifiers are aligned to deboogs32.
+- Added a capability-checked storage health line inside Library tools.
+- When the browser supports the Storage API, DEBOOGER reports whether persistent storage is active and shows local usage/quota.
+- When the browser does not expose those values, DEBOOGER states that storage details are unavailable instead of inventing numbers.
+- Storage health refreshes when Library tools opens and does not alter, delete or migrate library data.
+- Existing automatic persistent-storage requests on save remain unchanged.
+- Added storage-health.js to the offline app shell.
+- UI, state and service-worker build identifiers are aligned to deboogs33.
 Tests: strict phase verification completed; see TEST-REPORT.txt.
 Result: PASS.
-Source of truth: yes for Phase 18.
+Source of truth: yes for Phase 19.
