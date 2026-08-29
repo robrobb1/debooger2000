@@ -202,15 +202,6 @@ export async function deleteDeletedLibraryItem(id) {
   } finally { db.close(); }
 }
 
-export async function emptyDeletedLibraryItems() {
-  const db = await openDatabase();
-  try {
-    const tx = db.transaction(DELETED_STORE, 'readwrite');
-    tx.objectStore(DELETED_STORE).clear();
-    await commitTransaction(tx);
-  } finally { db.close(); }
-}
-
 export async function duplicateLibraryItem(id) {
   const original = await getLibraryItem(id);
   if (!original) throw new Error('The selected library item no longer exists.');
