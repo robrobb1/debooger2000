@@ -1,9 +1,10 @@
-const CACHE_NAME = 'debooger-shell-deboogs30';
+const CACHE_NAME = 'debooger-shell-deboogs31';
 const APP_SHELL = [
   './',
   './index.html',
   './manifest.webmanifest',
   './assets/debooger-icon.svg',
+  './assets/debooger-touch-180.png',
   './styles.css',
   './styles/files.css',
   './styles/paste.css',
