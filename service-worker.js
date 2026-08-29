@@ -1,4 +1,4 @@
-const CACHE_NAME = 'debooger-shell-deboogs31';
+const CACHE_NAME = 'debooger-shell-deboogs32';
 const APP_SHELL = [
   './',
   './index.html',
@@ -16,6 +16,7 @@ const APP_SHELL = [
   './src/file-utils.js',
   './src/library-backup.js',
   './src/library-restore.js',
+  './src/library-tools.js',
   './src/package-utils.js',
   './src/paste-engine.js',
   './src/preview-engine.js',
