@@ -1,19 +1,25 @@
-DEBOOGER2000 deboogs34 — PHASE 20 TEST REPORT
+DEBOOGER2000 deboogs35 — PHASE 21 RELEASE INTEGRATION TEST REPORT
 
 PASS
-- src/storage.js and src/recently-deleted.js passed Node syntax validation.
-- IndexedDB upgrade path creates deleted-items without replacing the existing library-items or folders stores.
-- Save → Delete moved the complete item out of the active library and into Recently Deleted with deletedAt and originalFolderId metadata.
-- Deleting the original folder and then restoring the item correctly returned it to On My DEBOOGER rather than referencing a missing folder.
-- Restore removed the item from Recently Deleted and returned it to the active library in the same transaction.
-- A restore id collision uses add() and aborts rather than silently overwriting an existing library record.
-- Delete forever removes only the selected Recently Deleted item.
-- No bulk empty-trash control or storage function remains in production.
-- Recently Deleted UI harness passed open, render, Restore, main-library refresh request and status behavior.
-- index.html contains unique Recently Deleted ids and one copy each of the existing backup/restore controls.
-- service-worker.js includes src/recently-deleted.js and uses cache debooger-shell-deboogs34.
-- UI badge, BUILD_VERSION and service-worker cache align to deboogs34.
+- Final repository root inspection contains only the expected PWA files/directories; no ios directory, native bridge module, Share Extension or temporary planning/test file is present in production.
+- Final source inventory contains the proven app/audit/export/project/runtime/viewer/WebContainer/ZIP modules plus the intentional PWA Files modules for file launch, project-file browsing, Library tools, backup/restore, storage health and Recently Deleted.
+- Comparison with deboogs12 confirms the branch is a direct descendant of the proven engine line and retains the existing export/file-utils/package-utils/paste/WebContainer/ZIP foundations while adding the Files/PWA work.
+- Re-ran isolated regression harnesses for the waiting-worker update notice, Library tools modal, storage health, IndexedDB Recently Deleted storage and Recently Deleted UI; all passed.
+- Recently Deleted regression passed save → delete → deleted store → restore, missing-original-folder fallback to root and per-item delete forever.
+- IndexedDB v4 upgrade adds deleted-items without replacing the active library or folders stores.
+- PDF route/source inspection confirms a single binary .pdf resolves to file-document, preview materialization uses application/pdf, and the project-file browser allows PDF while keeping binary content search disabled.
+- Source/text/JSON direct preview remains escaped/non-executing; images and PDFs use browser-safe data URLs; unsupported binary files remain explicit non-preview cases.
+- Project-file search remains bounded to the first 256 KB of non-binary content plus full virtual paths.
+- Runtime routing remains truthful for compiled React/Vite, raw React/Vite, Electron, backend services and WebContainer capability limitations.
+- Viewer remains one authoritative ViewerController with Desktop 1280×800, Tablet 834×1112 and Mobile 390×844 presets plus Fit/zoom/drag/pinch/fullscreen/landscape/snapshot/Exit.
+- Backup/restore remains full-library ZIP based, validates before write, remaps restore ids/folders and commits restore data atomically without overwriting existing records.
+- PWA update model retains no install-time skipWaiting, cache-first navigation under the active worker and a waiting-worker update notice instead of mid-session shell mixing.
+- iPhone/iPad Home Screen touch icon remains a real opaque 180×180 PNG and is cached with the shell.
+- UI badge, BUILD_VERSION and service-worker cache align to deboogs35.
 - No native iOS/app bridge code was introduced.
 
-External limitation:
-Live modal/tap behavior in an installed iPhone/iPad PWA still requires real-device verification; local Chromium rendering is administrator-blocked in this environment.
+External limitations:
+- Live installed-PWA rendering, visual overflow, console, tap and restart lifecycle checks cannot run here because local Chromium access is administrator-blocked.
+- Exact inline PDF rendering depends on browser/device native PDF support.
+- Safari/iOS currently does not register installed PWAs as Web Share Targets; iPhone receiving uses the Shortcut/browser URL intake path.
+- WebContainer/npm execution and lazy snapshot-library loading depend on compatible runtime/network availability.
