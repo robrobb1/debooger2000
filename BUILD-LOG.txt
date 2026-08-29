@@ -2,7 +2,7 @@ DEBOOGER2000 BUILD LOG
 
 Version: deboogs34
 Source: deboogs33
-Phase: Files App 20 — Recently Deleted safety
+Phase: Files App 20 — Recently Deleted safety + PDF preview
 Changes:
 - Upgraded IndexedDB to version 4 and added a dedicated deleted-items store.
 - Normal Delete now moves a saved item atomically from the active Files library into Recently Deleted instead of destroying it immediately.
@@ -10,9 +10,11 @@ Changes:
 - Restore is atomic and keeps the original item id/data/audit state; it returns to the original folder when that folder still exists, otherwise On My DEBOOGER.
 - Delete forever removes only the selected deleted item.
 - Deliberately removed the one-tap bulk empty-trash path so permanent deletion remains per-item and harder to trigger accidentally.
-- Existing folders, backup/restore, project viewer, ZIP/runtime routing and active-library storage remain authoritative and unchanged outside the deletion path.
-- Added recently-deleted.js to the offline app shell.
-- UI, state and service-worker build identifiers are aligned to deboogs34.
+- Added PDF as a browser-safe binary preview type. Single saved PDFs route directly to the existing viewer, and PDFs inside ZIP/projects can be opened from the Project files list.
+- PDF rendering uses browser-native application/pdf support with an explicit Open PDF fallback; no fake PDF parser or second viewer was added.
+- Existing folders, backup/restore, HTML/source/image preview, React/Vite, Electron/backend, ZIP/runtime routing and audit behavior remain authoritative.
+- recently-deleted.js is included in the offline app shell; UI, state and service-worker build identifiers align to deboogs34.
 Tests: strict phase verification completed; see TEST-REPORT.txt.
-Result: PASS.
+Result: PASS for all checks available in this environment.
+Known limitation: exact inline PDF rendering depends on the browser/device PDF capability; live installed-PWA rendering remains unavailable here because local Chromium access is administrator-blocked.
 Source of truth: yes for Phase 20.
