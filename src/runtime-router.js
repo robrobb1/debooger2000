@@ -4,6 +4,7 @@ import { readPackageJson } from './package-utils.js';
 
 const DIRECT_SOURCE_RE = /\.(?:css|js|mjs|cjs|jsx|ts|tsx|json|md|txt|xml|py|sh|vbs|yml|yaml|env|gitignore)$/i;
 const DIRECT_IMAGE_RE = /\.(?:svg|png|jpe?g|gif|webp|ico)$/i;
+const DIRECT_DOCUMENT_RE = /\.pdf$/i;
 
 function runnablePackage(pkg) {
   if (!pkg) return false;
@@ -18,6 +19,7 @@ function directFileRoute(files, keys) {
   const file = files?.[path];
   if (/\.html?$/i.test(path)) return null;
   if (DIRECT_IMAGE_RE.test(path)) return { mode: 'file-image', entry: path, runnable: true, reason: 'Showing the saved image directly in the viewer.' };
+  if (file?.binary && DIRECT_DOCUMENT_RE.test(path)) return { mode: 'file-document', entry: path, runnable: true, reason: 'Showing the saved PDF with the browser PDF viewer.' };
   if (!file?.binary && DIRECT_SOURCE_RE.test(path)) return { mode: 'file-source', entry: path, runnable: true, reason: 'Showing the saved source/text file without executing it.' };
   return null;
 }
