@@ -1,16 +1,14 @@
-DEBOOGER2000 deboogs30 — PHASE 16 TEST REPORT
+DEBOOGER2000 deboogs31 — PHASE 17 TEST REPORT
 
 PASS
-- src/pwa.js passed Node syntax validation.
-- Mocked HTTPS service-worker registration still used ./service-worker.js with scope ./.
-- An existing waiting service worker with an active controller triggers the update-ready path.
-- A newly installing worker triggers the notice only after it reaches installed state while an existing controller is present.
-- The idle status message becomes: “Update ready. Close and reopen DEBOOGER to apply safely.”
-- Focus restores the notice after the update-ready state has already been detected.
-- Existing error status is not overwritten by the update notice.
-- service-worker.js retains the deboogs29 atomic lifecycle behavior: no skipWaiting on install and cached active-shell navigation.
-- UI badge, BUILD_VERSION and service-worker cache now align to deboogs30.
+- assets/debooger-touch-180.png was generated from the DEBOOGER icon artwork and verified as a real 180×180 PNG.
+- Every pixel in the touch icon is opaque; there are no transparent corner pixels for iOS to render unpredictably.
+- Repository assets listing confirms the PNG exists on deboogs31 with the expected binary blob and file size.
+- index.html references ./assets/debooger-touch-180.png through rel=apple-touch-icon with sizes=180x180.
+- service-worker.js passed Node syntax validation and includes the touch icon in APP_SHELL.
+- The service-worker cache remains atomic/cache-first and is versioned as debooger-shell-deboogs31.
+- UI badge, BUILD_VERSION and service-worker cache align to deboogs31.
 - No native iOS/app bridge code was introduced.
 
 External limitation:
-A real installed-PWA update lifecycle across Safari/Chromium restart cannot be exercised here because local Chromium access is administrator-blocked. The update detection behavior was verified with an isolated service-worker registration/worker-state harness.
+The final Home Screen appearance still requires a real Safari Add to Home Screen install on iPhone/iPad; that device-level rendering cannot be exercised in this environment.
