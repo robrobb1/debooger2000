@@ -1,11 +1,11 @@
 import { state } from './state.js';
 import { buildStaticPreviewDocument } from './preview-engine.js';
 
-const IMAGE_FILE = /\.(?:svg|png|jpe?g|gif|webp|ico)$/i;
+const BROWSER_BINARY_FILE = /\.(?:svg|png|jpe?g|gif|webp|ico|pdf)$/i;
 const CONTENT_SEARCH_CHARS = 256 * 1024;
 
 export function projectFileCanPreview(path, file) {
-  return Boolean(file && (!file.binary || IMAGE_FILE.test(String(path || ''))));
+  return Boolean(file && (!file.binary || BROWSER_BINARY_FILE.test(String(path || ''))));
 }
 
 export function projectFileMatchesQuery(path, file, query) {
