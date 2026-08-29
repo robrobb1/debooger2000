@@ -1,20 +1,19 @@
 DEBOOGER2000 BUILD LOG
 
-Version: deboogs38
-Source: deboogs36
-Phase: Files App 22 — stable Recents ordering
+Version: deboogs39
+Source: deboogs38
+Phase: Files App 23 — PWA-only integration checkpoint
 Changes:
-- Fixed Recents at the source so it is ordered only by savedAt, the original save/import date.
-- Opening an older file no longer moves it toward the top of Recents.
-- Automatic re-auditing/runtime-error persistence no longer affects Recents order even though updatedAt may change.
-- Renaming or moving an existing file no longer affects Recents order.
-- Restoring an older item from Recently Deleted keeps its original savedAt and therefore returns to its original chronological position.
-- Duplicating an item still creates a new savedAt value, so the newly created copy correctly appears as a new item.
-- Normal Files-view Newest/Oldest sorting already uses savedAt and remains unchanged.
-- Existing media/PDF/image/source/HTML viewer behavior, ZIP/project handling, audit, backup/restore, Recently Deleted and PWA behavior remains unchanged.
-- Stale/diverged deboogs37 was deliberately not used; deboogs38 was created directly from clean deboogs36.
-- UI, state and service-worker build identifiers align to deboogs38.
-Tests: strict phase verification completed; see TEST-REPORT.txt.
+- Created a clean integration checkpoint directly from the corrected deboogs38 branch.
+- No feature implementation was replaced or redesigned in this phase; the purpose is to lock the current PWA-only feature set into one verified source branch.
+- Confirmed the production tree contains only the expected root files, assets, styles and browser/PWA modules; no native iOS directory, native bridge, App Group or Share Extension code is present.
+- Confirmed the versioned service-worker shell still contains the Files UI, audit, viewer, ZIP/project engine, file-launch, library tools, storage health, Recently Deleted, backup/restore and PWA modules.
+- Confirmed install/update behavior remains the safe waiting-worker model rather than mid-session skipWaiting replacement.
+- Confirmed the manifest remains standalone/scoped, retains browser share-target metadata and capability-limited desktop file-handler metadata.
+- Confirmed the corrected Recents implementation from deboogs38 remains based only on savedAt.
+- Confirmed PDF, browser-native audio/video, image, source/text, HTML, compiled React/Vite and truthful runtime routing remain present from the verified source branch.
+- UI, BUILD_VERSION and service-worker cache identifiers align to deboogs39.
+Tests: strict integration verification completed; see TEST-REPORT.txt.
 Result: PASS for all checks available in this environment.
-Known limitation: live installed-PWA visual verification remains unavailable because local Chromium access is administrator-blocked.
-Source of truth: yes for Phase 22.
+Known limitations remain truthful: Safari/iOS PWA inbound Web Share Target registration is not available; browser-native PDF/media codec support varies; WebContainer/npm needs a compatible runtime/network; live installed-PWA browser verification is administrator-blocked here.
+Source of truth: yes for Phase 23 integration checkpoint.
