@@ -6,8 +6,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <title>DEBOOGER2000 | Visual Project Viewer & Inspector — B045</title>
-  <!-- DEBOOGER2000 build B045: hide logo in viewer, real errors once, full-screen wide view. Previous build B044 preserved. -->
+  <title>DEBOOGER2000 | Visual Project Viewer & Inspector — B050</title>
+  <!-- DEBOOGER2000 build B050: phone starts at 1200, desktop full screen has a Back button. B045 kept. -->
   <!-- Bundled ZIP engine: JSZip 3.10.1 (MIT/GPLv3 dual licensed; upstream license notice retained below). -->
   <script data-vendor="jszip-3.10.1">
 /*!
@@ -12838,8 +12838,11 @@ module.exports = ZStream;
     body.panoramic-preview .stage-container { position: fixed !important; inset: 0 !important; width: 100dvw !important; height: 100dvh !important; padding: 0 !important; margin: 0 !important; overflow: hidden !important; background: #000 !important; }
     body.panoramic-preview .preview-sizer { width: 100% !important; height: 100% !important; }
     body.panoramic-preview .device-viewport.desktop-frame { width: var(--d2-preview-w, 1200px) !important; min-width: var(--d2-preview-w, 1200px) !important; max-width: none !important; height: var(--d2-preview-h, 800px) !important; max-height: none !important; transform-origin: 0 0; }
-    .panoramic-exit { display: none; position: fixed; z-index: 5000; top: 8px; right: 8px; height: 32px; padding: 0 10px; border: 0; border-radius: 8px; background: rgba(15,23,42,.72); color: #fff; font-weight: 700; }
+    .panoramic-exit { display: none; position: fixed; z-index: 6000; top: 12px; left: 12px; height: 40px; padding: 0 16px; border: 0; border-radius: 10px; background: #111; color: #fff; font-weight: 700; font-size: 15px; pointer-events: auto; cursor: pointer; }
     body.panoramic-preview .panoramic-exit { display: inline-flex; align-items: center; }
+    @media (pointer: fine) {
+      body.panoramic-preview .preview-gesture-layer { pointer-events: none; }
+    }
 
       @media (max-width: 900px) {
       .top-nav { display: none; }
@@ -13318,8 +13321,8 @@ module.exports = ZStream;
       <div class="header-actions" id="header-actions">
         <input type="file" id="file-input-folder" aria-label="Choose project folder" webkitdirectory directory multiple style="display:none;" />
       </div>
-      <button type="button" class="panoramic-exit" onclick="togglePanoramicPreview()">Back</button>
     </header>
+    <button type="button" class="panoramic-exit" onclick="togglePanoramicPreview()">Back</button>
 
     <!-- VIEW 1: HOME / INTAKE -->
     <section class="view-container active" id="view-home">
@@ -13915,7 +13918,7 @@ module.exports = ZStream;
           <select id="settings-default-preview" onchange="setDefaultPreview(this.value)"><option value="desktop">Desktop</option><option value="wide1200">1200</option><option value="mobile">Mobile</option></select>
         </div>
         <div style="font-size:12px;color:var(--text-muted);line-height:1.5;">
-          Build B045 is a standalone browser HTML app. It can preview HTML and React/Vite source in the browser, including public/ files, vite aliases, and common Vite imports. It still cannot run a real Vite server, npm install, or Electron main.
+          Build B050 is a standalone browser HTML app. It can preview HTML and React/Vite source in the browser, including public/ files, vite aliases, and common Vite imports. It still cannot run a real Vite server, npm install, or Electron main.
           Those actions need a separate desktop runtime that is not included in this build.
         </div>
       </div>
@@ -20856,12 +20859,14 @@ module.exports = ZStream;
     });
 
     function loadDefaultPreviewPreference() {
-      let preset = previewHostIsNarrow() ? 'wide1200' : 'desktop';
-      try {
-        const saved = window.localStorage?.getItem('debooger_default_preview');
-        if (saved === 'mobile' || saved === 'wide1200') preset = saved;
-        else if (saved === 'desktop' && !previewHostIsNarrow()) preset = 'desktop';
-      } catch (_) {}
+      const phone = window.matchMedia('(max-width: 900px)').matches || isIosClient();
+      let preset = phone ? 'wide1200' : 'desktop';
+      if (!phone) {
+        try {
+          const saved = window.localStorage?.getItem('debooger_default_preview');
+          if (saved === 'desktop' || saved === 'wide1200' || saved === 'mobile') preset = saved;
+        } catch (_) {}
+      }
       STATE.defaultPreview = preset;
       const select = document.getElementById('default-preview-select');
       if (select) select.value = preset;
@@ -26037,14 +26042,24 @@ Machine-readable correction markers are stored in .debooger/visual-issues.json. 
       const btn = document.getElementById('btn-panoramic');
       if (btn) btn.setAttribute('aria-pressed', String(on));
       if (on) {
+        STATE.previewBeforeWide = STATE.devicePreset || 'desktop';
         STATE.devicePreset = 'wide1200';
         STATE.previewUserScale = 1;
         STATE.previewPanX = 0;
         STATE.previewPanY = 0;
         document.querySelectorAll('.workspace-device-btn').forEach(b => b.classList.toggle('active', b.dataset.preset === 'wide1200'));
+      } else if (STATE.previewBeforeWide) {
+        setDeviceViewport(STATE.previewBeforeWide);
+        return;
       }
       applyPreviewLayout();
     }
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && document.body.classList.contains('panoramic-preview')) {
+        e.preventDefault();
+        togglePanoramicPreview();
+      }
+    });
 
     async function toggleViewerFullscreen() {
       const stage = document.getElementById('stage-box');
