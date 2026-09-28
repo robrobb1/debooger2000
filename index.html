@@ -6,8 +6,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <title>DEBOOGER2000 | Visual Project Viewer & Inspector — B050</title>
-  <!-- DEBOOGER2000 build B050: phone starts at 1200, desktop full screen has a Back button. B045 kept. -->
+  <title>DEBOOGER2000 | Visual Project Viewer & Inspector — B051</title>
+  <!-- DEBOOGER2000 build B051: hide fake repeated CSS notes, smaller problem cards. B050 kept. -->
   <!-- Bundled ZIP engine: JSZip 3.10.1 (MIT/GPLv3 dual licensed; upstream license notice retained below). -->
   <script data-vendor="jszip-3.10.1">
 /*!
@@ -12297,17 +12297,18 @@ module.exports = ZStream;
       background: #ffffff;
       box-shadow: var(--shadow-sm);
     }
-    .findings-container { padding: 8px 12px 14px; display: flex; flex-direction: column; gap: 8px; }
+    .findings-container { padding: 6px 10px 10px; display: flex; flex-direction: column; gap: 6px; }
     .finding-card {
       background: #ffffff;
       border: 1px solid var(--border-subtle);
-      border-radius: 8px;
-      padding: 10px 12px;
+      border-radius: 6px;
+      padding: 6px 8px;
     }
     .finding-card.finding-cleanup { border-color: #fdba74; background: #fff7ed; }
     .finding-card.finding-visual { border-color: #93c5fd; background: #eff6ff; }
-    .finding-title { font-weight: 700; font-size: 13px; color: var(--text-main); margin: 0 0 6px; line-height: 1.35; }
-    .finding-line { font-size: 12px; color: var(--text-main); line-height: 1.4; margin: 0 0 4px; }
+    .finding-title { font-weight: 700; font-size: 12px; color: var(--text-main); margin: 0 0 2px; line-height: 1.3; }
+    .finding-line { font-size: 11px; color: var(--text-main); line-height: 1.3; margin: 0; }
+    .finding-line + .finding-line { margin-top: 1px; }
     .finding-line span { color: var(--text-muted); }
     .finding-more { margin-top: 4px; font-size: 11px; color: var(--text-muted); background: none; border: 0; padding: 0; cursor: pointer; font-family: inherit; }
     .finding-evidence { display: none; margin-top: 8px; padding: 8px 10px; background: #f8fafc; border-radius: 6px; font-size: 11px; color: #475569; white-space: pre-wrap; }
@@ -13918,7 +13919,7 @@ module.exports = ZStream;
           <select id="settings-default-preview" onchange="setDefaultPreview(this.value)"><option value="desktop">Desktop</option><option value="wide1200">1200</option><option value="mobile">Mobile</option></select>
         </div>
         <div style="font-size:12px;color:var(--text-muted);line-height:1.5;">
-          Build B050 is a standalone browser HTML app. It can preview HTML and React/Vite source in the browser, including public/ files, vite aliases, and common Vite imports. It still cannot run a real Vite server, npm install, or Electron main.
+          Build B051 is a standalone browser HTML app. It can preview HTML and React/Vite source in the browser, including public/ files, vite aliases, and common Vite imports. It still cannot run a real Vite server, npm install, or Electron main.
           Those actions need a separate desktop runtime that is not included in this build.
         </div>
       </div>
@@ -23816,10 +23817,11 @@ ${issues.length ? issues.map(visualIssueToPrompt).join('\n\n---\n\n') : 'No visu
     function collectCleanupFindings(files) {
       const out = [];
       const add = (testId, title, file, evidence, fix) => {
-        if (out.length >= 48) return;
-        const key = testId + '|' + file + '|' + title + '|' + String(evidence || '').slice(0, 80);
-        if (out.some(x => x._key === key)) return;
-        out.push({ kind: 'cleanup', testId, category: 'Leftover', severity: 'medium', title, file, evidence: String(evidence || '').slice(0, 220), fix, desc: title, _key: key });
+        const key = String(title || '') + '|' + String(file || '');
+        const existing = out.find(x => x._key === key);
+        if (existing) { existing.count = (existing.count || 1) + 1; return; }
+        if (out.length >= 24) return;
+        out.push({ kind: 'cleanup', testId, category: 'Leftover', severity: 'medium', title, file, evidence: String(evidence || '').slice(0, 220), fix, desc: title, count: 1, _key: key });
       };
       const entries = Object.entries(files || {}).filter(([path, file]) => file && !file.binary && !/(^|\/)node_modules\//i.test(path));
       const keys = entries.map(([path]) => path);
@@ -23847,32 +23849,13 @@ ${issues.length ? issues.map(visualIssueToPrompt).join('\n\n---\n\n') : 'No visu
 
       entries.forEach(([path, file]) => {
         const text = String(file.content || '');
-        const isCss = /\.css$/i.test(path) || /\.html?$/i.test(path);
-        if (isCss) {
-          const imps = text.match(/!important/gi);
-          if (imps && imps.length) add('css-important', 'CSS uses !important', path, '!important × ' + imps.length, 'This often means a new edit is fighting an old rule. Delete the old rule instead of forcing it.');
-          const stripped = text.replace(/\/\*[\s\S]*?\*\//g, '');
-          if (/\b[^{}/]+\{\s*\}/.test(stripped)) add('css-empty', 'Empty CSS rule left behind', path, 'A { } block has nothing in it', 'Delete empty leftover rules.');
-          const ruleRe = /([^{}@][^{}]*)\{([^{}]+)\}/g;
-          const seen = new Map();
-          let rm;
-          while ((rm = ruleRe.exec(stripped))) {
-            const sel = rm[1].replace(/\s+/g, ' ').trim();
-            const body = rm[2];
-            if (!sel || sel.startsWith('@')) continue;
-            if (/display\s*:\s*flex/i.test(body) && /(?:^|;)\s*float\s*:\s*(?!none)\w+/i.test(body)) {
-              add('flex-float', 'Flex and float used together', path, sel.slice(0, 80), 'Float plus flex on the same block usually means an old layout was left in.');
-            }
-            const displays = [...body.matchAll(/display\s*:\s*([^;!]+)/gi)].map(x => x[1].trim().toLowerCase());
-            if (new Set(displays).size > 1) add('css-override', 'Same block sets display more than once', path, sel.slice(0, 50) + ' → ' + displays.join(' then '), 'The last display wins. Delete the old one.');
-            [...body.matchAll(/([a-z-]+)\s*:\s*([^;]+)/gi)].forEach(pm => {
-              const prop = pm[1].toLowerCase();
-              if (prop.startsWith('--') || prop === 'src') return;
-              const key = sel + '|' + prop;
-              if (seen.has(key)) add('css-override', 'Later CSS overrides an earlier rule', path, sel.slice(0, 70) + ' / ' + prop, 'You edited this more than once. Keep one rule.');
-              else seen.set(key, true);
-            });
-          }
+        const styleText = /\.html?$/i.test(path)
+          ? [...text.matchAll(/<style\b[^>]*>([\s\S]*?)<\/style>/gi)].map(m => m[1]).join('\n')
+          : (/\.css$/i.test(path) ? text : '');
+        if (styleText && styleText.length <= 200000) {
+          const stripped = styleText.replace(/\/\*[\s\S]*?\*\//g, '');
+          const empty = stripped.match(/(^|[{}\s;])([.#:]?[a-zA-Z][\w-]*)\s*\{\s*\}/);
+          if (empty) add('css-empty', 'Empty CSS rule left behind', path, empty[2] + ' { }', 'Delete this empty rule if you do not need it.');
           if (/\.css$/i.test(path)) {
             const classes = new Set();
             [...stripped.matchAll(/\.([A-Za-z_][\w-]{2,})/g)].forEach(m => {
