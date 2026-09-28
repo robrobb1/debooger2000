@@ -6,8 +6,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <title>DEBOOGER2000 | Visual Project Viewer & Inspector — B043</title>
-  <!-- DEBOOGER2000 build B043: phone stays one screen; top bar slides sideways. Previous build B042 preserved. -->
+  <title>DEBOOGER2000 | Visual Project Viewer & Inspector — B045</title>
+  <!-- DEBOOGER2000 build B045: hide logo in viewer, real errors once, full-screen wide view. Previous build B044 preserved. -->
   <!-- Bundled ZIP engine: JSZip 3.10.1 (MIT/GPLv3 dual licensed; upstream license notice retained below). -->
   <script data-vendor="jszip-3.10.1">
 /*!
@@ -11763,6 +11763,7 @@ module.exports = ZStream;
     }
     .topbar-logo .logo-text { font-size: 14px; line-height: 1.1; font-weight: 800; }
     .topbar-logo .logo-sub { display: none; }
+    body.workspace-view-active .topbar-logo { display: none; }
     .project-header-info { display: none !important; }
     .project-header-info:empty,
     .project-title:empty { display: none; }
@@ -11824,7 +11825,7 @@ module.exports = ZStream;
     .workspace-device-btn:hover,.workspace-icon-btn:hover,.workspace-menu-btn:hover { background:#f8fafc; color:var(--text-main); }
     .workspace-device-btn.active,.workspace-icon-btn.active,.workspace-menu-btn.active,.workspace-icon-btn.inspect-active { background:#e8eef5; color:#0f172a; }
     .workspace-icon-btn svg,.workspace-menu-btn svg { width:20px; height:20px; }
-    .workspace-zoom-value { display: none; }
+    .topbar-secondary { display: none !important; }
     .workspace-page-tabs { display:flex; align-items:center; min-width:0; max-width:220px; overflow-x:auto; gap:2px; }
     .workspace-page-tabs .page-tab-btn { height:40px; border:1px solid var(--border-subtle); background:#fff; color:var(--text-muted); padding:0 10px; font-size:11px; font-weight:700; cursor:pointer; border-radius:0; white-space:nowrap; }
     .workspace-page-tabs .page-tab-btn.active { background:#0f172a; color:#fff; border-color:#0f172a; }
@@ -12824,8 +12825,24 @@ module.exports = ZStream;
     .intel-chip-list { display:flex;flex-wrap:wrap;gap:6px; }
     .intel-chip { border:1px solid var(--border-subtle);border-radius:3px;padding:4px 8px;background:#fff;font-size:10px; }
     .mobile-nav-groups { display: none; }
+    body.panoramic-preview { overflow: hidden !important; background: #000 !important; }
+    body.panoramic-preview aside,
+    body.panoramic-preview header,
+    body.panoramic-preview .workspace-pane-left,
+    body.panoramic-preview .workspace-pane-right,
+    body.panoramic-preview .console-drawer,
+    body.panoramic-preview .visual-inspector-panel { display: none !important; }
+    body.panoramic-preview .main-viewport { margin: 0 !important; width: 100dvw !important; height: 100dvh !important; min-width: 0 !important; overflow: hidden !important; }
+    body.panoramic-preview #view-workspace { display: flex !important; width: 100dvw !important; height: 100dvh !important; }
+    body.panoramic-preview .workspace-pane-center { position: fixed !important; inset: 0 !important; width: 100dvw !important; height: 100dvh !important; z-index: 4000; }
+    body.panoramic-preview .stage-container { position: fixed !important; inset: 0 !important; width: 100dvw !important; height: 100dvh !important; padding: 0 !important; margin: 0 !important; overflow: hidden !important; background: #000 !important; }
+    body.panoramic-preview .preview-sizer { width: 100% !important; height: 100% !important; }
+    body.panoramic-preview .device-viewport.desktop-frame { width: var(--d2-preview-w, 1200px) !important; min-width: var(--d2-preview-w, 1200px) !important; max-width: none !important; height: var(--d2-preview-h, 800px) !important; max-height: none !important; transform-origin: 0 0; }
+    .panoramic-exit { display: none; position: fixed; z-index: 5000; top: 8px; right: 8px; height: 32px; padding: 0 10px; border: 0; border-radius: 8px; background: rgba(15,23,42,.72); color: #fff; font-weight: 700; }
+    body.panoramic-preview .panoramic-exit { display: inline-flex; align-items: center; }
 
-    @media (max-width: 900px) {
+      @media (max-width: 900px) {
+      .top-nav { display: none; }
       body {
         height: auto;
         min-height: 100vh;
@@ -12963,9 +12980,8 @@ module.exports = ZStream;
         height: var(--header-h) !important;
         min-height: var(--header-h) !important;
         flex-wrap: nowrap;
-        overflow-x: auto;
+        overflow-x: hidden;
         overflow-y: hidden;
-        -webkit-overflow-scrolling: touch;
       }
       body.workspace-view-active .topbar-brand,
       body.workspace-view-active .top-nav,
@@ -13242,7 +13258,7 @@ module.exports = ZStream;
           <button type="button" class="workspace-device-btn workspace-icon-btn" data-preset="wide1200" onclick="setDeviceViewport('wide1200', this)" title="1200 wide" aria-label="1200 wide"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h10"/></svg></button>
           <button type="button" class="workspace-device-btn workspace-icon-btn" data-preset="mobile" onclick="setDeviceViewport('mobile', this)" title="Phone size" aria-label="Phone size"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a1 1 0 001-1V4a1 1 0 00-1-1H8a1 1 0 00-1 1v16a1 1 0 001 1z"/></svg></button>
         </div>
-        <div class="workspace-control-group" aria-label="Preview zoom">
+        <div class="workspace-control-group topbar-secondary" aria-label="Preview zoom">
           <button type="button" class="workspace-icon-btn" onclick="adjustZoom(-0.1)" title="Zoom out" aria-label="Zoom out">−</button>
           <button type="button" class="workspace-icon-btn" onclick="adjustZoom(0.1)" title="Zoom in" aria-label="Zoom in">+</button>
         </div>
@@ -13251,14 +13267,15 @@ module.exports = ZStream;
           <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
         </button>
         <button class="top-trash-emoji project-only-action" id="btn-top-trash" type="button" onclick="clearLoadedProject()" title="Erase project and start over" aria-label="Erase project and start over">🗑️</button>
+        <button type="button" class="workspace-icon-btn" id="btn-panoramic" onclick="togglePanoramicPreview()" title="Full screen wide view" aria-label="Full screen wide view" aria-pressed="false">Wide</button>
         </div>
         <div class="workspace-extra-tools" aria-label="Other options">
-        <button type="button" class="workspace-icon-btn" id="btn-inspect-toolbar" onclick="toggleVisualInspectMode()" aria-pressed="false" title="Edit mode" aria-label="Edit mode"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg><span class="visual-issue-badge" id="visual-issue-badge">0</span></button>
-        <button type="button" class="workspace-icon-btn" id="btn-files-toolbar" onclick="toggleWorkspaceDrawer('files')" aria-pressed="false" title="Files" aria-label="Files"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/></svg></button>
-        <div class="results-score-wrap">
+        <button type="button" class="workspace-icon-btn topbar-secondary" id="btn-inspect-toolbar" onclick="toggleVisualInspectMode()" aria-pressed="false" title="Edit mode" aria-label="Edit mode"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg><span class="visual-issue-badge" id="visual-issue-badge">0</span></button>
+        <button type="button" class="workspace-icon-btn topbar-secondary" id="btn-files-toolbar" onclick="toggleWorkspaceDrawer('files')" aria-pressed="false" title="Files" aria-label="Files"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/></svg></button>
+        <div class="results-score-wrap topbar-secondary">
           <button type="button" class="workspace-icon-btn" id="btn-results-toolbar" onclick="toggleWorkspaceDrawer('diagnostics')" aria-pressed="false" title="Diagnostics" aria-label="Diagnostics"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg><span class="results-error-badge" id="results-error-badge"></span><span class="results-score-badge" id="results-score-badge" title="Test score"></span></button>
         </div>
-        <div class="workspace-menu-wrap">
+        <div class="workspace-menu-wrap topbar-secondary">
           <button type="button" class="workspace-icon-btn" id="btn-ai-repair-menu" onclick="toggleWorkspacePopover('ai-repair-menu')" aria-expanded="false" title="Saved fixes" aria-label="Saved fixes"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg></button>
           <div class="workspace-popover" id="ai-repair-menu" role="menu" aria-label="AI repair handoff">
             <div class="workspace-popover-title">Saved files</div>
@@ -13271,12 +13288,20 @@ module.exports = ZStream;
             <div class="workspace-correction-list" id="workspace-correction-list"><div style="padding:7px 8px;font-size:10px;color:var(--text-muted);">No corrections saved.</div></div>
           </div>
         </div>
-        <button type="button" class="workspace-icon-btn" id="btn-viewer-fullscreen" onclick="toggleViewerFullscreen()" title="Show only the previewed page" aria-label="Page full screen">
+        <button type="button" class="workspace-icon-btn topbar-secondary" id="btn-viewer-fullscreen" onclick="toggleViewerFullscreen()" title="Show only the previewed page" aria-label="Page full screen">
           <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4h4M16 4h4v4M20 16v4h-4M8 20H4v-4"/></svg>
         </button>
         <div class="workspace-menu-wrap">
           <button type="button" class="workspace-icon-btn" id="btn-workspace-more" onclick="toggleWorkspacePopover('workspace-more-menu')" aria-expanded="false" title="More preview tools" aria-label="More preview tools">•••</button>
           <div class="workspace-popover" id="workspace-more-menu" role="menu" aria-label="More preview tools">
+            <button type="button" onclick="adjustZoom(-0.1)"><span>Zoom out</span></button>
+            <button type="button" onclick="adjustZoom(0.1)"><span>Zoom in</span></button>
+            <button type="button" onclick="toggleVisualInspectMode()"><span>Edit mode</span></button>
+            <button type="button" onclick="toggleWorkspaceDrawer('files')"><span>Files</span></button>
+            <button type="button" onclick="toggleWorkspaceDrawer('diagnostics')"><span>Diagnostics</span></button>
+            <button type="button" onclick="toggleViewerFullscreen()"><span>Full page</span></button>
+            <button type="button" onclick="toggleWorkspacePopover('ai-repair-menu')"><span>Saved fixes</span></button>
+            <div class="workspace-popover-sep"></div>
             <button type="button" id="btn-console-toolbar" onclick="toggleRuntimeConsole()" aria-expanded="false"><span>Console</span><span class="runtime-error-badge" id="runtime-error-badge">0</span></button>
             <button type="button" onclick="fitViewportToStage()"><span>Fit to Screen</span></button>
             <label><span>Default Preview</span><select id="default-preview-select" onchange="setDefaultPreview(this.value)"><option value="desktop">Desktop</option><option value="wide1200">1200</option><option value="mobile">Mobile</option></select></label>
@@ -13293,6 +13318,7 @@ module.exports = ZStream;
       <div class="header-actions" id="header-actions">
         <input type="file" id="file-input-folder" aria-label="Choose project folder" webkitdirectory directory multiple style="display:none;" />
       </div>
+      <button type="button" class="panoramic-exit" onclick="togglePanoramicPreview()">Back</button>
     </header>
 
     <!-- VIEW 1: HOME / INTAKE -->
@@ -13889,7 +13915,7 @@ module.exports = ZStream;
           <select id="settings-default-preview" onchange="setDefaultPreview(this.value)"><option value="desktop">Desktop</option><option value="wide1200">1200</option><option value="mobile">Mobile</option></select>
         </div>
         <div style="font-size:12px;color:var(--text-muted);line-height:1.5;">
-          Build B043 is a standalone browser HTML app. It can preview HTML and React/Vite source in the browser, including public/ files, vite aliases, and common Vite imports. It still cannot run a real Vite server, npm install, or Electron main.
+          Build B045 is a standalone browser HTML app. It can preview HTML and React/Vite source in the browser, including public/ files, vite aliases, and common Vite imports. It still cannot run a real Vite server, npm install, or Electron main.
           Those actions need a separate desktop runtime that is not included in this build.
         </div>
       </div>
@@ -20600,7 +20626,7 @@ module.exports = ZStream;
         sizer.style.width = '100%';
         sizer.style.height = '100%';
       }
-      if (layer) layer.hidden = !(isIosClient() || window.matchMedia('(pointer: coarse)').matches);
+      if (layer) layer.hidden = !(isIosClient() || window.matchMedia('(pointer: coarse)').matches || document.body.classList.contains('panoramic-preview'));
       const zoomFitLabel = document.getElementById('zoom-indicator');
       if (zoomFitLabel) zoomFitLabel.textContent = Math.round(STATE.previewUserScale * 100) + '%';
     }
@@ -23045,8 +23071,10 @@ setTimeout(function(){if(document.documentElement.getAttribute("data-d2-mounted"
           scheduleVerifiedAuditRefresh();
           return;
         }
-        const key = `${item.kind}|${item.message}|${item.file}|${item.line}|${item.col}`;
-        if (!STATE.runtimeErrors.some(x => `${x.kind}|${x.message}|${x.file}|${x.line}|${x.col}` === key)) STATE.runtimeErrors.push(item);
+        const key = String(item.message || '');
+        const existing = STATE.runtimeErrors.find(x => x.message === key);
+        if (existing) existing.count = (existing.count || 1) + 1;
+        else STATE.runtimeErrors.push({ ...item, count: 1 });
         addConsoleLog('err', `[${item.kind === 'promise' ? 'PROMISE_REJECT' : 'RUNTIME_ERROR'}] ${item.message}${item.line ? ` (Line ${item.line})` : ''}`);
         updateRuntimeConsoleBadge();
         scheduleVerifiedAuditRefresh();
@@ -23964,9 +23992,11 @@ ${issues.length ? issues.map(visualIssueToPrompt).join('\n\n---\n\n') : 'No visu
       };
       const addFinding = (testId, categoryKey, finding) => {
         mark(testId,'error',`${finding.file || 'project'}: ${finding.title}`);
+        const key = String(finding.title || 'Issue');
+        const existing = findings.find(x => x._key === key);
+        if (existing) { existing.count = (existing.count || 1) + 1; return; }
         categories[categoryKey] = (categories[categoryKey] || 0) + 1;
-        const key = `${testId}|${finding.title}|${finding.file || ''}|${finding.evidence || ''}`;
-        if (!findings.some(x => x._key === key)) findings.push({ ...finding, testId, _key:key });
+        findings.push({ ...finding, testId, count: 1, _key:key });
       };
       const notVerified = (id,detail) => mark(id,'not-verified',detail);
 
@@ -23980,7 +24010,11 @@ ${issues.length ? issues.map(visualIssueToPrompt).join('\n\n---\n\n') : 'No visu
       // JSON syntax: parse every JSON source exactly.
       textEntries.filter(([path]) => /\.json$/i.test(path)).forEach(([path,file]) => {
         try { JSON.parse(getVirtualFileText(file)); }
-        catch (err) { addFinding('json-syntax','project',{ id:`json-${findings.length}`, category:'Project', severity:'high', title:'Invalid JSON syntax', file:path, desc:'A JSON parser rejected this file.', evidence:String(err.message || err), fix:'Correct the JSON syntax at the reported location.' }); }
+        catch (err) {
+          const stripped = getVirtualFileText(file).replace(/\/\*[\s\S]*?\*\//g,'').replace(/(^|[^:])\/\/.*$/gm,'$1');
+          try { JSON.parse(stripped); }
+          catch (_) { addFinding('json-syntax','project',{ id:`json-${findings.length}`, category:'Project', severity:'high', title:'Invalid JSON syntax', file:path, desc:'A JSON parser rejected this file.', evidence:String(err.message || err), fix:'Correct the JSON syntax at the reported location.' }); }
+        }
       });
 
       // package.json direct local entry contracts.
@@ -24016,9 +24050,9 @@ ${issues.length ? issues.map(visualIssueToPrompt).join('\n\n---\n\n') : 'No visu
         }
       };
 
-      textEntries.filter(([path]) => /\.(?:js|mjs|cjs)$/i.test(path)).forEach(([path,file]) => {
+      textEntries.filter(([path]) => /\.(?:js|mjs|cjs)$/i.test(path) && !/(^|\/)(?:node_modules|dist|build|out|\.vercel|assets)\//i.test(path)).forEach(([path,file]) => {
         const code = getVirtualFileText(file);
-        const sourceType = /\.cjs$/i.test(path) ? 'script' : (/\.mjs$/i.test(path) || /(^|\n)\s*(?:import|export)\b/m.test(code) ? 'module' : 'script');
+        const sourceType = /\.cjs$/i.test(path) ? 'script' : (/\.mjs$/i.test(path) || /\b(?:import|export)\b/.test(code) ? 'module' : 'script');
         parseUnit(path,code,sourceType,'js-syntax');
       });
       if (textEntries.some(([path]) => /\.(?:jsx|ts|tsx)$/i.test(path))) notVerified('js-syntax','JSX/TypeScript syntax is not claimed as verified by the embedded plain-JavaScript parser.');
@@ -24041,6 +24075,7 @@ ${issues.length ? issues.map(visualIssueToPrompt).join('\n\n---\n\n') : 'No visu
           doc.querySelectorAll(selector).forEach(el => {
             const ref = (el.getAttribute(attr)||'').trim();
             if (!ref || externalBase || /^(?:https?:|data:|blob:|about:|mailto:|tel:|javascript:|#|\/\/)/i.test(ref)) return;
+            if (/\.(?:webmanifest|ico)$/i.test(ref) || /manifest|favicon|apple-touch-icon/i.test(ref)) return;
             if (!findVirtualFile(ref,fromPath)) addFinding('html-local-resource','html',{ id:`html-ref-${findings.length}`, category:'HTML', severity:'high', title:'Local HTML resource is missing', file:path, desc:'The rendered document explicitly references a local project file that is not present.', evidence:`${attr}="${ref}"`, fix:'Restore the exact referenced file or correct the path.' });
           });
         });
@@ -24157,6 +24192,8 @@ ${issues.length ? issues.map(visualIssueToPrompt).join('\n\n---\n\n') : 'No visu
             return;
           }
           splitCssDeclarations(rule.body).forEach(rawDecl => {
+            rawDecl = String(rawDecl || '').replace(/\/\*[\s\S]*?\*\//g,'').trim();
+            if (!rawDecl) return;
             const colon = rawDecl.indexOf(':');
             if (colon < 1) {
               addFinding('css-declaration-parse','css',{ id:`css-decl-${findings.length}`, category:'CSS', severity:'high', title:'CSS declaration has no property/value separator', file:label, desc:'A complete declaration inside a verified style rule has no colon separator and cannot be parsed as CSS.', evidence:`Line ${rule.line}: ${rawDecl}`, fix:'Correct the declaration syntax.' });
@@ -24164,7 +24201,7 @@ ${issues.length ? issues.map(visualIssueToPrompt).join('\n\n---\n\n') : 'No visu
             }
             const prop = rawDecl.slice(0,colon).trim();
             let value = rawDecl.slice(colon+1).trim();
-            if (!prop || !value || prop.startsWith('--')) return;
+            if (!prop || !value || prop.startsWith('--') || prop.startsWith('-') || prop.includes('/*')) return;
             value = value.replace(new RegExp('\\s*!' + 'important\\s*$', 'i'),'').trim();
             const probe = document.createElement('div').style;
             try { probe.setProperty(prop,value); }
@@ -24344,7 +24381,7 @@ ${issues.length ? issues.map(visualIssueToPrompt).join('\n\n---\n\n') : 'No visu
       card.className = 'finding-card' + (tone === 'cleanup' ? ' finding-cleanup' : tone === 'visual' ? ' finding-visual' : '');
       const file = String(f.file || '').split('/').pop() || 'this project';
       card.innerHTML = `
-        <div class="finding-title">${escapeHtml(f.title || 'Something looks leftover')}</div>
+        <div class="finding-title">${escapeHtml(f.title || 'Something looks leftover')}${Number(f.count) > 1 ? ' (' + Number(f.count) + ')' : ''}</div>
         <p class="finding-line"><span>File:</span> ${escapeHtml(file)}</p>
         <p class="finding-line"><span>Fix:</span> ${escapeHtml(f.fix || 'Clean this up if you do not need it.')}</p>
         <button type="button" class="finding-more" onclick="toggleFindingTechnical(event,this)">Show proof</button>
@@ -25992,6 +26029,21 @@ Machine-readable correction markers are stored in .debooger/visual-issues.json. 
     function refreshSandboxViewer() {
       buildSandboxLiveViewer();
       showToast('Sandbox refreshed.');
+    }
+
+    function togglePanoramicPreview() {
+      const on = !document.body.classList.contains('panoramic-preview');
+      document.body.classList.toggle('panoramic-preview', on);
+      const btn = document.getElementById('btn-panoramic');
+      if (btn) btn.setAttribute('aria-pressed', String(on));
+      if (on) {
+        STATE.devicePreset = 'wide1200';
+        STATE.previewUserScale = 1;
+        STATE.previewPanX = 0;
+        STATE.previewPanY = 0;
+        document.querySelectorAll('.workspace-device-btn').forEach(b => b.classList.toggle('active', b.dataset.preset === 'wide1200'));
+      }
+      applyPreviewLayout();
     }
 
     async function toggleViewerFullscreen() {
