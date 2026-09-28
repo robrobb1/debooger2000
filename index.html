@@ -6,8 +6,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <title>DEBOOGER2000 | Visual Project Viewer & Inspector — B045</title>
-  <!-- DEBOOGER2000 build B045: hide logo in viewer, real errors once, full-screen wide view. Previous build B044 preserved. -->
+  <title>DEBOOGER2000 | Visual Project Viewer & Inspector — B046</title>
+  <!-- DEBOOGER2000 build B046: green home page, test results as a phone screen. Previous build B045 preserved. -->
   <!-- Bundled ZIP engine: JSZip 3.10.1 (MIT/GPLv3 dual licensed; upstream license notice retained below). -->
   <script data-vendor="jszip-3.10.1">
 /*!
@@ -11590,17 +11590,17 @@ module.exports = ZStream;
   </script>
   <style>
     :root {
-      --bg-canvas: #f8fafc;
+      --bg-canvas: #f5f7f5;
       --bg-card: #ffffff;
-      --border-subtle: #e2e8f0;
-      --border-strong: #cbd5e1;
-      --text-main: #0f172a;
-      --text-muted: #64748b;
-      --text-subtle: #94a3b8;
-      --primary: #059669;
-      --primary-dark: #047857;
-      --primary-light: #ecfdf5;
-      --primary-border: #a7f3d0;
+      --border-subtle: #dde3dd;
+      --border-strong: #c9d4c9;
+      --text-main: #23272b;
+      --text-muted: #5f6962;
+      --text-subtle: #8a9490;
+      --primary: #4bb229;
+      --primary-dark: #3a941f;
+      --primary-light: #eff8ec;
+      --primary-border: #c9e4bf;
       --dark-accent: #0f172a;
       --danger: #ef4444;
       --danger-light: #fef2f2;
@@ -11889,8 +11889,17 @@ module.exports = ZStream;
       margin: 20px auto;
       text-align: center;
     }
-    .hero-headline { font-size: 32px; font-weight: 800; letter-spacing: -0.04em; color: var(--text-main); margin-bottom: 8px; }
+    .home-eyebrow { font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--primary-dark); margin-bottom: 8px; }
+    .hero-headline { font-size: 34px; font-weight: 700; letter-spacing: -0.04em; color: var(--text-main); margin-bottom: 16px; line-height: 1.15; }
     .hero-tagline { font-size: 15px; color: var(--text-muted); max-width: 600px; margin: 0 auto 30px; }
+    .home-features { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; max-width: 720px; margin: 0 auto 22px; text-align: left; }
+    .home-features div { background: #fff; border: 1px solid var(--border-subtle); border-radius: 12px; padding: 12px 14px; }
+    .home-features strong { display: block; font-size: 14px; color: var(--text-main); }
+    .home-features span { display: block; margin-top: 4px; font-size: 12px; color: var(--text-muted); }
+    @media (max-width: 700px) {
+      .hero-headline { font-size: 26px; }
+      .home-features { grid-template-columns: 1fr; }
+    }
     
     .dropzone-box {
       background: #ffffff;
@@ -11980,7 +11989,7 @@ module.exports = ZStream;
       min-width: 0;
       display: flex;
       flex-direction: column;
-      background: #f1f5f9;
+      background: #f5f7f5;
       overflow: hidden;
       position: relative;
     }
@@ -12838,6 +12847,18 @@ module.exports = ZStream;
     body.panoramic-preview .stage-container { position: fixed !important; inset: 0 !important; width: 100dvw !important; height: 100dvh !important; padding: 0 !important; margin: 0 !important; overflow: hidden !important; background: #000 !important; }
     body.panoramic-preview .preview-sizer { width: 100% !important; height: 100% !important; }
     body.panoramic-preview .device-viewport.desktop-frame { width: var(--d2-preview-w, 1200px) !important; min-width: var(--d2-preview-w, 1200px) !important; max-width: none !important; height: var(--d2-preview-h, 800px) !important; max-height: none !important; transform-origin: 0 0; }
+    .results-back-btn { display: none; }
+    .more-results-dot { display: none; position: absolute; top: 1px; right: 1px; margin: 0; min-width: 14px; height: 14px; padding: 0 3px; border-radius: 999px; background: #b94238; color: #fff; font-size: 9px; font-weight: 800; line-height: 14px; }
+    .more-results-dot.has-errors { display: inline-block; }
+    @media (max-width: 900px) {
+      .workspace-view-settings { padding-right: 0; }
+      body.workspace-view-active .header-actions { width: 0; min-width: 0; padding: 0; margin: 0; overflow: hidden; }
+      .workspace-pane-right.drawer-open {
+        position: fixed; inset: 0; width: 100vw; max-width: none; height: 100dvh; z-index: 4500;
+        overflow: auto; background: var(--bg-canvas); transform: none; opacity: 1; pointer-events: auto;
+      }
+      .workspace-pane-right.drawer-open .results-back-btn { display: inline-flex; }
+    }
     .panoramic-exit { display: none; position: fixed; z-index: 5000; top: 8px; right: 8px; height: 32px; padding: 0 10px; border: 0; border-radius: 8px; background: rgba(15,23,42,.72); color: #fff; font-weight: 700; }
     body.panoramic-preview .panoramic-exit { display: inline-flex; align-items: center; }
 
@@ -13292,13 +13313,13 @@ module.exports = ZStream;
           <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4h4M16 4h4v4M20 16v4h-4M8 20H4v-4"/></svg>
         </button>
         <div class="workspace-menu-wrap">
-          <button type="button" class="workspace-icon-btn" id="btn-workspace-more" onclick="toggleWorkspacePopover('workspace-more-menu')" aria-expanded="false" title="More preview tools" aria-label="More preview tools">•••</button>
+          <button type="button" class="workspace-icon-btn" id="btn-workspace-more" onclick="toggleWorkspacePopover('workspace-more-menu')" aria-expanded="false" title="More preview tools" aria-label="More preview tools">•••<span class="more-results-dot" id="more-results-dot"></span></button>
           <div class="workspace-popover" id="workspace-more-menu" role="menu" aria-label="More preview tools">
+            <button type="button" onclick="closeWorkspacePopovers(); toggleWorkspaceDrawer('diagnostics')"><span>Test results</span><span id="menu-results-count"></span></button>
             <button type="button" onclick="adjustZoom(-0.1)"><span>Zoom out</span></button>
             <button type="button" onclick="adjustZoom(0.1)"><span>Zoom in</span></button>
             <button type="button" onclick="toggleVisualInspectMode()"><span>Edit mode</span></button>
             <button type="button" onclick="toggleWorkspaceDrawer('files')"><span>Files</span></button>
-            <button type="button" onclick="toggleWorkspaceDrawer('diagnostics')"><span>Diagnostics</span></button>
             <button type="button" onclick="toggleViewerFullscreen()"><span>Full page</span></button>
             <button type="button" onclick="toggleWorkspacePopover('ai-repair-menu')"><span>Saved fixes</span></button>
             <div class="workspace-popover-sep"></div>
@@ -13324,12 +13345,19 @@ module.exports = ZStream;
     <!-- VIEW 1: HOME / INTAKE -->
     <section class="view-container active" id="view-home">
       <div class="hero-card">
+        <div class="home-eyebrow">Project viewer + debugger</div>
+        <h1 class="hero-headline">Open a project. See it, test it, understand it.</h1>
+        <div class="home-features">
+          <div><strong>Preview it</strong><span>See the real page on this screen.</span></div>
+          <div><strong>Test it</strong><span>Open test results from the ••• menu.</span></div>
+          <div><strong>Understand it</strong><span>Files, checks, and one score.</span></div>
+        </div>
         <div class="dropzone-box" id="main-dropzone">
           <input type="file" id="file-input-single" class="dropzone-native-picker" aria-label="Choose project file or ZIP" multiple accept=".html,.htm,.zip,.css,.js,.jsx,.ts,.tsx,.json" />
           <div class="drop-icon-wrap">
             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
           </div>
-          <h3 style="font-size: 18px; font-weight: 700; margin-bottom: 6px;">Drag & Drop Project ZIP, HTML, or Folder here</h3>
+          <h3 style="font-size: 18px; font-weight: 700; margin-bottom: 6px;">Tap to choose your project</h3>
           <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 20px;">One ZIP, many ZIPs, one HTML, React+Vite source, or a folder</p>
           <div class="dropzone-actions" id="dropzone-actions">
             <button type="button" class="btn btn-primary" id="dropzone-browse-btn">Browse Files / ZIP</button>
@@ -13441,7 +13469,8 @@ module.exports = ZStream;
       <!-- Right: Diagnostics workspace -->
       <div class="workspace-pane-right">
         <div class="pane-header">
-          <span>What's wrong</span>
+          <button type="button" class="btn btn-subtle btn-sm results-back-btn" onclick="toggleWorkspaceDrawer('diagnostics', false)">Back</button>
+          <span>Test results</span>
           <button class="btn btn-subtle btn-sm" onclick="reRunAudit()">Check again</button>
         </div>
         <div id="upload-debug-box" class="upload-debug-box" hidden></div>
@@ -13915,7 +13944,7 @@ module.exports = ZStream;
           <select id="settings-default-preview" onchange="setDefaultPreview(this.value)"><option value="desktop">Desktop</option><option value="wide1200">1200</option><option value="mobile">Mobile</option></select>
         </div>
         <div style="font-size:12px;color:var(--text-muted);line-height:1.5;">
-          Build B045 is a standalone browser HTML app. It can preview HTML and React/Vite source in the browser, including public/ files, vite aliases, and common Vite imports. It still cannot run a real Vite server, npm install, or Electron main.
+          Build B046 is a standalone browser HTML app. It can preview HTML and React/Vite source in the browser, including public/ files, vite aliases, and common Vite imports. It still cannot run a real Vite server, npm install, or Electron main.
           Those actions need a separate desktop runtime that is not included in this build.
         </div>
       </div>
@@ -23783,6 +23812,14 @@ ${issues.length ? issues.map(visualIssueToPrompt).join('\n\n---\n\n') : 'No visu
         resultsBadge.textContent = String(report.findings.length);
         resultsBadge.classList.toggle('has-errors', report.findings.length > 0);
         resultsBadge.title = report.findings.length ? report.findings.length + ' broken items' : 'No broken items';
+      }
+      const menuCount = document.getElementById('menu-results-count');
+      const moreDot = document.getElementById('more-results-dot');
+      const problemCount = report.findings.length;
+      if (menuCount) menuCount.textContent = problemCount ? String(problemCount) : '';
+      if (moreDot) {
+        moreDot.textContent = problemCount ? String(problemCount) : '';
+        moreDot.classList.toggle('has-errors', problemCount > 0);
       }
       const cleanupBadge = document.getElementById('results-cleanup-badge');
       if (cleanupBadge) {
