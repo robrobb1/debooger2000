@@ -6,8 +6,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <title>DEBOOGER2000 | Visual Project Viewer & Inspector — B046</title>
-  <!-- DEBOOGER2000 build B046: green home page, test results as a phone screen. Previous build B045 preserved. -->
+  <title>DEBOOGER2000 | Visual Project Viewer & Inspector — B047</title>
+  <!-- DEBOOGER2000 build B047: big HTML files no longer freeze the page at 8%. Previous build B046 preserved. -->
   <!-- Bundled ZIP engine: JSZip 3.10.1 (MIT/GPLv3 dual licensed; upstream license notice retained below). -->
   <script data-vendor="jszip-3.10.1">
 /*!
@@ -13944,7 +13944,7 @@ module.exports = ZStream;
           <select id="settings-default-preview" onchange="setDefaultPreview(this.value)"><option value="desktop">Desktop</option><option value="wide1200">1200</option><option value="mobile">Mobile</option></select>
         </div>
         <div style="font-size:12px;color:var(--text-muted);line-height:1.5;">
-          Build B046 is a standalone browser HTML app. It can preview HTML and React/Vite source in the browser, including public/ files, vite aliases, and common Vite imports. It still cannot run a real Vite server, npm install, or Electron main.
+          Build B047 is a standalone browser HTML app. It can preview HTML and React/Vite source in the browser, including public/ files, vite aliases, and common Vite imports. It still cannot run a real Vite server, npm install, or Electron main.
           Those actions need a separate desktop runtime that is not included in this build.
         </div>
       </div>
@@ -21586,6 +21586,33 @@ module.exports = ZStream;
       return text.length > 40 || /<(?:main|aside|section|form|table|header|nav)\b/i.test(inner);
     }
 
+    function embeddedFullPageHtml(files) {
+      const keys = Object.keys(files || {});
+      for (const key of keys) {
+        if (!/\.(jsx|tsx|js|ts|mjs)$/i.test(key)) continue;
+        const text = getVirtualFileText(files[key]);
+        if (!text || text.length > 200000) continue;
+        const found = text.match(/['"]([^'"]+\.html)(?:\?[^'"]*)?['"]/i);
+        if (!found) continue;
+        const hit = resolveReactLocal(found[1], key, files, projectPathAliases(files, ''));
+        if (!hit || hit.file?.binary) continue;
+        const html = getVirtualFileText(hit.file);
+        if (html.length > 80000 && /<body[\s>]/i.test(html) && /<(?:header|main|section|button)\b/i.test(html)) return hit.path;
+      }
+      return '';
+    }
+
+    function htmlAuditSource(source) {
+      const text = String(source || '');
+      if (text.length < 250000) return text;
+      return text.replace(/<script\b([^>]*)>[\s\S]*?<\/script>/gi, (match, attrs) => {
+        const type = ((String(attrs).match(/\btype\s*=\s*["']([^"']+)["']/i) || [])[1] || '').toLowerCase();
+        const isJs = !type || type === 'module' || /^(?:text|application)\/(?:javascript|ecmascript)$/.test(type);
+        if (isJs && match.length <= 400000) return match;
+        return isJs ? `<script${attrs}><\/script>` : '';
+      });
+    }
+
     function realHtmlPreviewTarget(files) {
       const keys = Object.keys(files || {});
       const htmlKey = keys.find(k => /(^|\/)index\.html?$/i.test(k) && !/(^|\/)(?:dist|build|out)\//i.test(k));
@@ -21672,11 +21699,15 @@ module.exports = ZStream;
       const readyPreview = findReadyWebPreviewEntry();
       const deskPreview = realHtmlPreviewTarget(STATE.files);
       const wantsReact = STATE.projectType === 'react-vite' || Object.keys(STATE.files).some(k => /\.(tsx|jsx)$/i.test(k));
+      const embeddedHtml = embeddedFullPageHtml(STATE.files);
       if (readyPreview) {
         STATE.entryFile = readyPreview;
         finalHtml = constructStaticHtmlBundle(readyPreview);
       } else if (deskPreview) {
         finalHtml = constructDeskPreview(deskPreview.htmlKey, deskPreview.entry);
+      } else if (embeddedHtml) {
+        STATE.entryFile = embeddedHtml;
+        finalHtml = constructStaticHtmlBundle(embeddedHtml);
       } else if (wantsReact) {
         if (compiledReactEntry) finalHtml = constructReactViteBundle();
         else {
@@ -23855,7 +23886,7 @@ ${issues.length ? issues.map(visualIssueToPrompt).join('\n\n---\n\n') : 'No visu
       };
       const entries = Object.entries(files || {}).filter(([path, file]) => file && !file.binary && !/(^|\/)node_modules\//i.test(path));
       const keys = entries.map(([path]) => path);
-      const allText = entries.map(([, file]) => String(file.content || '')).join('\n');
+      const allText = entries.filter(([, file]) => String(file.content || '').length <= 200000).map(([, file]) => String(file.content || '')).join('\n');
       const twExact = /^(container|flex|grid|hidden|block|inline|absolute|relative|fixed|sticky|truncate|italic|underline|uppercase|contents)$/;
       const twPrefix = /^(p|px|py|pt|pr|pb|pl|m|mx|my|mt|mr|mb|ml|w|h|min|max|gap|text|bg|border|rounded|shadow|ring|font|leading|tracking|overflow|z|top|left|right|bottom|inset|col|row|items|justify|self|content|order|grow|shrink|space|divide|opacity|scale|rotate|translate|duration|ease|transition|object|float|clear|outline)-/;
       let unusedCss = 0;
@@ -23879,11 +23910,14 @@ ${issues.length ? issues.map(visualIssueToPrompt).join('\n\n---\n\n') : 'No visu
 
       entries.forEach(([path, file]) => {
         const text = String(file.content || '');
-        const isCss = /\.css$/i.test(path) || /\.html?$/i.test(path);
-        if (isCss) {
-          const imps = text.match(/!important/gi);
+        const isCssFile = /\.css$/i.test(path);
+        const isHtml = /\.html?$/i.test(path);
+        const styleText = isHtml ? [...text.matchAll(/<style\b[^>]*>([\s\S]*?)<\/style>/gi)].map(m => m[1]).join('\n') : '';
+        const scanText = isCssFile ? text : styleText;
+        if (scanText && scanText.length <= 200000) {
+          const imps = scanText.match(/!important/gi);
           if (imps && imps.length) add('css-important', 'CSS uses !important', path, '!important × ' + imps.length, 'This often means a new edit is fighting an old rule. Delete the old rule instead of forcing it.');
-          const stripped = text.replace(/\/\*[\s\S]*?\*\//g, '');
+          const stripped = scanText.replace(/\/\*[\s\S]*?\*\//g, '');
           if (/\b[^{}/]+\{\s*\}/.test(stripped)) add('css-empty', 'Empty CSS rule left behind', path, 'A { } block has nothing in it', 'Delete empty leftover rules.');
           const ruleRe = /([^{}@][^{}]*)\{([^{}]+)\}/g;
           const seen = new Map();
@@ -24096,7 +24130,7 @@ ${issues.length ? issues.map(visualIssueToPrompt).join('\n\n---\n\n') : 'No visu
 
       // HTML file graph plus inline source parser checks.
       textEntries.filter(([path]) => /\.html?$/i.test(path)).forEach(([path,file]) => {
-        const source = getVirtualFileText(file);
+        const source = htmlAuditSource(getVirtualFileText(file));
         const doc = new DOMParser().parseFromString(source,'text/html');
         const base = doc.querySelector('base[href]')?.getAttribute('href') || '';
         const externalBase = /^(?:https?:)?\/\//i.test(base);
@@ -24179,7 +24213,7 @@ ${issues.length ? issues.map(visualIssueToPrompt).join('\n\n---\n\n') : 'No visu
       const cssSources = [];
       textEntries.filter(([path]) => /\.css$/i.test(path)).forEach(([path,file]) => cssSources.push([path,getVirtualFileText(file),path]));
       textEntries.filter(([path]) => /\.html?$/i.test(path)).forEach(([path,file]) => {
-        const doc = new DOMParser().parseFromString(getVirtualFileText(file),'text/html');
+        const doc = new DOMParser().parseFromString(htmlAuditSource(getVirtualFileText(file)),'text/html');
         doc.querySelectorAll('style').forEach((style,index) => cssSources.push([`${path} <style #${index+1}>`,style.textContent||'',path]));
       });
       cssSources.forEach(([label,css,resolveFrom]) => {
@@ -24255,7 +24289,7 @@ ${issues.length ? issues.map(visualIssueToPrompt).join('\n\n---\n\n') : 'No visu
 
       // Cross-script global lexical collisions for classic scripts only.
       textEntries.filter(([path]) => /\.html?$/i.test(path)).forEach(([htmlPath,htmlFile]) => {
-        const doc = new DOMParser().parseFromString(getVirtualFileText(htmlFile),'text/html');
+        const doc = new DOMParser().parseFromString(htmlAuditSource(getVirtualFileText(htmlFile)),'text/html');
         const names = new Map();
         const classic = [];
         doc.querySelectorAll('script').forEach((script,index) => {
@@ -24304,7 +24338,7 @@ ${issues.length ? issues.map(visualIssueToPrompt).join('\n\n---\n\n') : 'No visu
       const htmlEntries = textEntries.filter(([path]) => /\.html?$/i.test(path));
       const jsEntries = textEntries.filter(([path]) => /\.(?:js|mjs|cjs)$/i.test(path));
       const jsonEntries = textEntries.filter(([path]) => /\.json$/i.test(path));
-      const allHtmlText = htmlEntries.map(([,f]) => getVirtualFileText(f)).join('\n');
+      const allHtmlText = htmlEntries.map(([,f]) => htmlAuditSource(getVirtualFileText(f))).join('\n');
       const allJsText = parsedUnits.map(u => u.code).join('\n');
       const allCssText = cssSources.map(([,css]) => String(css || '')).join('\n');
       const hasBinary = Object.values(files).some(file => file?.binary);
@@ -24475,11 +24509,16 @@ ${issues.length ? issues.map(visualIssueToPrompt).join('\n\n---\n\n') : 'No visu
 
     // Automated Backups & Revision Tracker
     function createBackupSnapshot(label) {
+      const snapshotFiles = {};
+      Object.entries(STATE.files || {}).forEach(([path, file]) => {
+        if (!file) return;
+        snapshotFiles[path] = String(file.content || '').length > 500000 ? file : JSON.parse(JSON.stringify(file));
+      });
       const snapshot = {
         id: 'rev_' + Date.now(),
         label: label || `Snapshot ${STATE.backups.length + 1}`,
         time: new Date().toLocaleTimeString(),
-        files: JSON.parse(JSON.stringify(STATE.files)),
+        files: snapshotFiles,
         score: STATE.auditReport.score,
         filesCount: Object.keys(STATE.files).length
       };
