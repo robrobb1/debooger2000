@@ -6,8 +6,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <title>DEBOOGER2000 | Visual Project Viewer & Inspector — B051</title>
-  <!-- DEBOOGER2000 build B051: hide fake repeated CSS notes, smaller problem cards. B050 kept. -->
+  <title>DEBOOGER2000 | Visual Project Viewer & Inspector — B052</title>
+  <!-- DEBOOGER2000 build B052: open the real HTML page inside a Next project instead of a blank page. B051 kept. -->
   <!-- Bundled ZIP engine: JSZip 3.10.1 (MIT/GPLv3 dual licensed; upstream license notice retained below). -->
   <script data-vendor="jszip-3.10.1">
 /*!
@@ -13919,7 +13919,7 @@ module.exports = ZStream;
           <select id="settings-default-preview" onchange="setDefaultPreview(this.value)"><option value="desktop">Desktop</option><option value="wide1200">1200</option><option value="mobile">Mobile</option></select>
         </div>
         <div style="font-size:12px;color:var(--text-muted);line-height:1.5;">
-          Build B051 is a standalone browser HTML app. It can preview HTML and React/Vite source in the browser, including public/ files, vite aliases, and common Vite imports. It still cannot run a real Vite server, npm install, or Electron main.
+          Build B052 is a standalone browser HTML app. It can preview HTML and React/Vite source in the browser, including public/ files, vite aliases, and common Vite imports. It still cannot run a real Vite server, npm install, or Electron main.
           Those actions need a separate desktop runtime that is not included in this build.
         </div>
       </div>
@@ -22995,14 +22995,17 @@ setTimeout(function(){if(document.documentElement.getAttribute("data-d2-mounted"
       const candidates = keys.filter(k =>
         /(^|\/)(?:demo|preview|examples|example|playground|docs)\/(?:index\.html?)$/i.test(k)
         || /(^|\/)(?:demo|preview)\/[^/]+\.html?$/i.test(k)
+        || /(^|\/)public\/index\.html?$/i.test(k)
       ).sort((a, b) => {
-        const score = p => /index\.html?$/i.test(p) ? 0 : 1;
+        const score = p => /public\/index\.html?$/i.test(p) ? 0 : /index\.html?$/i.test(p) ? 1 : 2;
         return score(a) - score(b) || a.length - b.length;
       });
       for (const k of candidates) {
         const f = files[k];
         if (!f || f.binary) continue;
-        if (htmlLooksLikeReadyPreview(getVirtualFileText(f))) return k;
+        const html = getVirtualFileText(f);
+        if (/(^|\/)public\/index\.html?$/i.test(k) && (html.length < 4000 || !htmlHasVisibleApp(html))) continue;
+        if (htmlLooksLikeReadyPreview(html)) return k;
       }
       return null;
     }
