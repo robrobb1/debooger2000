@@ -6,8 +6,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <title>DEBOOGER2000 | Visual Project Viewer & Inspector — B052</title>
-  <!-- DEBOOGER2000 build B052: open the real HTML page inside a Next project instead of a blank page. B051 kept. -->
+  <title>DEBOOGER2000 | Visual Project Viewer & Inspector — B053</title>
+  <!-- DEBOOGER2000 build B053: pick the real page automatically and include the files it needs. B052 kept. -->
   <!-- Bundled ZIP engine: JSZip 3.10.1 (MIT/GPLv3 dual licensed; upstream license notice retained below). -->
   <script data-vendor="jszip-3.10.1">
 /*!
@@ -13919,7 +13919,7 @@ module.exports = ZStream;
           <select id="settings-default-preview" onchange="setDefaultPreview(this.value)"><option value="desktop">Desktop</option><option value="wide1200">1200</option><option value="mobile">Mobile</option></select>
         </div>
         <div style="font-size:12px;color:var(--text-muted);line-height:1.5;">
-          Build B052 is a standalone browser HTML app. It can preview HTML and React/Vite source in the browser, including public/ files, vite aliases, and common Vite imports. It still cannot run a real Vite server, npm install, or Electron main.
+          Build B053 is a standalone browser HTML app. It can preview HTML and React/Vite source in the browser, including public/ files, vite aliases, and common Vite imports. It still cannot run a real Vite server, npm install, or Electron main.
           Those actions need a separate desktop runtime that is not included in this build.
         </div>
       </div>
@@ -21424,7 +21424,7 @@ module.exports = ZStream;
       if (resolved) tries.push(resolved);
       if (clean.startsWith('/')) {
         const bare = clean.replace(/^\/+/, '');
-        tries.push(bare, 'public/' + bare, 'static/' + bare);
+        tries.push(bare, 'public/' + bare, 'static/' + bare, 'assets/' + bare, 'images/' + bare, 'img/' + bare, 'media/' + bare);
       }
       const seen = new Set();
       for (const t of tries) {
@@ -21647,19 +21647,28 @@ module.exports = ZStream;
 
       let pendingLiveReact = false;
       const readyPreview = findReadyWebPreviewEntry();
+      const realPage = choosePreviewHtml(STATE.files);
+      const needsServer = projectNeedsServer(STATE.files);
+      const sourceIsStub = reactSourceIsStub(STATE.files);
       const deskPreview = realHtmlPreviewTarget(STATE.files);
       const wantsReact = STATE.projectType === 'react-vite' || Object.keys(STATE.files).some(k => /\.(tsx|jsx)$/i.test(k));
       if (readyPreview) {
         STATE.entryFile = readyPreview;
         finalHtml = constructStaticHtmlBundle(readyPreview);
+      } else if (realPage && (needsServer || sourceIsStub || !wantsReact)) {
+        STATE.entryFile = realPage;
+        finalHtml = constructStaticHtmlBundle(realPage);
       } else if (deskPreview) {
         finalHtml = constructDeskPreview(deskPreview.htmlKey, deskPreview.entry);
-      } else if (wantsReact) {
+      } else if (wantsReact && !needsServer) {
         if (compiledReactEntry) finalHtml = constructReactViteBundle();
         else {
           finalHtml = constructReactPreviewShell('Converting React files so the viewer can show the real page. Needed packages load from the internet.');
           pendingLiveReact = true;
         }
+      } else if (needsServer) {
+        finalHtml = constructReactPreviewShell('This project needs its own server, and the ZIP has no finished page to show.', true);
+        STATE.previewAuditEligible = false;
       } else if (STATE.projectType === 'backend-service' && !isReadablePreviewPath(STATE.entryFile)) {
         finalHtml = constructBackendServiceBundle();
       } else if (isReadablePreviewPath(STATE.entryFile) && !/\.html?$/i.test(STATE.entryFile || '')) {
@@ -22972,6 +22981,53 @@ setTimeout(function(){if(document.documentElement.getAttribute("data-d2-mounted"
       }
     }
 
+
+    function htmlIsStubPage(html) {
+      const s = String(html || '');
+      if (/your v0 generation will show here/i.test(s)) return true;
+      if (!htmlHasVisibleApp(s) && /<div[^>]*id=["']root["'][^>]*>\s*<\/div>/i.test(s)) return true;
+      return false;
+    }
+
+    function htmlBootsFrameworkSource(html) {
+      const m = String(html || '').match(/<script[^>]+src=["']([^"']+)["'][^>]*>/i);
+      return !!(m && /\.(tsx|jsx)(?:\?|$)/i.test(m[1]));
+    }
+
+    function reactSourceIsStub(files) {
+      const blob = Object.keys(files || {}).filter(k => /\.(tsx|jsx)$/i.test(k) && !/(^|\/)node_modules\//i.test(k)).map(k => getVirtualFileText(files[k])).join('\n');
+      return /your v0 generation will show here/i.test(blob);
+    }
+
+    function projectNeedsServer(files) {
+      const { pkg } = readProjectPackageJson(files);
+      const deps = Object.assign({}, pkg && pkg.dependencies, pkg && pkg.devDependencies);
+      const keys = Object.keys(files || {});
+      if (deps.next || deps.gatsby || deps.nuxt || deps['@angular/core'] || deps['react-native'] || deps['@sveltejs/kit'] || deps['@remix-run/react']) return true;
+      if (keys.some(k => /(^|\/)next\.config\./i.test(k))) return true;
+      if (keys.some(k => /(^|\/)app\/layout\.(tsx|jsx)$/i.test(k)) && keys.some(k => /(^|\/)app\/page\.(tsx|jsx)$/i.test(k))) return true;
+      return false;
+    }
+
+    function choosePreviewHtml(files) {
+      const compiled = findCompiledWebEntry(files);
+      if (compiled && !htmlIsStubPage(getVirtualFileText(files[compiled]))) return compiled;
+      let best = null;
+      let bestScore = 0;
+      Object.keys(files || {}).forEach(k => {
+        if (!/\.html?$/i.test(k) || files[k]?.binary || /(^|\/)node_modules\//i.test(k)) return;
+        const html = getVirtualFileText(files[k]);
+        if (!html || htmlIsStubPage(html) || htmlBootsFrameworkSource(html)) return;
+        if (!htmlHasVisibleApp(html) && html.length < 8000) return;
+        let score = Math.min(30, Math.floor(html.length / 15000));
+        if (htmlHasVisibleApp(html)) score += 50;
+        if (/(^|\/)(?:dist|build|out|storybook-static|\.vercel\/output\/static)\/index\.html?$/i.test(k)) score += 200;
+        if (/(^|\/)(?:public|demo|preview|examples|example)\/index\.html?$/i.test(k)) score += 120;
+        if (/^index\.html?$/i.test(k)) score += 30;
+        if (score > bestScore) { bestScore = score; best = k; }
+      });
+      return best;
+    }
 
     function findCompiledWebEntry(files = STATE.files) {
       return Object.keys(files || {})
