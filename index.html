@@ -6,8 +6,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <title>DEBOOGER2000 | Visual Project Viewer & Inspector — B053</title>
-  <!-- DEBOOGER2000 build B053: pick the real page automatically and include the files it needs. B052 kept. -->
+  <title>DEBOOGER2000 | Visual Project Viewer & Inspector — B054</title>
+  <!-- DEBOOGER2000 build B054: Design screen shows one page at a time, with size, weight, colors, corners, and lines. B053 kept. -->
   <!-- Bundled ZIP engine: JSZip 3.10.1 (MIT/GPLv3 dual licensed; upstream license notice retained below). -->
   <script data-vendor="jszip-3.10.1">
 /*!
@@ -12149,6 +12149,17 @@ module.exports = ZStream;
     .code-block { display:none; margin-top:6px; padding:8px 10px; background:#f8fafc; border:1px solid var(--border-subtle); font-size:11px; white-space:pre-wrap; }
     .code-block.open { display:block; }
     .font-name-list { font-size: 14px; line-height: 1.7; }
+    .design-page-tabs { display:flex; flex-wrap:wrap; gap:6px; margin:0 0 16px; }
+    .design-page-tabs button { height:32px; border:1px solid var(--border-subtle); background:#fff; color:var(--text-main); padding:0 12px; font-size:12px; font-weight:700; cursor:pointer; }
+    .design-page-tabs button.active { background:#0f172a; color:#fff; border-color:#0f172a; }
+    .design-box { max-height:260px; overflow:auto; margin-top:8px; }
+    .design-empty { color:var(--text-muted); font-size:13px; padding:8px 0; }
+    .design-mini-table { width:100%; border-collapse:collapse; font-size:12px; }
+    .design-mini-table th { text-align:left; font-size:10px; font-weight:800; letter-spacing:.04em; text-transform:uppercase; color:var(--text-muted); padding:4px 6px; border-bottom:1px solid var(--border-subtle); position:sticky; top:0; background:#fff; }
+    .design-mini-table td { padding:6px; border-bottom:1px solid #f1f5f9; vertical-align:top; overflow-wrap:anywhere; }
+    .design-mini-table td:first-child { font-weight:650; }
+    .design-swatch { display:inline-flex; align-items:center; gap:6px; border:0; background:transparent; padding:0; font:inherit; color:inherit; cursor:pointer; }
+    .design-swatch i { width:14px; height:14px; border:1px solid var(--border-subtle); display:inline-block; }
 
     /* Workspace preview controls live in the main top header to maximize preview height. */
     
@@ -13711,59 +13722,43 @@ module.exports = ZStream;
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 10px;">
           <div>
             <h2 style="font-size: 20px; font-weight: 650; margin: 0;">Design</h2>
-            <p style="color: var(--text-muted); font-size: 13px; margin: 4px 0 0 0;">What this project looks like, page by page. Nothing here is made up.</p>
+            <p style="color: var(--text-muted); font-size: 13px; margin: 4px 0 0 0;">Pick a page. Size, weight, colors, corners, and lines stay with that page.</p>
           </div>
           <div style="display: flex; gap: 8px; flex-wrap: wrap;">
             <button class="btn btn-dark btn-sm" onclick="copyAllDesignPages()">Copy all pages</button>
           </div>
         </div>
 
-        <div class="inspector-two-col-grid">
-          <!-- Exact Fonts Used -->
-          <div class="card">
-            <div class="card-title">Fonts</div>
-            <div id="inspector-fonts-container" class="font-name-list" style="margin-top: 10px;">
-              <div style="color: var(--text-muted); font-size: 13px;">Load a project to see fonts.</div>
-            </div>
-          </div>
+        <div id="design-page-tabs" class="design-page-tabs"></div>
 
-          <!-- Exact Hex Colors & Swatches -->
+        <div class="inspector-two-col-grid">
+          <div class="card">
+            <div class="card-title">Type</div>
+            <div class="card-desc">Font, size, and weight for each section.</div>
+            <div id="design-type-box" class="design-box"></div>
+          </div>
           <div class="card">
             <div class="card-title">Colors</div>
             <div class="card-desc">Click a color to copy it.</div>
-            <div id="inspector-colors-container" style="margin-top: 14px; max-height: 280px; overflow-y: auto;">
-              <div style="padding: 20px; text-align: center; color: var(--text-muted); font-size: 12px;">Load a project to extract colors.</div>
-            </div>
+            <div id="design-color-box" class="design-box"></div>
           </div>
         </div>
 
         <div class="inspector-two-col-grid">
-          <!-- Spacing & Rhythm -->
           <div class="card">
-            <div class="card-title">Gaps and space</div>
-            <div class="card-desc">How far things sit apart.</div>
-            <div id="inspector-spacing-container" style="margin-top: 14px;">
-              <div style="padding: 20px; text-align: center; color: var(--text-muted); font-size: 12px;">Load a project to analyze spacing.</div>
-            </div>
+            <div class="card-title">Corners</div>
+            <div class="card-desc">How round each section is.</div>
+            <div id="design-corner-box" class="design-box"></div>
           </div>
-
-          <!-- Borders, Corners & Lines -->
           <div class="card">
-            <div class="card-title">Corners and lines</div>
-            <div class="card-desc">Round corners and borders.</div>
-            <div id="inspector-borders-container" style="margin-top: 14px;">
-              <div style="padding: 20px; text-align: center; color: var(--text-muted); font-size: 12px;">Load a project to inspect borders.</div>
-            </div>
+            <div class="card-title">Lines</div>
+            <div class="card-desc">Borders on each section.</div>
+            <div id="design-line-box" class="design-box"></div>
           </div>
         </div>
 
-        <div class="card">
-          <div class="card-title">Each page</div>
-          <div class="card-desc">What that screen uses. Tap Show code if you want the file line.</div>
-          <div id="inspector-usage-container" style="margin-top:14px;"><div style="padding:16px;color:var(--text-muted);font-size:13px;">Load a project to see each page.</div></div>
-        </div>
-
-        <div id="design-inspector-sections"></div>
+        <button type="button" class="code-toggle" id="design-code-toggle" onclick="toggleDesignCode()">Show code</button>
+        <div id="design-code-block" class="code-block"></div>
       </div>
     </section>
 
@@ -13919,7 +13914,7 @@ module.exports = ZStream;
           <select id="settings-default-preview" onchange="setDefaultPreview(this.value)"><option value="desktop">Desktop</option><option value="wide1200">1200</option><option value="mobile">Mobile</option></select>
         </div>
         <div style="font-size:12px;color:var(--text-muted);line-height:1.5;">
-          Build B053 is a standalone browser HTML app. It can preview HTML and React/Vite source in the browser, including public/ files, vite aliases, and common Vite imports. It still cannot run a real Vite server, npm install, or Electron main.
+          Build B054 is a standalone browser HTML app. It can preview HTML and React/Vite source in the browser, including public/ files, vite aliases, and common Vite imports. It still cannot run a real Vite server, npm install, or Electron main.
           Those actions need a separate desktop runtime that is not included in this build.
         </div>
       </div>
@@ -24601,6 +24596,84 @@ ${issues.length ? issues.map(visualIssueToPrompt).join('\n\n---\n\n') : 'No visu
       return property || 'Color';
     }
 
+    function htmlUsesToken(content, token) {
+      const needle = String(token || '').toLowerCase();
+      if (!needle) return false;
+      const re = /(?:class(?:Name)?|id)\s*=\s*["']([^"']+)["']/gi;
+      let m;
+      while ((m = re.exec(content))) {
+        if (/^id\s*=/i.test(m[0])) {
+          if (m[1].toLowerCase() === needle) return true;
+        } else if (m[1].toLowerCase().split(/\s+/).indexOf(needle) >= 0) return true;
+      }
+      return false;
+    }
+
+    function designTagLabel(tag, attrs, line) {
+      const t = String(tag || '').toLowerCase();
+      if (!t || t === 'style' || t === 'script' || t === 'link' || t === 'meta' || t === 'html' || t === 'head' || t === 'body') return '';
+      const aria = (String(attrs || '').match(/\baria-label\s*=\s*["']([^"']+)["']/i) || [])[1];
+      const id = (String(attrs || '').match(/\bid\s*=\s*["']([^"']+)["']/i) || [])[1];
+      const cls = (String(attrs || '').match(/\bclass(?:Name)?\s*=\s*["']([^"']+)["']/i) || [])[1];
+      const text = (String(line || '').match(new RegExp('<' + t + '\\b[^>]*>([^<]{1,40})<', 'i')) || [])[1];
+      const nice = { header:'Header', nav:'Menu', main:'Main', footer:'Footer', aside:'Side', section:'Section', article:'Article', form:'Form', button:'Button', h1:'Title', h2:'Heading', h3:'Small heading', h4:'Small heading', a:'Link', p:'Text', label:'Label', input:'Field', textarea:'Field', select:'Field', li:'List item' };
+      const base = nice[t] || '';
+      const extra = String(aria || id || (text || '').trim() || (cls ? cls.split(/\s+/)[0] : '')).replace(/\s+/g, ' ').trim().slice(0, 36);
+      if (base && extra && base.toLowerCase() !== extra.toLowerCase()) return (base + ' · ' + extra).slice(0, 72);
+      return (base || extra || '').slice(0, 72);
+    }
+    function designPartName(line) {
+      const re = /<([a-zA-Z][\w:-]*)\b([^>]*)>/g;
+      let m;
+      let last = '';
+      while ((m = re.exec(String(line || '')))) {
+        const name = designTagLabel(m[1], m[2], line);
+        if (name) last = name;
+      }
+      return last;
+    }
+
+    function designNoteUtilities(line, note) {
+      const twSize = { xs:'12px', sm:'14px', base:'16px', lg:'18px', xl:'20px', '2xl':'24px', '3xl':'30px', '4xl':'36px', '5xl':'48px', '6xl':'60px', '7xl':'72px', '8xl':'96px', '9xl':'128px' };
+      const twWeight = { thin:'100', extralight:'200', light:'300', normal:'400', medium:'500', semibold:'600', bold:'700', extrabold:'800', black:'900' };
+      const twRadius = { none:'0', sm:'2px', md:'6px', lg:'8px', xl:'12px', '2xl':'16px', '3xl':'24px', full:'9999px' };
+      const tagRe = /<([a-zA-Z][\w:-]*)\b([^>]*)>/g;
+      let tagM;
+      while ((tagM = tagRe.exec(String(line || '')))) {
+        const clsM = String(tagM[2] || '').match(/\bclass(?:Name)?\s*=\s*["']([^"']+)["']/i);
+        if (!clsM) continue;
+        const sectionName = designTagLabel(tagM[1], tagM[2], line) || '';
+        clsM[1].split(/\s+/).forEach(cls => {
+          if (!cls) return;
+          const say = (kind, value, property) => note(kind, value, property, sectionName);
+          let m;
+          if ((m = cls.match(/^text-\[(\d*\.?\d+(?:px|rem|em|%))\]$/i))) say('Font size', m[1], 'font-size');
+          else if (twSize[cls.slice(5)] && /^text-(xs|sm|base|lg|xl|[2-9]xl)$/.test(cls)) say('Font size', twSize[cls.slice(5)], 'font-size');
+          else if ((m = cls.match(/^font-\[([^\]]+)\]$/i))) say('Font weight', m[1], 'font-weight');
+          else if (cls.indexOf('font-') === 0 && twWeight[cls.slice(5)]) say('Font weight', twWeight[cls.slice(5)], 'font-weight');
+          else if (cls === 'rounded') say('Radius', '4px', 'border-radius');
+          else if ((m = cls.match(/^rounded-\[([^\]]+)\]$/i))) say('Radius', m[1], 'border-radius');
+          else if ((m = cls.match(/^rounded-(none|sm|md|lg|xl|2xl|3xl|full)$/))) say('Radius', twRadius[m[1]], 'border-radius');
+          else if (cls === 'border' || /^border-[trblxy]$/.test(cls) || /^border(?:-[trblxy])?-\d+$/.test(cls) || (m = cls.match(/^border-\[([^\]]+)\]$/i))) say('Border', m ? m[1] : cls, 'border');
+          else if ((m = cls.match(/^(text|bg|border)-\[(#[0-9a-fA-F]{3,8})\]$/i))) say('Color', designColorToHex(m[2]), m[1].toLowerCase() === 'bg' ? 'background' : (m[1].toLowerCase() === 'border' ? 'border' : 'color'));
+        });
+      }
+      const jsSize = String(line).match(/\bfontSize\s*:\s*['"]([^'"]+)['"]/);
+      if (jsSize) note('Font size', jsSize[1], 'font-size');
+      const jsWeight = String(line).match(/\bfontWeight\s*:\s*['"]?(\d{3}|bold|normal|lighter|bolder)['"]?/);
+      if (jsWeight) note('Font weight', jsWeight[1], 'font-weight');
+      const fontShort = String(line).match(/(?:^|[^\w-])font\s*:\s*([^;}{]+)/i);
+      if (fontShort) {
+        const v = fontShort[1];
+        const w = v.match(/\b(\d{3}|bold|normal|lighter|bolder)\b/);
+        const s = v.match(/\b(\d*\.?\d+(?:px|rem|em|%))\b/);
+        if (w) note('Font weight', w[1], 'font-weight');
+        if (s) note('Font size', s[1], 'font-size');
+        const fam = v.replace(/\b(?:\d*\.?\d+(?:px|rem|em|%)|\d{3}|bold|normal|lighter|bolder)\b/gi, '').replace(/\/\s*[\d.]+/, '').replace(/!important/ig, '').trim().replace(/,$/, '');
+        if (fam && fam.length < 80) note('Font', fam, 'font-family');
+      }
+    }
+
     function collectDesignEvidence() {
       const allText = Object.entries(STATE.files).filter(([path,f]) => f && !f.binary && !String(path).startsWith('.debooger/')).map(([,f]) => String(f.content || '')).join('\n');
       const fontFamilies = new Set();
@@ -24646,43 +24719,129 @@ ${issues.length ? issues.map(visualIssueToPrompt).join('\n\n---\n\n') : 'No visu
       });
 
       const usage = [];
+      const parts = [];
+      let partsCapped = false;
       Object.entries(STATE.files).forEach(([path, file]) => {
         if (!file || file.binary || typeof file.content !== 'string' || String(path).startsWith('.debooger/')) return;
         const lines = file.content.split('\n');
-        lines.forEach((line, index) => {
-          const clean = line.trim();
-          if (!clean) return;
-          const add = (kind, value, property) => usage.push({ kind, value, property, file: path, line: index + 1, context: clean.slice(0, 180) });
-          let m;
-          const colorRe = /#(?:[0-9a-fA-F]{6}|[0-9a-fA-F]{3})\b|rgba?\([^)]*\)|hsla?\([^)]*\)/g;
-          while ((m = colorRe.exec(line))) {
-            const before = line.slice(0, m.index);
-            const pm = before.match(/([a-z-]+)\s*:\s*[^:;]*$/i);
-            add('Color', designColorToHex(m[0]), pm ? pm[1] : 'source');
+        const isCss = /\.css$/i.test(path);
+        let bucket = null;
+        let cssSection = '';
+        let inStyle = false;
+        let depth = 0;
+        function commitBucket() {
+          if (!bucket) return;
+          const has = bucket.font || bucket.sizes.length || bucket.weights.length || bucket.colors.length || bucket.corners.length || bucket.lines.length;
+          if (has) {
+            if (parts.length >= 500) partsCapped = true;
+            else parts.push(bucket);
           }
-          const propChecks = [
-            ['Font', /font-family\s*:\s*([^;}]+)/ig, 'font-family'],
-            ['Font weight', /font-weight\s*:\s*([^;}]+)/ig, 'font-weight'],
-            ['Font size', /font-size\s*:\s*([^;}]+)/ig, 'font-size'],
-            ['Line height', /line-height\s*:\s*([^;}]+)/ig, 'line-height'],
-            ['Letter spacing', /letter-spacing\s*:\s*([^;}]+)/ig, 'letter-spacing'],
-            ['Radius', /border-radius\s*:\s*([^;}]+)/ig, 'border-radius'],
-            ['Border', /(?:border|border-top|border-right|border-bottom|border-left)\s*:\s*([^;}]+)/ig, 'border'],
-            ['Shadow', /box-shadow\s*:\s*([^;}]+)/ig, 'box-shadow'],
-            ['Spacing', /(?:padding|margin|gap|row-gap|column-gap)\s*:\s*([^;}]+)/ig, 'spacing']
-          ];
-          const twUse = /\b((?:gap|gap-x|gap-y|p|px|py|pt|pr|pb|pl|m|mx|my|mt|mr|mb|ml|space-x|space-y)-\d+(?:\.\d+)?)\b/g;
-          let twu; while ((twu = twUse.exec(line))) add('Spacing', twu[1], twu[1].split('-')[0]);
-          propChecks.forEach(([kind,re,prop]) => { let x; while ((x=re.exec(line))) add(kind, x[1].trim().replace(new RegExp('\\s*!' + 'important\\s*$', 'i'),''), prop); });
+          bucket = null;
+        }
+        function paint(kind, value, property, section, line, index) {
+          if (!['Color', 'Font', 'Font size', 'Font weight', 'Radius', 'Border'].includes(kind)) return;
+          const cleanVal = String(value || '').replace(/\s*!important\s*$/i, '').trim();
+          if (!cleanVal || cleanVal === 'inherit' || cleanVal === 'initial' || cleanVal === 'unset') return;
+          const name = section || 'This page';
+          if (!bucket || bucket.section !== name) {
+            commitBucket();
+            bucket = { section: name, file: path, font: '', sizes: [], weights: [], colors: [], corners: [], lines: [], raw: [] };
+          }
+          if (bucket.raw.length < 4) bucket.raw.push({ file: path, line: index + 1, context: line.trim().slice(0, 180) });
+          if (kind === 'Color') bucket.colors.push({ value: cleanVal, property: property || 'source' });
+          else if (kind === 'Font') {
+            const fontName = cleanVal.split(',')[0].replace(/["']/g, '').trim();
+            if (fontName) bucket.font = bucket.font || fontName;
+          } else if (kind === 'Font size') bucket.sizes.push(cleanVal);
+          else if (kind === 'Font weight') bucket.weights.push(cleanVal);
+          else if (kind === 'Radius') bucket.corners.push(cleanVal);
+          else if (kind === 'Border' && cleanVal !== 'none') bucket.lines.push(cleanVal);
+        }
+        lines.forEach((line, index) => {
+          if (/<style\b/i.test(line)) inStyle = true;
+          const track = isCss || inStyle;
+          const clean = line.trim();
+          if (clean) {
+            const opens = track ? (line.match(/\{/g) || []).length : 0;
+            const closes = track ? (line.match(/\}/g) || []).length : 0;
+            if (track && opens) {
+              let sel = line.split('{')[0].replace(/\/\*.*?\*\//g, '').trim();
+              const cut = sel.lastIndexOf('}');
+              if (cut >= 0) sel = sel.slice(cut + 1).trim();
+              if (/^@font-face\b/i.test(sel)) cssSection = 'Font file';
+              else if (sel && sel.charAt(0) !== '@' && sel.length < 100 && !/^(if|for|while|function|switch|catch|return)\b/.test(sel)) cssSection = sel.replace(/\s+/g, ' ').slice(0, 80);
+            }
+            const section = (track && cssSection) ? cssSection : (!track ? (designPartName(line) || 'This page') : (cssSection || 'This page'));
+            const add = (kind, value, property) => {
+              usage.push({ kind, value, property, file: path, line: index + 1, context: clean.slice(0, 180) });
+              paint(kind, value, property, section, line, index);
+            };
+            let m;
+            const colorRe = /#(?:[0-9a-fA-F]{6}|[0-9a-fA-F]{3})\b|rgba?\([^)]*\)|hsla?\([^)]*\)/g;
+            while ((m = colorRe.exec(line))) {
+              const before = line.slice(0, m.index);
+              const pm = before.match(/([a-z-]+)\s*:\s*[^:;]*$/i);
+              add('Color', designColorToHex(m[0]), pm ? pm[1] : 'source');
+            }
+            const propChecks = [
+              ['Font', /font-family\s*:\s*([^;}]+)/ig, 'font-family'],
+              ['Font weight', /font-weight\s*:\s*([^;}]+)/ig, 'font-weight'],
+              ['Font size', /font-size\s*:\s*([^;}]+)/ig, 'font-size'],
+              ['Line height', /line-height\s*:\s*([^;}]+)/ig, 'line-height'],
+              ['Letter spacing', /letter-spacing\s*:\s*([^;}]+)/ig, 'letter-spacing'],
+              ['Radius', /border-radius\s*:\s*([^;}]+)/ig, 'border-radius'],
+              ['Border', /(?:border|border-top|border-right|border-bottom|border-left)\s*:\s*([^;}]+)/ig, 'border'],
+              ['Shadow', /box-shadow\s*:\s*([^;}]+)/ig, 'box-shadow'],
+              ['Spacing', /(?:padding|margin|gap|row-gap|column-gap)\s*:\s*([^;}]+)/ig, 'spacing']
+            ];
+            const twUse = /\b((?:gap|gap-x|gap-y|p|px|py|pt|pr|pb|pl|m|mx|my|mt|mr|mb|ml|space-x|space-y)-\d+(?:\.\d+)?)\b/g;
+            let twu; while ((twu = twUse.exec(line))) add('Spacing', twu[1], twu[1].split('-')[0]);
+            propChecks.forEach(([kind,re,prop]) => { let x; while ((x=re.exec(line))) add(kind, x[1].trim().replace(new RegExp('\\s*!' + 'important\\s*$', 'i'),''), prop); });
+            designNoteUtilities(line, (kind, value, property, sectionName) => paint(kind, value, property, sectionName || section, line, index));
+            depth = Math.max(0, depth + opens - closes);
+            const ruleEnded = track && depth === 0 && closes > 0;
+            if (ruleEnded || !track) commitBucket();
+            if (ruleEnded) cssSection = '';
+          }
+          if (/<\/style>/i.test(line)) {
+            inStyle = false;
+            depth = 0;
+            commitBucket();
+            cssSection = '';
+          }
         });
+        commitBucket();
       });
+      const htmlDocs = Object.entries(STATE.files).filter(([p, f]) => f && !f.binary && /\.html?$/i.test(p)).map(([p, f]) => ({ path: p, content: String(f.content || '') }));
+      if (htmlDocs.length) {
+        const extra = [];
+        const drop = [];
+        parts.forEach((part, index) => {
+          if (!/\.css$/i.test(part.file || '')) return;
+          const tokens = [];
+          const tokenRe = /[.#]([_a-zA-Z][\w-]*)/g;
+          let tm;
+          while ((tm = tokenRe.exec(String(part.section || '')))) {
+            if (tm[1].length > 1 && tokens.indexOf(tm[1]) < 0) tokens.push(tm[1]);
+          }
+          if (!tokens.length) return;
+          const hits = htmlDocs.filter(doc => tokens.some(token => htmlUsesToken(doc.content, token)));
+          if (!hits.length) return;
+          drop.push(index);
+          hits.forEach(doc => extra.push({ section: part.section, file: doc.path, font: part.font, sizes: part.sizes.slice(), weights: part.weights.slice(), colors: part.colors.slice(), corners: part.corners.slice(), lines: part.lines.slice(), raw: part.raw.slice() }));
+        });
+        drop.sort((a, b) => b - a).forEach(index => parts.splice(index, 1));
+        extra.forEach(part => parts.push(part));
+      }
       return {
         fonts: [...fontFamilies],
         colors: Object.entries(colorCounts).sort((a, b) => b[1] - a[1]),
         spacing: [...spacing],
         radii: [...radii],
         borders: [...borders],
-        usage
+        usage,
+        parts,
+        partsCapped
       };
     }
 
@@ -24718,166 +24877,264 @@ ${issues.length ? issues.map(visualIssueToPrompt).join('\n\n---\n\n') : 'No visu
       if (p.includes('font')) return 'type';
       return 'style';
     }
+    let designPagePick = '';
+
+    function designPageLabel(path) {
+      const file = String(path || '');
+      if (/\.css$/i.test(file)) return file.split('/').pop();
+      return friendlyPageName(file);
+    }
+    function designTabText(name) {
+      const s = String(name || 'Page');
+      if (s.indexOf('.') >= 0) return s;
+      return s.charAt(0).toUpperCase() + s.slice(1);
+    }
+    function designPageOrder(pages) {
+      return Object.keys(pages).sort((a, b) => {
+        const rank = (page) => {
+          const file = pages[page].file || '';
+          if (/index\.html?$/i.test(file) || page === 'Home') return 0;
+          if (/\.html?$/i.test(file)) return 1;
+          if (/\.css$/i.test(file)) return 2;
+          return 3;
+        };
+        const d = rank(a) - rank(b);
+        return d || a.localeCompare(b);
+      });
+    }
+    function designJoin(list) {
+      const out = [];
+      (list || []).forEach(v => {
+        const s = String(v || '').replace(/\s*!important/ig, '').trim();
+        if (s && out.indexOf(s) < 0) out.push(s);
+      });
+      return out.join(', ');
+    }
     function designPagesFromUsage(data) {
       const pages = {};
-      (data.usage || []).forEach(u => {
-        const page = friendlyPageName(u.file);
-        if (!pages[page]) pages[page] = { colors: [], spacing: [], fonts: [], other: [], raw: [] };
-        const item = { kind: u.kind, value: u.value, property: u.property, file: u.file, line: u.line, context: u.context };
-        pages[page].raw.push(item);
-        if (u.kind === 'Color') pages[page].colors.push(item);
-        else if (u.kind === 'Spacing') pages[page].spacing.push(item);
-        else if (u.kind === 'Font' || u.kind === 'Font size' || u.kind === 'Font weight') pages[page].fonts.push(item);
-        else pages[page].other.push(item);
+      (data.parts || []).forEach(part => {
+        const page = designPageLabel(part.file);
+        if (!pages[page]) pages[page] = { parts: [], raw: [], file: part.file };
+        pages[page].parts.push(part);
+        (part.raw || []).forEach(row => pages[page].raw.push(row));
       });
       return pages;
     }
+    function designTypeRows(info) {
+      const rows = [];
+      const seen = new Set();
+      (info.parts || []).forEach(p => {
+        const size = designJoin(p.sizes);
+        const weight = designJoin(p.weights);
+        const font = String(p.font || '').trim();
+        if (!size && !weight && !font) return;
+        const key = p.section + '|' + size + '|' + weight + '|' + font;
+        if (seen.has(key)) return;
+        seen.add(key);
+        rows.push({ section: p.section || 'This page', size: size, weight: weight, font: font });
+      });
+      return rows;
+    }
+    function designColorRows(info) {
+      const rows = [];
+      const seen = new Set();
+      (info.parts || []).forEach(p => {
+        (p.colors || []).forEach(c => {
+          const value = String(c.value || '').trim();
+          if (!value) return;
+          const use = simpleUseWords(c.property);
+          const key = (p.section || '') + '|' + value.toUpperCase() + '|' + use;
+          if (seen.has(key)) return;
+          seen.add(key);
+          rows.push({ section: p.section || 'This page', value: value, use: use });
+        });
+      });
+      return rows;
+    }
+    function designValueRows(info, field) {
+      const rows = [];
+      const seen = new Set();
+      (info.parts || []).forEach(p => {
+        const vals = [];
+        (p[field] || []).forEach(v => {
+          const s = String(v || '').replace(/\s*!important/ig, '').trim();
+          if (s && vals.indexOf(s) < 0) vals.push(s);
+        });
+        vals.forEach(value => {
+          const key = (p.section || '') + '|' + value;
+          if (seen.has(key)) return;
+          seen.add(key);
+          rows.push({ section: p.section || 'This page', value: value });
+        });
+      });
+      return rows;
+    }
     function pageDesignPlainText(page, info) {
-      const lines = [page + ' page'];
-      const seenC = new Set();
-      info.colors.forEach(c => {
-        const key = String(c.value).toUpperCase();
-        if (seenC.has(key)) return;
-        seenC.add(key);
-        lines.push('- ' + simpleColorWords(c.value) + ' ' + String(c.value).toUpperCase() + ' for ' + simpleUseWords(c.property));
-      });
-      const seenS = new Set();
-      info.spacing.forEach(s => {
-        if (seenS.has(s.value)) return;
-        seenS.add(s.value);
-        lines.push('- Space: ' + s.value);
-      });
-      const seenF = new Set();
-      info.fonts.forEach(f => {
-        if (seenF.has(f.value)) return;
-        seenF.add(f.value);
-        lines.push('- Font: ' + f.value);
-      });
-      if (lines.length === 1) lines.push('- No extra design notes on this page.');
+      const lines = [designTabText(page)];
+      const typeRows = designTypeRows(info);
+      const colorRows = designColorRows(info);
+      const cornerRows = designValueRows(info, 'corners');
+      const lineRows = designValueRows(info, 'lines');
+      if (typeRows.length) {
+        lines.push('Type');
+        typeRows.forEach(r => {
+          const bits = [r.section];
+          if (r.size) bits.push('size ' + r.size);
+          if (r.weight) bits.push('weight ' + r.weight);
+          if (r.font) bits.push(r.font);
+          lines.push('- ' + bits.join(' | '));
+        });
+      }
+      if (colorRows.length) {
+        lines.push('Colors');
+        colorRows.forEach(r => lines.push('- ' + r.section + ' | ' + simpleColorWords(r.value) + ' ' + String(r.value).toUpperCase() + ' | ' + r.use));
+      }
+      if (cornerRows.length) {
+        lines.push('Corners');
+        cornerRows.forEach(r => lines.push('- ' + r.section + ' | ' + r.value));
+      }
+      if (lineRows.length) {
+        lines.push('Lines');
+        lineRows.forEach(r => lines.push('- ' + r.section + ' | ' + r.value));
+      }
+      if (lines.length === 1) lines.push('- No type, colors, corners, or lines on this page.');
       return lines.join('\n');
     }
 
+    function designEmptyNote(text) {
+      const note = document.createElement('div');
+      note.className = 'design-empty';
+      note.textContent = text;
+      return note;
+    }
+    function designTable(headers, records) {
+      const table = document.createElement('table');
+      table.className = 'design-mini-table';
+      const head = document.createElement('thead');
+      const headRow = document.createElement('tr');
+      headers.forEach(label => {
+        const th = document.createElement('th');
+        th.textContent = label;
+        headRow.appendChild(th);
+      });
+      head.appendChild(headRow);
+      const body = document.createElement('tbody');
+      records.forEach(cells => {
+        const tr = document.createElement('tr');
+        cells.forEach(cell => {
+          const td = document.createElement('td');
+          if (cell && cell.nodeType) td.appendChild(cell);
+          else td.textContent = cell == null ? '' : String(cell);
+          tr.appendChild(td);
+        });
+        body.appendChild(tr);
+      });
+      table.append(head, body);
+      return table;
+    }
+    function designColorChip(value) {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'design-swatch';
+      const safe = /^(#[0-9a-fA-F]{3,8}|(?:rgb|hsl)a?\([^)]*\))$/.test(String(value || '').trim()) ? String(value).trim() : '';
+      if (safe) {
+        const swatch = document.createElement('i');
+        swatch.style.background = safe;
+        btn.appendChild(swatch);
+      }
+      const label = document.createElement('span');
+      label.textContent = simpleColorWords(value) + ' ' + String(value).toUpperCase();
+      btn.appendChild(label);
+      btn.addEventListener('click', async () => {
+        try { await navigator.clipboard.writeText(String(value)); showToast('Copied ' + value); }
+        catch (_) { showToast(String(value)); }
+      });
+      return btn;
+    }
     function renderDesignInspector() {
-      const fontsBox = document.getElementById('inspector-fonts-container');
-      const colorsBox = document.getElementById('inspector-colors-container');
-      const spacingBox = document.getElementById('inspector-spacing-container');
-      const bordersBox = document.getElementById('inspector-borders-container');
-      const usageBox = document.getElementById('inspector-usage-container');
-      if (!fontsBox || !colorsBox || !spacingBox || !bordersBox || !usageBox) return;
+      const tabs = document.getElementById('design-page-tabs');
+      const typeBox = document.getElementById('design-type-box');
+      const colorBox = document.getElementById('design-color-box');
+      const cornerBox = document.getElementById('design-corner-box');
+      const lineBox = document.getElementById('design-line-box');
+      const codeBox = document.getElementById('design-code-block');
+      const codeBtn = document.getElementById('design-code-toggle');
+      if (!tabs || !typeBox || !colorBox || !cornerBox || !lineBox) return;
 
       const data = collectDesignEvidence();
-      const fontNames = [...new Set((data.fonts || []).map(f => String(f).split(',')[0].replace(/["']/g, '').trim()).filter(Boolean))];
-      fontsBox.innerHTML = fontNames.length ? fontNames.map(n => escapeHtml(n)).join('<br>') : '<div style="color:var(--text-muted);">No font names found.</div>';
-
-      colorsBox.innerHTML = '';
-      if (!data.colors.length) {
-        colorsBox.innerHTML = '<div style="color:var(--text-muted);">No colors found.</div>';
-      } else {
-        data.colors.slice(0, 24).forEach(([hex, count]) => {
-          const btn = document.createElement('button');
-          btn.type = 'button';
-          btn.className = 'simple-swatch';
-          btn.innerHTML = '<i style="background:' + hex + '"></i><span>' + escapeHtml(simpleColorWords(hex)) + ' <b style="font-weight:600">' + escapeHtml(String(hex).toUpperCase()) + '</b></span>';
-          btn.addEventListener('click', async () => {
-            try { await navigator.clipboard.writeText(hex); showToast('Copied ' + hex); }
-            catch (_) { showToast(hex); }
-          });
-          colorsBox.appendChild(btn);
-        });
-      }
-
-      spacingBox.innerHTML = '';
-      if (!data.spacing.length) {
-        spacingBox.innerHTML = '<div style="color:var(--text-muted);">No gaps found.</div>';
-      } else {
-        const list = document.createElement('ul');
-        list.style.cssText = 'margin:0;padding-left:18px;font-size:13px;';
-        data.spacing.slice(0, 16).forEach(v => {
-          const li = document.createElement('li');
-          li.textContent = v;
-          list.appendChild(li);
-        });
-        spacingBox.appendChild(list);
-      }
-
-      const radiusText = data.radii.length ? data.radii.join(', ') : 'None found';
-      const borderText = data.borders.length ? data.borders.slice(0, 8).join(', ') : 'None found';
-      bordersBox.innerHTML = '<div style="font-size:13px;line-height:1.6;">Corners: ' + escapeHtml(radiusText) + '<br>Lines: ' + escapeHtml(borderText) + '</div>';
-
       const pages = designPagesFromUsage(data);
-      usageBox.innerHTML = '';
-      const names = Object.keys(pages);
-      if (!names.length) {
-        usageBox.innerHTML = '<div style="color:var(--text-muted);">Load a project to see each page.</div>';
-      } else {
-        names.forEach(name => {
-          const info = pages[name];
-          const card = document.createElement('div');
-          card.className = 'page-design-card';
-          const title = document.createElement('h3');
-          title.textContent = name;
-          const tools = document.createElement('div');
-          tools.style.cssText = 'display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap;';
-          const copyBtn = document.createElement('button');
-          copyBtn.className = 'btn btn-outline btn-sm';
-          copyBtn.textContent = 'Copy this page';
-          copyBtn.addEventListener('click', () => {
-            copyTextForAi(pageDesignPlainText(name, info) + '\n\nCode\n' + info.raw.slice(0, 20).map(x => x.file + ':' + x.line + ' ' + x.context).join('\n'), 'Copied ' + name);
-          });
-          tools.appendChild(copyBtn);
-          const ul = document.createElement('ul');
-          const seenC = new Set();
-          info.colors.forEach(c => {
-            const key = String(c.value).toUpperCase();
-            if (seenC.has(key)) return;
-            seenC.add(key);
-            const li = document.createElement('li');
-            li.textContent = simpleColorWords(c.value) + ' ' + key + ' for ' + simpleUseWords(c.property);
-            ul.appendChild(li);
-          });
-          const seenS = new Set();
-          info.spacing.slice(0, 8).forEach(s => {
-            if (seenS.has(s.value)) return;
-            seenS.add(s.value);
-            const li = document.createElement('li');
-            li.textContent = 'Space: ' + s.value;
-            ul.appendChild(li);
-          });
-          if (!ul.children.length) {
-            const li = document.createElement('li');
-            li.textContent = 'No extra colors or gaps listed for this page.';
-            ul.appendChild(li);
-          }
-          const tog = document.createElement('button');
-          tog.type = 'button';
-          tog.className = 'code-toggle';
-          tog.textContent = 'Show code';
-          const pre = document.createElement('div');
-          pre.className = 'code-block';
-          pre.textContent = info.raw.slice(0, 12).map(x => x.file + ' line ' + x.line + '\n' + x.context).join('\n\n');
-          tog.addEventListener('click', () => {
-            pre.classList.toggle('open');
-            tog.textContent = pre.classList.contains('open') ? 'Hide code' : 'Show code';
-          });
-          card.append(title, tools, ul, tog, pre);
-          usageBox.appendChild(card);
-        });
+      const names = designPageOrder(pages);
+      tabs.innerHTML = '';
+      typeBox.innerHTML = '';
+      colorBox.innerHTML = '';
+      cornerBox.innerHTML = '';
+      lineBox.innerHTML = '';
+      if (codeBox) {
+        codeBox.textContent = '';
+        codeBox.classList.remove('open');
       }
-      const extra = document.getElementById('design-inspector-sections');
-      if (extra) extra.innerHTML = '';
+      if (codeBtn) codeBtn.textContent = 'Show code';
+      if (!names.length) {
+        tabs.appendChild(designEmptyNote('Load a project to see each page.'));
+        return;
+      }
+      if (names.indexOf(designPagePick) < 0) designPagePick = names[0];
+      names.forEach(name => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.textContent = designTabText(name);
+        if (name === designPagePick) btn.className = 'active';
+        btn.addEventListener('click', () => {
+          designPagePick = name;
+          renderDesignInspector();
+        });
+        tabs.appendChild(btn);
+      });
+      if (data.partsCapped) tabs.appendChild(designEmptyNote('Some sections were left out so this page stays short.'));
+      const info = pages[designPagePick];
+      const typeRows = designTypeRows(info);
+      const colorRows = designColorRows(info);
+      const cornerRows = designValueRows(info, 'corners');
+      const lineRows = designValueRows(info, 'lines');
+      if (!typeRows.length) typeBox.appendChild(designEmptyNote('No font size or weight on this page.'));
+      else typeBox.appendChild(designTable(['Section', 'Size', 'Weight', 'Font'], typeRows.map(r => [r.section, r.size, r.weight, r.font])));
+      if (!colorRows.length) colorBox.appendChild(designEmptyNote('No colors on this page.'));
+      else colorBox.appendChild(designTable(['Section', 'Color', 'Use'], colorRows.map(r => [r.section, designColorChip(r.value), r.use])));
+      if (!cornerRows.length) cornerBox.appendChild(designEmptyNote('No corners on this page.'));
+      else cornerBox.appendChild(designTable(['Section', 'Corner'], cornerRows.map(r => [r.section, r.value])));
+      if (!lineRows.length) lineBox.appendChild(designEmptyNote('No lines on this page.'));
+      else lineBox.appendChild(designTable(['Section', 'Line'], lineRows.map(r => [r.section, r.value])));
+      if (codeBox) {
+        const seen = new Set();
+        const bits = [];
+        (info.raw || []).forEach(row => {
+          const key = row.file + ':' + row.line;
+          if (seen.has(key) || bits.length >= 24) return;
+          seen.add(key);
+          bits.push(row.file + ' line ' + row.line + '\n' + row.context);
+        });
+        codeBox.textContent = bits.join('\n\n') || 'No code lines for this page.';
+      }
     }
-
+    function toggleDesignCode() {
+      const pre = document.getElementById('design-code-block');
+      const tog = document.getElementById('design-code-toggle');
+      if (!pre || !tog) return;
+      pre.classList.toggle('open');
+      tog.textContent = pre.classList.contains('open') ? 'Hide code' : 'Show code';
+    }
     function copyAllDesignPages() {
       const data = collectDesignEvidence();
       const pages = designPagesFromUsage(data);
-      const parts = ['DESIGN — page by page', 'Project: ' + (STATE.projectName || ''), ''];
-      Object.keys(pages).forEach(name => {
-        parts.push(pageDesignPlainText(name, pages[name]));
-        parts.push('Code');
-        pages[name].raw.slice(0, 12).forEach(x => parts.push(x.file + ' line ' + x.line + ' — ' + x.context));
-        parts.push('');
+      const names = designPageOrder(pages);
+      const chunks = ['DESIGN', 'Project: ' + (STATE.projectName || ''), ''];
+      if (!names.length) chunks.push('No pages found.');
+      names.forEach(name => {
+        chunks.push(pageDesignPlainText(name, pages[name]));
+        chunks.push('');
       });
-      copyTextForAi(parts.join('\n'), 'Copied all pages.');
+      if (data.partsCapped) chunks.push('Some sections were left out so this stays readable.');
+      copyTextForAi(chunks.join('\n'), 'Copied all pages.');
     }
 
     function exportDesignTokens(type) {
